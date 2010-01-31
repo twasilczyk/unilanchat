@@ -9,7 +9,7 @@ dist: java-build launcher-build
 	cp launcher-build/UniLANChat.exe dist
 	cp launcher-build/UniLANChat dist
 
-all: dist java-doc UniLANChat.zip UniLANChat.tar.gz UniLANChat-doc.tar.gz
+all: dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
 
 java-build:
 	mkdir java-build
@@ -37,16 +37,16 @@ java-doc:
 
 dist-zip: dist java-doc
 	mkdir dist-zip
-	mkdir dist-zip/UniLANChat
+	mkdir dist-zip/UniLANChat-bin
 	mkdir dist-zip/UniLANChat-doc
-	cp -r dist/* dist-zip/UniLANChat
+	cp -r dist/* dist-zip/UniLANChat-bin
 	cp -r java-doc/* dist-zip/UniLANChat-doc
 
-UniLANChat.zip: dist-zip
-	cd dist-zip ; zip -r ../UniLANChat.zip UniLANChat
+UniLANChat-bin.zip: dist-zip
+	cd dist-zip ; zip -r ../UniLANChat-bin.zip UniLANChat-bin
 
-UniLANChat.tar.gz: dist-zip
-	cd dist-zip ; tar --owner nobody --group nobody -czf ../UniLANChat.tar.gz UniLANChat
+UniLANChat-bin.tar.gz: dist-zip
+	cd dist-zip ; tar --owner nobody --group nobody -czf ../UniLANChat-bin.tar.gz UniLANChat-bin
 
 UniLANChat-doc.tar.gz: dist-zip
 	cd dist-zip ; tar --owner nobody --group nobody -czf ../UniLANChat-doc.tar.gz UniLANChat-doc
@@ -57,6 +57,6 @@ clean:
 	@rm -f -r java-build
 	@rm -f -r launcher-build
 	@rm -f -r dist-zip
-	@rm -f UniLANChat.zip
-	@rm -f UniLANChat.tar.gz
+	@rm -f UniLANChat-bin.zip
+	@rm -f UniLANChat-bin.tar.gz
 	@rm -f UniLANChat-doc.tar.gz
