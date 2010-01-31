@@ -1,0 +1,116 @@
+Połączenia są nawiązywane na porcie UDP 2425, przy przesyłaniu plików TCP.
+
+Komunikaty są w formacie (czysty tekst):
+	[numer protokołu]:[numer pakietu]:[nazwa nadawcy]:[nazwa hostu nadawcy]:[flagi poleceń]:[sekcja dodatkowa]0
+ * numer protokołu -- zawsze 1
+ * numer pakietu -- ?
+ * nazwa nadawcy -- Nick, ustawiany przez użytkownika
+ * nazwa hostu nadawcy -- jak w opisie
+ * flagi poleceń -- maska bitowa, złożona ze stałych z IPMSG.H
+   0x000000FF -- id polecenia
+   0xFFFFFF00 -- flagi bitowe opcji
+ * 0 -- znak NULL
+
+---------------------------
+
+* peer -- użytkownik, z którym się komunikujemy
+* bcast -- 255.255.255.255
+
+opis akcji protokołu w formie
+-> host docelowy / <- host źródłowy
+# [flagi poleceń hex]:[sekcja dodatkowa]
+> FUNKCJA
+* FLAGA -- opis flag poleceń
+	opis sekcji dodatkowej
+
+---------------------------
+
+Uruchomienie programu, refresh
+
+-> bcast
+# 0:
+> NOOPERATION
+
+-> bcast
+# 600001:[nick]0[grupa]
+> BR_ENTRY
+* FILEATTACHOPT -- Załączaniki
+* ENCRYPTOPT -- Szyfrowanie
+	Między nickiem a grupą występuje znak NULL (0x00)
+	Jeżeli nie ma opcji, przy nicku jest niebieski pasek
+
+<- peer
+# 600003:[nick]0[grupa]
+> BR_ANSENTRY
+* FILEATTACHOPT -- Załączaniki
+* ENCRYPTOPT -- Szyfrowanie
+
+---------------------------
+
+Zakończenie programu (wykonywany dwa razy)
+
+-> bcast
+# 0:
+> NOOPERATION
+
+-> bcast
+# 600002:[nick]0[grupa]
+> BR_EXIT
+* FILEATTACHOPT -- Załączaniki
+* ENCRYPTOPT -- Szyfrowanie
+
+tu mogą być używane flagi:
+* ABSENCEOPT
+
+---------------------------
+
+Wysłanie wiadomości
+
+-> peer
+# 72:21003
+> GETPUBKEY
+	21003 (hex):
+	* RSA_512
+	* RSA_1024
+	* RC2_40
+	* BLOWFISH_128
+
+<- peer
+# 73:20002:E-[N:256 znakow kodujacych 128 bajtow]
+> ANSPUBKEY
+	20002 (hex):
+	* RSA_1024
+	* BLOWFISH_128
+	klucz RSA:
+	* 10001 -- e (chyba zawsze)
+	* [128b (1024 bity)] -- n
+
+-> peer
+# 400120:20002:[128b]:[zaszyfrowana wiadomosc]:[podpis]
+> SENDMSG
+* ENCRYPTOPT
+* SENDCHECKOPT
+	20002 -- j/w
+	128b -- "common key"
+	zaszyfrowana wiadomość -- blowfish
+	podpis jest opcjonalny
+
+<- peer
+# 21:[nr pakietu]
+> RECVMSG
+	nr pakietu -- z odebraną wiadomością
+
+-------------------------
+
+Ustawienie statusu
+
+-> bcast
+# 0:
+> NOOPERATION
+
+-> bcast
+# 600104:{nick}[{opis}]0{grupa}
+> BR_ABSENCE
+* FILEATTACHOPT -- Załączaniki
+* ENCRYPTOPT -- Szyfrowanie
+* ABSENCEOPT (jeżeli zmieniamy stan na dostępny -- bit nie ustawiony)

@@ -1,0 +1,14 @@
+bugi:
+- przy zamykaniu tabów zmienia się aktualnie zaznaczony
+- JEditorPane nie zawija zbyt szerokich wiadomości
+- jeżeli program uruchomiono na jednym pulpicie, po aktywacji z traya nie przeskakuje na inny
+- przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt (zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają)
+- czasem po próbie wysłania wiadomości, program freezuje
+- przy wywoływaniu z traya, program nie zawsze uzyskuje focus
+
+feature request:
+- tylko jedna instancja programu
+- przygotować jakąś oryginalną ikonkę
+
+zignorowane bugi:
+- SystemTray często crashuje system, trochę pomaga "sun.java2d.opengl". Rozwiązanie: wyłączyć "Composite" w xorg.conf
