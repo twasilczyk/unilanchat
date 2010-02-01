@@ -3,3 +3,13 @@ p
 	margin: 0;
 	font-family: arial, sans-serif;
 }
+
+a
+{
+	color: #0000ff;
+}
+
+a:hover
+{
+	color: #70a0fe;
+}

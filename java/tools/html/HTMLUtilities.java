@@ -1,7 +1,10 @@
-package tools;
+package tools.html;
 
+import java.io.*;
+import java.net.URL;
 import java.util.regex.*;
 import javax.swing.JOptionPane;
+import javax.swing.text.html.StyleSheet;
 
 /**
  * Klasa pomocnicza przy pracy z HTML.
@@ -63,29 +66,12 @@ public class HTMLUtilities
 	}
 
 	/**
-	 * Lista używanych domen najwyższego rzędu, potrzebna przy wykrywaniu URL.
-	 */
-	protected static final String[] tlds = {
-		"com", "net", "org", "info", "biz", "edu", "gov",
-		"pl", "eu", "de", "uk", "us", "ru", "cn", "jp", "cz", "sk",
-		"to"
-		};
-
-	/**
-	 * Znaki, które mogą się znaleźć w dalszej (poza domeną) części URL.
-	 */
-	protected static final String urlAdditionalChars =
-			"ęóąśłżźćńĘÓĄŚŁŻŹĆŃ" +
-			"#&\\-:;=?\\+\\%/\\.";
-
-	/**
 	 * Wyrażenie regularne znajdujące adresy URL.
 	 */
 	protected static final Pattern tagURLsPattern =
-			Pattern.compile("(https?://)?"+
-			"[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)*\\.(" + join(tlds, "|") + ")" +
-			"(/[\\w" + urlAdditionalChars + "]*)?",
-			Pattern.CASE_INSENSITIVE);
+			Pattern.compile(
+			"(\\s[(\\[<{]?)((https?://|ftp://|www\\.)\\S+?)([)\\]>}.:,;]?\\s)",
+			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	/**
 	 * Znajduje wszystkie adresy URL w tekście i zamienia je na łącza.
@@ -99,27 +85,28 @@ public class HTMLUtilities
 			throw new NullPointerException();
 
 		StringBuffer result = new StringBuffer(text.length());
-		Matcher matcher = tagURLsPattern.matcher(text);
+		Matcher matcher = tagURLsPattern.matcher(" " + text.replaceAll(" ", "  ") + " ");
 		
 		while (matcher.find())
 		{
-			String link = matcher.group();
+			String link = matcher.group(2);
+			String preLink = matcher.group(1);
+			String postLink = matcher.group(4);
 			String linkLowerCase = link.toLowerCase();
-
-			if (link.startsWith("@")) //ignorujemy adresy email
-				continue;
 
 			String url;
 			if (!linkLowerCase.startsWith("http://") &&
-				!linkLowerCase.startsWith("https://"))
+				!linkLowerCase.startsWith("https://") &&
+				!linkLowerCase.startsWith("ftp://"))
 				url = "http://" + link;
 			else
 				url = link;
 
-			matcher.appendReplacement(result, "<a href=\"" + url + "\">" + link + "</a>");
+			matcher.appendReplacement(result,
+					preLink + "<a href=\"" + url + "\">" + link + "</a>" + postLink);
 		}
 		matcher.appendTail(result);
-		return result.toString();
+		return result.toString().trim().replaceAll("  ", " ");
 	}
 
 	static final String[] browsers = {
@@ -173,6 +160,17 @@ public class HTMLUtilities
 		{
 			JOptionPane.showMessageDialog(null,
 			"Error attempting to launch web browser\n" + e.toString());
+		}
+	}
+
+	public static void loadCSSRules(StyleSheet ss, URL sheet)
+	{
+		try
+		{
+			ss.loadRules(new InputStreamReader(sheet.openStream()), null);
+		}
+		catch (IOException e)
+		{
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package views.swing;
 
+import tools.html.HTMLUtilities;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
@@ -7,9 +8,11 @@ import java.util.Date;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import javax.swing.text.html.HTMLDocument;
 import protocols.*;
 import resources.ResourceManager;
 import tools.*;
+import tools.html.HyperlinkHighlighter;
 
 /**
  * Panel pokoju rozmów, zawierający listę wiadomości oraz pole do ich wysyłania
@@ -56,12 +59,12 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		inputScrollPane.setPreferredSize(new Dimension(50, minInputHeight));
 
-		messagesText.append("<link rel=\"stylesheet\" type=\"text/css\" href=" +
-				ResourceManager.get("chatRoom.css") + " />");
+		HTMLUtilities.loadCSSRules(((HTMLDocument)messagesPane.getDocument()).getStyleSheet(), ResourceManager.get("chatRoom.css"));
 
 		MessagesPaneListener messagesPaneListener = new MessagesPaneListener();
 		messagesPane.addHyperlinkListener(messagesPaneListener);
 		messagesPane.addKeyListener(messagesPaneListener);
+		new HyperlinkHighlighter(messagesPane);
 	}
 
 	class MessagesPaneListener implements HyperlinkListener, KeyListener
