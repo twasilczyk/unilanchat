@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import components.swing.JImagePanel;
 import controllers.MainController;
 import protocols.*;
 import resources.ResourceManager;
@@ -173,11 +174,8 @@ class ContactListPanelRenderer implements ListCellRenderer
 	{
 		if (value == null) //patrz ContactListModel.getElementAt()
 			return new JLabel();
-		if (!(value instanceof Contact))
-		{
-			System.err.println("Moge iterować tylko po kontaktach");
-			throw new IllegalArgumentException(value.getClass().getName());
-		}
+		
+		assert(value instanceof Contact);
 		Contact contact = (Contact)value;
 
 		if (isSelected)
@@ -220,7 +218,7 @@ class ContactListPanelRenderer implements ListCellRenderer
 		if (contact instanceof protocols.ipmsg.IpmsgContact)
 			protocolIcon.image = iconIpmsg;
 		else
-			throw new IllegalArgumentException("Nieznany protokół");
+			assert(false);
 
 		return render;
 	}

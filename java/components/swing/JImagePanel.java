@@ -1,4 +1,4 @@
-package views.swing;
+package components.swing;
 
 import java.awt.*;
 import javax.swing.JPanel;

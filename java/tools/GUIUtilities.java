@@ -1,15 +1,15 @@
 package tools;
 
+import java.applet.Applet;
 import java.awt.*;
 import javax.swing.*;
-
 
 /**
  * Klasa pomocnicza dla aplikacji korzystających z GUI (Swing, ewentualnie AWT).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class GUIUtilities
+public abstract class GUIUtilities
 {
 	private GUIUtilities() { }
 
@@ -41,6 +41,7 @@ public class GUIUtilities
 			}
 			catch (Exception e)
 			{
+				continue;
 			}
 
 		return UIManager.getLookAndFeel().getName();
@@ -94,9 +95,9 @@ public class GUIUtilities
 		else
 			ownerPos = window.getOwner().getBounds();
 		window.setLocation(
-				(int) ((ownerPos.getWidth() - window.getWidth()) / 2 + ownerPos.getX()),
-				(int) ((ownerPos.getHeight() - window.getHeight()) / 2 + ownerPos.getY())
-				);
+			(int) ((ownerPos.getWidth() - window.getWidth()) / 2 + ownerPos.getX()),
+			(int) ((ownerPos.getHeight() - window.getHeight()) / 2 + ownerPos.getY())
+			);
 	}
 
 	/**
@@ -118,10 +119,12 @@ public class GUIUtilities
 		}
 		catch (InterruptedException e)
 		{
+			e.printStackTrace();
 			return false;
 		}
 		catch (java.lang.reflect.InvocationTargetException e)
 		{
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -140,6 +143,7 @@ public class GUIUtilities
 
 	}
 }
+
 class CarefulRepaintManager extends RepaintManager
 {
 	protected final boolean crashOnErrors;
@@ -151,15 +155,19 @@ class CarefulRepaintManager extends RepaintManager
 
 	protected void doThreadCheck()
 	{
-		if (!SwingUtilities.isEventDispatchThread())
+		if (SwingUtilities.isEventDispatchThread())
+			return;
+		if (Thread.currentThread().getName().startsWith("Image Fetcher "))
+			return;
+		
+		if (crashOnErrors)
+			throw new RuntimeException("Nie wywołano z EventDispatchThread, ale z: " +
+				Thread.currentThread().getName());
+		else
 		{
-			if (crashOnErrors)
-				throw new RuntimeException("Nie wywołano z EventDispatchThread");
-			else
-			{
-				System.err.println("Nie wywołano z EventDispatchThread");
-				Thread.dumpStack();
-			}
+			System.err.println("Nie wywołano z EventDispatchThread, ale z: " +
+				Thread.currentThread().getName());
+			Thread.dumpStack();
 		}
 	}
 
@@ -173,5 +181,17 @@ class CarefulRepaintManager extends RepaintManager
 	{
 		doThreadCheck();
 		super.addDirtyRegion(c, x, y, w, h);
+	}
+
+	@Override public void addDirtyRegion(Applet applet, int x, int y, int w, int h)
+	{
+		doThreadCheck();
+		super.addDirtyRegion(applet, x, y, w, h);
+	}
+
+	@Override public void addDirtyRegion(Window window, int x, int y, int w, int h)
+	{
+		doThreadCheck();
+		super.addDirtyRegion(window, x, y, w, h);
 	}
 }

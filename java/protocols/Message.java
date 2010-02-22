@@ -1,5 +1,7 @@
 package protocols;
 
+import java.util.Date;
+
 import tools.SimpleObservable;
 
 /**
@@ -9,6 +11,11 @@ import tools.SimpleObservable;
  */
 public abstract class Message extends SimpleObservable
 {
+	private static int msgCount = 0;
+	public final int id = msgCount++;
+
+	public final Date date = new Date();
+
 	protected final ChatRoom room;
 	protected String contents;
 

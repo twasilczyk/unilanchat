@@ -20,11 +20,8 @@ public class MainMenu extends JMenuBar
 			String cmd = event.getActionCommand();
 			if (cmd.equals("application.close"))
 				mainView.getMainController().applicationClose();
-			else if (cmd.equals("application.showMainRoom"))
-				mainView.getChatRoomsView().showRoom(
-					mainView.getMainController().getChatController().getMainChatRoom());
 			else
-				throw new IllegalArgumentException("Nieprawidłowe polecenie");
+				assert(false);
 		}
 	}
 
@@ -40,10 +37,5 @@ public class MainMenu extends JMenuBar
 		itemZamknij.setActionCommand("application.close");
 		itemZamknij.addActionListener(mainMenuListener);
 		menuProgram.add(itemZamknij);
-
-		JMenuItem itemChatRooms = new JMenuItem("Pokój główny");
-		itemChatRooms.setActionCommand("application.showMainRoom");
-		itemChatRooms.addActionListener(mainMenuListener);
-		this.add(itemChatRooms);
 	}
 }

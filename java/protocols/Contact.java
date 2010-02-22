@@ -57,4 +57,19 @@ public abstract class Contact extends SimpleObservable
 	 * @return Tekstowy opis statusu, lub null, jeżeli nie ustawiony
 	 */
 	public abstract String getTextStatus();
+
+	public static String join(Iterable<Contact> contacts, String glue)
+	{
+		StringBuilder joined = new StringBuilder();
+		boolean first = true;
+		for (Contact c : contacts)
+		{
+			if (first)
+				first = false;
+			else
+				joined.append(glue);
+			joined.append(c.getName());
+		}
+		return joined.toString();
+	}
 }

@@ -3,7 +3,7 @@ package views.swing;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import controllers.MainController;
 import resources.ResourceManager;
@@ -24,6 +24,9 @@ public class MainView extends JFrame
 	protected TrayIcon trayIcon = null;
 	protected boolean trayModeShowUnread = false;
 
+	protected final MainViewListener mainViewListener =
+		new MainViewListener();
+
 	/**
 	 * Główny konstruktor. Aby utworzyć nową instancję widoku, należy skorzystać
 	 * z metody init()
@@ -40,12 +43,17 @@ public class MainView extends JFrame
 		chatRoomsView.addObserver(new ChatRoomsViewObserver());
 
 		this.setMinimumSize(new Dimension(100, 200));
-		this.setPreferredSize(new Dimension(200, 500));
+		this.setPreferredSize(new Dimension(200, 450));
 		this.setLayout(new BorderLayout(0, 3));
 		this.setIconImage(ResourceManager.getIcon("icon.png").getImage());
 
 		this.setJMenuBar(new MainMenu(this));
 
+		JButton mainRoomButton = new JButton("Pokój główny");
+		mainRoomButton.setActionCommand("openMainRoom");
+		mainRoomButton.addActionListener(mainViewListener);
+
+		this.add(mainRoomButton, BorderLayout.NORTH);
 		this.add(new ContactListPanel(this), BorderLayout.CENTER);
 		this.add(new StatusPanel(mainController), BorderLayout.SOUTH);
 
@@ -53,6 +61,19 @@ public class MainView extends JFrame
 		GUIUtilities.centerWindow(this);
 
 		new TrayInitThread();
+	}
+
+	class MainViewListener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			String cmd = e.getActionCommand();
+			if (cmd.equals("openMainRoom"))
+				getChatRoomsView().showRoom(
+					mainView.getMainController().getChatController().getMainChatRoom());
+			else
+				throw new RuntimeException("Nieznane polecenie: " + cmd);
+		}
 	}
 
 	/**
@@ -161,6 +182,7 @@ public class MainView extends JFrame
 	{
 		public TrayInitThread()
 		{
+			super("ULC-TrayInitThread");
 			this.setDaemon(true);
 			this.start();
 		}
@@ -174,7 +196,7 @@ public class MainView extends JFrame
 
 			SystemTray tray = SystemTray.getSystemTray();
 			PopupMenu trayMenu = new PopupMenu();
-
+			
 			trayIcon = new TrayIcon(ResourceManager.getImage("icon.png"),
 					"UniLANChat", trayMenu);
 			trayIcon.setImageAutoSize(true);

@@ -99,8 +99,9 @@ public class ChatRoom extends SimpleObservable
 	 */
 	public void gotMessage(IncomingMessage message)
 	{
-		if (message.getChatRoom() != this)
-			throw new IllegalArgumentException("Wiadomość nie z tego pokoju");
+		if (message == null)
+			throw new NullPointerException();
+		assert(message.getChatRoom() == this);
 		messages.add(message);
 	}
 
@@ -111,8 +112,9 @@ public class ChatRoom extends SimpleObservable
 	 */
 	public void sentMessage(OutgoingMessage message)
 	{
-		if (message.getChatRoom() != this)
-			throw new IllegalArgumentException("Wiadomość nie do tego pokoju");
+		if (message == null)
+			throw new NullPointerException();
+		assert(message.getChatRoom() == this);
 		messages.add(message);
 	}
 }

@@ -1,0 +1,77 @@
+UniLANChat - An IM client, which unifies few LANChat protocols
+
+UniLANChat to wieloprotokołowy, wieloplatformowy i wielojęzykowy klient czatów
+p2p. Aktualnie jest na poziomie wczesnego rozwoju.
+
+Autorzy:
+ * Tomasz Wasilczyk (www.wasilczyk.pl)
+ * Piotr Gajowiak
+
+Strona projektu:
+ * http://unilanchat.googlecode.com/
+
+################################################################################
+## ZALEŻNOŚCI
+################################################################################
+
+Do uruchomienia programu wymagany jest JRE. Nie gwarantuje się poprawnego
+działania aplikacji z implementacjami innymi, niż firmy Oracle. Najnowszą wersję
+JRE można pobrać z adresu:
+
+http://www.java.com/getjava/
+
+
+Zaleca się kompilację pod systemem Linux - właśnie dla tego systemu jest
+przygotowany plik Makefile. Do kompilacji potrzebne są następujące biblioteki:
+
+ * JavaSE JDK - najlepiej instalować bezpośrednio ze strony Oracle, inne
+   dystrybucje (np. ta instalowana z repozytoriów OpenSUSE 11.2) mogą posiadać
+   inny układ katalogów, lub nie zawierać wszystkich potrzebnych plików.
+   JDK6 można pobrać z adresu:
+
+   http://java.sun.com/javase/downloads/widget/jdk6.jsp
+
+ * gcc, gcc-c++ - potrzebna do kompilacji bibliotek JNI
+
+ * xorg-x11-libX11, xorg-x11-libX11-devel - potrzebna dla klasy
+   X11StartupNotification
+
+################################################################################
+## KOMPILACJA
+################################################################################
+
+Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
+
+ * make dist (domyślny)
+   wersja programu gotowa do uruchomienia
+
+ * make all
+   w katalogu głównym tworzy pliki tar.gz i zip, do publikacji jako gotowe
+   wydania programu
+
+ * make netbeans
+   przygotowanie katalogu z kodem źródłowym javy do kompilacji z użyciem innego
+   pliku Makefile (np. poprzez środowisko NetBeans). Polega m.in. na
+   umieszczeniu skompilowanych bibliotek JNI w odpowiednich katalogach. Poza
+   wywołaniem tej opcji należy zastąpić wygenerowany przez NetBeans plik
+   manifest.mf, tym dostarczonym razem z aplikacją
+
+ * make java-doc
+   dokumentacja kodu źródłowego
+
+ * make clean
+   przygotowanie do synchronizacji z svn, lub zrobienia paczki z kodem źródłowym
+
+################################################################################
+## ZNANE PROBLEMY
+################################################################################
+
+ * Niektóre implementacje SystemTray w przypadku niektórych dystrybucji Linuxa
+   i niektórych wersji sterowników karty graficznej powodują częste crashe
+   systemu przy uruchamianiu programu. Pewną poprawę można uzyskać poprzez
+   dodanie "-Dsun.java2d.opengl=true" do argumentów JVM, ale najskuteczniejsze
+   jest wyłączenie rozszerzenia Composite w plku xorg.conf:
+
+   Section "Extensions"
+     Option       "Composite" "off"
+   EndSection

@@ -3,8 +3,11 @@ package tools.html;
 import java.io.*;
 import java.net.URL;
 import java.util.regex.*;
-import javax.swing.JOptionPane;
-import javax.swing.text.html.StyleSheet;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.text.html.*;
+
+import tools.GUIUtilities;
 
 /**
  * Klasa pomocnicza przy pracy z HTML.
@@ -153,7 +156,7 @@ public class HTMLUtilities
 					}
 				}
 				if (!found)
-					throw new RuntimeException();
+					throw new RuntimeException("Nie znaleziono żadnej działającej przeglądarki");
 			}
 		}
 		catch (Exception e)
@@ -172,5 +175,109 @@ public class HTMLUtilities
 		catch (IOException e)
 		{
 		}
+	}
+
+	public static void insertBeforeEnd(final Element elem, final String html)
+	{
+		GUIUtilities.swingInvokeAndWait(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					HTMLDocument doc = (HTMLDocument)elem.getDocument();
+
+					if (elem.getElementCount() == 1 &&
+						elem.getElement(0).getName().equals("p-implied") &&
+						elem.getElement(0).getElementCount() <= 1 &&
+						elem.getElement(0).getElement(0).getEndOffset() <= 2)
+						doc.setInnerHTML(elem, html);
+					else
+						doc.insertBeforeEnd(elem, html);
+				}
+				catch (BadLocationException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+				catch (IOException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+			}
+		});
+	}
+
+	public static void insertAfterEnd(final Element elem, final String html)
+	{
+		GUIUtilities.swingInvokeAndWait(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					HTMLDocument doc = (HTMLDocument)elem.getDocument();
+					doc.insertAfterEnd(elem, html);
+				}
+				catch (BadLocationException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+				catch (IOException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+			}
+		});
+	}
+
+	public static void setInnerHTML(final Element elem, final String html,
+			boolean waitForSwing)
+	{
+		Runnable r = new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					HTMLDocument doc = (HTMLDocument)elem.getDocument();
+					doc.setInnerHTML(elem, html);
+				}
+				catch (BadLocationException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+				catch (IOException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+			}
+		};
+
+		if (waitForSwing)
+			GUIUtilities.swingInvokeAndWait(r);
+		else
+			SwingUtilities.invokeLater(r);
+	}
+
+	public static void remove(final Element elem)
+	{
+		GUIUtilities.swingInvokeAndWait(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					HTMLDocument doc = (HTMLDocument)elem.getDocument();
+
+					int offset = elem.getStartOffset();
+					int len = elem.getEndOffset() - offset;
+					doc.remove(offset, len);
+				}
+				catch (BadLocationException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+			}
+		});
 	}
 }

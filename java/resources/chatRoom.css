@@ -1,9 +1,3 @@
-p
-{
-	margin: 0;
-	font-family: arial, sans-serif;
-}
-
 a
 {
 	color: #0000ff;
@@ -12,4 +6,34 @@ a
 a:hover
 {
 	color: #70a0fe;
+}
+
+p
+{
+	margin: 0;
+}
+
+#messages
+{
+	font-family: arial, sans-serif;
+}
+
+#messages td
+{
+	padding: 0;
+}
+
+.messageRow, .messageContent
+{
+	width: 100%;
+	text-align: left;
+}
+
+.message-serviceCell
+{
+	background-color: #eeeeee;
+	text-align: left;
+	padding: 2px;
+	margin: 2px;
+	margin-bottom: 7px;
 }

@@ -5,7 +5,8 @@ import javax.swing.text.*;
 import javax.swing.text.html.*;
 
 /**
- * Klasa implementująca funkcjonalność CSS a:hover
+ * Klasa implementująca funkcjonalność CSS a:hover oraz wyświetlająca tooltip
+ * alt tagu img (w implementacji DOM w javie mógłby być problem z title).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -44,9 +45,9 @@ public class HyperlinkHighlighter
 		public void mouseClicked(MouseEvent arg0) { }
 		public void mousePressed(MouseEvent arg0) { }
 		public void mouseReleased(MouseEvent arg0) { }
+		public void mouseDragged(MouseEvent arg0) { }
 		public void mouseEntered(MouseEvent arg0) { }
 		public void mouseExited(MouseEvent arg0) { }
-		public void mouseDragged(MouseEvent arg0) { }
 
 		public void mouseMoved(MouseEvent e)
 		{
@@ -64,7 +65,18 @@ public class HyperlinkHighlighter
 				return;
 			}
 
-			if (elem.getAttributes().getAttribute(HTML.Tag.A) != null)
+			AttributeSet elemAttr = elem.getAttributes();
+
+			boolean isImage = elemAttr.getAttribute(StyleConstants.NameAttribute).
+				equals(HTML.Tag.IMG);
+			Object imageAltAttrib = elemAttr.getAttribute(HTML.Attribute.ALT);
+
+			if (isImage && imageAltAttrib != null)
+				pane.setToolTipText(imageAltAttrib.toString());
+			else
+				pane.setToolTipText(null);
+
+			if (!isImage && elemAttr.getAttribute(HTML.Tag.A) != null)
 				highlightHyperlink(elem);
 			else
 				removeHyperlinkHighlight();
@@ -96,7 +108,6 @@ public class HyperlinkHighlighter
 				throw new NullPointerException();
 			int start = el.getStartOffset();
 			int end = el.getEndOffset();
-			//TODO: może da się to zrobić na elemencie, a nie znakach?
 			doc.setCharacterAttributes(start, end - start,
 					highlight?styleHover:styleNormal, false);
 		}

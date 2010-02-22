@@ -6,6 +6,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import components.swing.JImagePanel;
 import controllers.MainController;
 import protocols.Contact;
 import resources.ResourceManager;
@@ -229,12 +230,13 @@ public class StatusPanel extends JPanel implements Observer
 
 			if (isSelected)
 			{
-				render.setBackground(selectedStatusColor);
+				render.setOpaque(true);
 				statusLabel.setForeground(Color.WHITE);
+				render.setBackground(selectedStatusColor); // windows zapomina
 			}
 			else
 			{
-				render.setBackground(Color.WHITE);
+				render.setOpaque(false);
 				statusLabel.setForeground(Color.BLACK);
 			}
 

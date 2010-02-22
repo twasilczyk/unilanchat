@@ -3,6 +3,7 @@ package protocols;
 import java.util.*;
 
 /**
+ * Prywatny pokój rozmów - do komunikacji z tylko jedym kontaktem.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

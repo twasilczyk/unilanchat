@@ -1,18 +1,11 @@
 package views.swing;
 
-import tools.html.HTMLUtilities;
 import java.awt.*;
 import java.awt.event.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.swing.*;
-import javax.swing.event.*;
 
-import javax.swing.text.html.HTMLDocument;
 import protocols.*;
-import resources.ResourceManager;
-import tools.*;
-import tools.html.HyperlinkHighlighter;
+import tools.SetListener;
 
 /**
  * Panel pokoju rozmów, zawierający listę wiadomości oraz pole do ich wysyłania
@@ -24,11 +17,8 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 	protected final ChatRoom chatRoom;
 	protected final ChatRoomsView chatRoomsView;
 
-	protected final JEditorPane messagesPane = new JEditorPane("text/html", "");
-	protected final JScrollPane messagesScrollPane = new JScrollPane(messagesPane);
-	protected final StringBuilder messagesText = new StringBuilder();
-	protected final SimpleDateFormat messagesDateFormat = new SimpleDateFormat("HH:mm:ss");
-
+	protected final MessagesPanel messagesPanel = new MessagesPanel();
+	
 	protected final JTextPane inputPane = new JTextPane();
 	protected final JScrollPane inputScrollPane = new JScrollPane(inputPane);
 
@@ -44,54 +34,19 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		chatRoom.getMessagesVector().addSetListener(this);
 
 		this.setLayout(new BorderLayout(0, 4));
-		this.add(messagesScrollPane, BorderLayout.CENTER);
+		this.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 0));
+
+		this.add(messagesPanel, BorderLayout.CENTER);
 		this.add(inputScrollPane, BorderLayout.SOUTH);
 
-		messagesPane.setBackground(Color.WHITE);
-		messagesPane.setEditable(false);
-		messagesScrollPane.setVerticalScrollBarPolicy(
-				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-		InputPaneListener inputPaneListener = new InputPaneListener();
 		inputPane.setBackground(Color.WHITE);
-		inputPane.addKeyListener(inputPaneListener);
+		inputPane.addKeyListener(new InputPaneListener());
 		inputScrollPane.setVerticalScrollBarPolicy(
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		inputScrollPane.setPreferredSize(new Dimension(50, minInputHeight));
+		inputScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-		HTMLUtilities.loadCSSRules(((HTMLDocument)messagesPane.getDocument()).getStyleSheet(), ResourceManager.get("chatRoom.css"));
-
-		MessagesPaneListener messagesPaneListener = new MessagesPaneListener();
-		messagesPane.addHyperlinkListener(messagesPaneListener);
-		messagesPane.addKeyListener(messagesPaneListener);
-		new HyperlinkHighlighter(messagesPane);
-	}
-
-	class MessagesPaneListener implements HyperlinkListener, KeyListener
-	{
-		public void hyperlinkUpdate(HyperlinkEvent e)
-		{
-			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
-				HTMLUtilities.openURL(e.getURL().toString());
-		}
-
-		public void keyTyped(KeyEvent e)
-		{
-			if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-			{
-				chatRoomsView.setVisible(false);
-				return;
-			}
-			if ((e.getKeyChar() >= 32 || e.getKeyChar() == 10) && !inputPane.hasFocus())
-			{
-				inputPane.requestFocus();
-				if (e.getKeyChar() >= 32)
-					inputPane.replaceSelection(String.valueOf(e.getKeyChar()));
-			}
-		}
-
-		public void keyPressed(KeyEvent e) { }
-		public void keyReleased(KeyEvent e) { }
+		messagesPanel.addKeyListener(new MessagesPanelListener());
 	}
 
 	class InputPaneListener implements KeyListener
@@ -158,44 +113,40 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		}
 	}
 
+	class MessagesPanelListener implements KeyListener
+	{
+
+		public void keyTyped(KeyEvent e)
+		{
+			if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+			{
+				chatRoomsView.setVisible(false);
+				return;
+			}
+			if ((e.getKeyChar() >= 32 || e.getKeyChar() == 10) && !inputPane.hasFocus())
+			{
+				inputPane.requestFocus();
+				if (e.getKeyChar() >= 32)
+					inputPane.replaceSelection(String.valueOf(e.getKeyChar()));
+			}
+		}
+
+		public void keyPressed(KeyEvent e) { }
+
+		public void keyReleased(KeyEvent e) { }
+
+	}
+
 	public ChatRoom getChatRoom()
 	{
 		return chatRoom;
 	}
 
-	protected static String escapeMessageContents(String plaintext)
-	{
-		return HTMLUtilities.nl2br(HTMLUtilities.tagURLs(HTMLUtilities.escape(plaintext)));
-	}
-
 	public void itemAdded(Message item)
 	{
-		GUIUtilities.swingInvokeAndWait(new ParametrizedRunnable<Message>(item)
-		{
-			public void run()
-			{
-				JScrollBar scroll = messagesScrollPane.getVerticalScrollBar();
-				int prevPos = scroll.getValue();
-				boolean wasAtMax = prevPos >= scroll.getMaximum() - scroll.getVisibleAmount();
-				Date now = new Date();
-				messagesText.append("<p>(" +
-						messagesDateFormat.format(new Date()) + ") <strong>" +
-						
-						HTMLUtilities.escape(parameter.getAuthor()) + ":</strong> " +
-						escapeMessageContents(parameter.getContents()) + "</p>");
-
-				messagesPane.setText(messagesText.toString());
-				messagesPane.validate();
-
-				if (wasAtMax)
-					scroll.setValue(scroll.getMaximum());
-				else
-					scroll.setValue(prevPos);
-
-				if (!isFocusedTab())
-					setUnread(true);
-			}
-		});
+		messagesPanel.add(item);
+		if (!isFocusedTab())
+			setUnread(true);
 	}
 
 	public void itemRemoved(Message item)
@@ -203,7 +154,10 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		throw new UnsupportedOperationException("Nie można usuwać wiadomości");
 	}
 
-	public void itemUpdated(Message item) { }
+	public void itemUpdated(Message item)
+	{
+		messagesPanel.update(item);
+	}
 
 	public boolean isFocusedTab()
 	{

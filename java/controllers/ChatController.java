@@ -1,5 +1,6 @@
 package controllers;
 
+import main.Main;
 import protocols.*;
 
 /**
@@ -79,14 +80,20 @@ public class ChatController
 	 */
 	public void sendMessage(ChatRoom room, String message)
 	{
-		OutgoingMessage msg = new OutgoingMessage(room);
+		final OutgoingMessage msg = new OutgoingMessage(room);
 		msg.setContents(message);
 
-		// ryzyko ConcurrentModificationException, w przypadku edycji listy kont
-		// w trakcie wysyłania
-		
-		for (Account acc : mainController.getAccountsVector())
-			acc.postMessage(msg);
 		room.sentMessage(msg);
+
+		Main.backgroundProcessing.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// ryzyko ConcurrentModificationException, w przypadku edycji listy kont
+				// w trakcie wysyłania
+				for (Account acc : mainController.getAccountsVector())
+					acc.postMessage(msg);
+			}
+		});
 	}
 }

@@ -49,6 +49,7 @@ public class IpmsgAccount extends Account
 
 		public IpmsgConnectionThread()
 		{
+			super("ULC-Ipmsg-IpmsgConnectionThread");
 			this.setDaemon(true);
 			this.start();
 		}
@@ -408,6 +409,7 @@ public class IpmsgAccount extends Account
 
 		public GarbageContactsCollector()
 		{
+			super("ULC-Ipmsg-GarbageContactsCollector");
 			setDaemon(true);
 			start();
 		}
@@ -497,10 +499,11 @@ public class IpmsgAccount extends Account
 				contact = new IpmsgContact(this, ip);
 				contactList.add(contact);
 			}
-			else if (genContact instanceof IpmsgContact)
-				contact = (IpmsgContact)genContact;
 			else
-				throw new RuntimeException("Konflikt oznaczeń ID, kontakt nie jest z protokołu ipmsg: " + genContact.getClass().getName());
+			{
+				assert(genContact instanceof IpmsgContact);
+				contact = (IpmsgContact)genContact;
+			}
 			return contact;
 		}
 	}
@@ -599,7 +602,7 @@ public class IpmsgAccount extends Account
 	 *
 	 * @param textStatus Nowy status opisowy
 	 */
-	@Override public synchronized void setTextStatus(String textStatus)
+	public synchronized void setTextStatus(String textStatus)
 	{
 		if (textStatus == null)
 			throw new NullPointerException();
@@ -732,6 +735,7 @@ public class IpmsgAccount extends Account
 
 		IncomingMessage message = new IncomingMessage(chatRoom, authorName);
 		message.setContents(messageContents.toString().trim());
+		message.setRawContents(messageRAWContents);
 		chatRoom.gotMessage(message);
 	}
 
@@ -759,6 +763,7 @@ public class IpmsgAccount extends Account
 
 		public PostMessageThread()
 		{
+			super("ULC-Ipmsg-PostMessageThread");
 			setDaemon(true);
 			start();
 		}
@@ -776,20 +781,10 @@ public class IpmsgAccount extends Account
 						if (!messagePacket.isNextTryAvailable())
 						{
 							removeMessages.add(messagePacket);
-							//TODO: może powiadamianie wiadomości o tym, że nie doszła?
 							
-							StringBuilder failMsg = new StringBuilder("Nie doszło do: ");
-							boolean fst = true;
 							for (IpmsgContact receiver : messagePacket.receivers)
-							{
 								receiver.setStatus(Contact.UserStatus.OFFLINE);
-								if (fst)
-									fst = false;
-								else
-									failMsg.append(", ");
-								failMsg.append(receiver.getIP());
-							}
-							System.err.println(failMsg);
+							messagePacket.message.notifyReceiversFailed(messagePacket.receivers);
 						}
 					for (IpmsgMessagePacket messagePacket : removeMessages)
 						messages.remove(messagePacket.getID());
@@ -840,11 +835,12 @@ public class IpmsgAccount extends Account
 		 */
 		public synchronized void confirmMessage(IpmsgContact contact, long id)
 		{
-			IpmsgMessagePacket message = messages.get(id);
-			if (message == null)
+			IpmsgMessagePacket messagePacket = messages.get(id);
+			if (messagePacket == null)
 				return;
-			message.receivers.remove(contact); // true, jeżeli wcześniej nie potwierdzone
-			if (message.receivers.isEmpty())
+			if (messagePacket.receivers.remove(contact)) // true, jeżeli wcześniej nie potwierdzone
+				messagePacket.message.notifyReceiverGot(contact);
+			if (messagePacket.receivers.isEmpty())
 				messages.remove(id);
 		}
 	}
@@ -859,10 +855,12 @@ public class IpmsgAccount extends Account
 
 		public final IpmsgPacket packet;
 		public final Vector<IpmsgContact> receivers = new Vector<IpmsgContact>();
+		public final OutgoingMessage message;
 		protected int sendTries = 0;
 
 		public IpmsgMessagePacket(OutgoingMessage message)
 		{
+			this.message = message;
 			ChatRoom room = message.getChatRoom();
 			packet = new IpmsgPacket(userName);
 
@@ -871,12 +869,15 @@ public class IpmsgAccount extends Account
 				receivers.addAll(getOnlineContacts()); //TODO: contactList ma być pobierana z chatRoom jako członkowie rozmowy
 				packet.setFlag(IpmsgPacket.FLAG_MULTICAST, true); // FLAG_BROADCAST ignoruje flagę FLAG_SENDCHECK
 			}
-			else if (!room.id.endsWith("@ipmsg"))
-				throw new UnsupportedOperationException("Nie można wysyłać wiadomości z innych protokołów");
-			else if (room instanceof PrivateChatRoom)
-				receivers.add((IpmsgContact)((PrivateChatRoom)room).getContact());
 			else
-				throw new UnsupportedOperationException("Aktualnie nie są obsługiwane pokoje multicast");
+			{
+				assert(room.id.endsWith("@ipmsg"));
+				if (room instanceof PrivateChatRoom)
+					receivers.add((IpmsgContact)((PrivateChatRoom)room).getContact());
+				else
+					throw new UnsupportedOperationException("Aktualnie nie są obsługiwane pokoje multicast");
+			}
+			message.notifyReceiversAdded(receivers);
 
 			packet.setCommand(IpmsgPacket.COMM_SENDMSG);
 			packet.setFlag(IpmsgPacket.FLAG_SENDCHECK, true);
@@ -913,7 +914,7 @@ public class IpmsgAccount extends Account
 	 * @param message Wiadomość do wysłania
 	 * @return Czy wiadomość może być przesłana tym protokołem
 	 */
-	@Override public boolean postMessage(OutgoingMessage message)
+	public boolean postMessage(OutgoingMessage message)
 	{
 		ChatRoom room = message.getChatRoom();
 		if (!room.id.isEmpty() && !room.id.endsWith("@ipmsg"))

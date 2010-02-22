@@ -3,13 +3,23 @@ dirs=$(shell cd java ; find . -type d -iregex '..+' \! -iregex '.*\.svn.*')
 srcs=$(shell cd java ; find . -iname '*.java' \! -iregex '.*\.svn.*')
 res=$(shell cd java ; find . -type f \! -iname '*.java' \! -iregex '.*\.svn.*')
 
-dist: java-build launcher-build
+JNI_CPP_FLAGS = -shared -static -Wall -Wextra -O2
+JNI_CPP_INC = jni/jni_helper.cpp
+JNI_CPP_INCDIR = -I/usr/java/default/include -I/usr/java/default/include/linux
+JAVA_BIN_DIR = /usr/java/default/bin/
+
+dist: java-build jni-build launcher-build
 	mkdir dist
-	cd java-build ; jar cfe ../dist/UniLANChat.jar main.Main  *
+	cd java-build ; jar cfme ../dist/UniLANChat.jar ../manifest.mf main.Main  *
 	cp launcher-build/UniLANChat.exe dist
 	cp launcher-build/UniLANChat dist
 
 all: dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
+
+netbeans: clean jni-build
+	@rm -f -r java-build
+	@rm -f -r jni-build
+	@rm -f jni/tools_X11StartupNotification.h
 
 java-build:
 	mkdir java-build
@@ -22,6 +32,13 @@ java-build:
 	for resi in $(res) ; do \
 		cp java/$$resi java-build/$$resi ; \
 	done
+
+jni-build: java-build
+	mkdir jni-build
+	$(JAVA_BIN_DIR)javah -d jni -classpath java-build tools.X11StartupNotification
+	g++ $(JNI_CPP_FLAGS) -lX11 jni/tools_X11StartupNotification.cpp $(JNI_CPP_INC) -o jni-build/libtools_X11StartupNotification.so $(JNI_CPP_INCDIR)
+	cp -f jni-build/*.so java-build/jni
+	cp -f jni-build/*.so java/jni
 
 launcher-build:
 	mkdir launcher-build
@@ -55,8 +72,12 @@ clean:
 	@rm -f -r dist
 	@rm -f -r java-doc
 	@rm -f -r java-build
+	@rm -f -r jni-build
 	@rm -f -r launcher-build
 	@rm -f -r dist-zip
 	@rm -f UniLANChat-bin.zip
 	@rm -f UniLANChat-bin.tar.gz
 	@rm -f UniLANChat-doc.tar.gz
+	@rm -f jni/tools_X11StartupNotification.h
+	@rm -f java/jni/*.so
+	@rm -f java/jni/*.dll

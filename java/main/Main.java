@@ -1,7 +1,7 @@
 package main;
 
 import controllers.MainController;
-import tools.GUIUtilities;
+import tools.*;
 
 /**
  * Główna klasa aplikacji, odpowiedzialna za jej uruchomienie.
@@ -16,6 +16,24 @@ public abstract class Main
 	 * @todo nick ma być ustawiany w okienku konfiguracji
 	 */
 	public static String tmpNick = System.getProperty("user.name", "anonim");
+
+	public static ProcessingQueue backgroundProcessing = new ProcessingQueue();
+
+	/**
+	 * Oznaczenie numeru wersji w formacie:
+	 * <numer główny>.<numer dodatkowy>[.<numer wydania>]
+	 */
+	public static final String version = "0.1";
+
+	/**
+	 * Stabilne wydania mają ustawioną tą flagę na false.
+	 */
+	public static final boolean isNightly = true;
+
+	public static final String applicationName = "UniLANChat";
+
+	public static final String applicationFullName =
+		applicationName + " " + version + (isNightly?" (nightly)":"");
 
 	/**
 	 * Uruchomienie aplikacji z konsoli.
@@ -34,7 +52,7 @@ public abstract class Main
 //		for (Object k : System.getProperties().keySet())
 //			System.out.println(k.toString() + " = " + System.getProperty((String)k));
 
-		GUIUtilities.setApplicationName("UniLANChat");
+		GUIUtilities.setApplicationName(applicationFullName);
 		GUIUtilities.installCarefulRepaintManager(false);
 		GUIUtilities.setBestLookAndFeel();
 

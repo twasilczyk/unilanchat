@@ -1,12 +1,10 @@
 package controllers;
 
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Vector;
+import java.util.*;
 
 import protocols.*;
 import protocols.ipmsg.IpmsgAccount;
-import tools.SimpleObservable;
+import tools.*;
 
 /**
  * Główny kontroler aplikacji.
@@ -77,6 +75,7 @@ public class MainController extends SimpleObservable implements Observer
 
 		public StatusControlThread()
 		{
+			super("ULC-StatusControlThread");
 			setDaemon(true);
 			start();
 		}
@@ -230,6 +229,8 @@ public class MainController extends SimpleObservable implements Observer
 	 */
 	public void onAppLoad()
 	{
+		if (X11StartupNotification.isSupported)
+			X11StartupNotification.notifyStartupComplete();
 		setStatus(Contact.UserStatus.ONLINE);
 	}
 
