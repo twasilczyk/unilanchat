@@ -4,12 +4,15 @@ import java.awt.*;
 import javax.swing.JPanel;
 
 /**
- * Komponent wyświetlający obrazek
+ * Komponent wyświetlający obrazek.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
 public class JImagePanel extends JPanel
 {
+	/**
+	 * Obrazek wyświetlany na komponencie.
+	 */
 	public Image image = null;
 
 	public JImagePanel()

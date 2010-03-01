@@ -8,11 +8,22 @@ package jni;
  */
 public class NativeLibraryLoadFailed extends UnsatisfiedLinkError
 {
+	/**
+	 * Błąd ładowania spowodowany w klasie JNIManager.
+	 *
+	 * @param libname nazwa ładowanej biblioteki
+	 */
 	public NativeLibraryLoadFailed(String libname)
 	{
 		super("Błąd ładowania biblioteki " +libname);
 	}
 
+	/**
+	 * Błąd ładowania spowodowany innym wyjątkiem.
+	 *
+	 * @param libname nazwa ładowanej biblioteki
+	 * @param cause wyjątek, który spowodował błąd
+	 */
 	public NativeLibraryLoadFailed(String libname, Throwable cause)
 	{
 		super("Błąd ładowania biblioteki " +libname);

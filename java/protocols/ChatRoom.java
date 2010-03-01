@@ -33,8 +33,10 @@ public class ChatRoom extends SimpleObservable
 	protected ListenableVector<Message> messages = new ListenableVector<Message>();
 
 	/**
+	 * Główny konstruktor.
+	 *
 	 * @see #getID()
-	 * @param id Identyfikator pokoju
+	 * @param id identyfikator pokoju
 	 */
 	public ChatRoom(String id)
 	{
@@ -45,7 +47,7 @@ public class ChatRoom extends SimpleObservable
 	 * Zwraca identyfikator pokoju.
 	 *
 	 * @see #id
-	 * @return Identyfikator pokoju
+	 * @return identyfikator pokoju
 	 */
 	public String getID()
 	{
@@ -56,7 +58,7 @@ public class ChatRoom extends SimpleObservable
 	 * Zwraca tytuł pokoju.
 	 *
 	 * @see #title
-	 * @return Tytuł pokoju
+	 * @return tytuł pokoju
 	 */
 	public String getTitle()
 	{
@@ -69,7 +71,7 @@ public class ChatRoom extends SimpleObservable
 	 * Ustawia nowy tytuł pokoju.
 	 *
 	 * @see #getTitle()
-	 * @param title Nowy tytuł pokoju
+	 * @param title nowy tytuł pokoju
 	 */
 	public void setTitle(String title)
 	{
@@ -85,7 +87,7 @@ public class ChatRoom extends SimpleObservable
 	/**
 	 * Zwraca wektor wiadomości w pokoju.
 	 *
-	 * @return Wiadomości w pokoju
+	 * @return wiadomości w pokoju
 	 */
 	public ListenableVector<Message> getMessagesVector()
 	{
@@ -95,7 +97,7 @@ public class ChatRoom extends SimpleObservable
 	/**
 	 * Powiadamia pokój, że wiadomość (przychodząca) została odebrana.
 	 *
-	 * @param message Wiadomość przychodząca
+	 * @param message wiadomość przychodząca
 	 */
 	public void gotMessage(IncomingMessage message)
 	{
@@ -108,7 +110,7 @@ public class ChatRoom extends SimpleObservable
 	/**
 	 * Powiadamia pokój, że rozpoczęto wysyłanie wiadomości.
 	 *
-	 * @param message Wiadomość wychodząca
+	 * @param message wiadomość wychodząca
 	 */
 	public void sentMessage(OutgoingMessage message)
 	{

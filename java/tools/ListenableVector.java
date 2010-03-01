@@ -14,7 +14,6 @@ import java.util.*;
 public class ListenableVector<E extends Observable> extends Vector<E>
 		implements Observer
 {
-
 	@Override public synchronized boolean add(E e)
 	{
 		super.add(e);
@@ -61,7 +60,7 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 		@SuppressWarnings("unchecked") E observ = (E)o;
 		boolean contains = super.remove(observ);
 		if (contains)
-			observ.deleteObserver(this);
+			notifyRemoved(observ);
 		return contains;
 	}
 
@@ -127,9 +126,9 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 	 * Dodaje nowego obserwatora kolekcji do listy powiadamianych.
 	 *
 	 * Nie powinno się dodawać słuchaczy, jak już zaczynają być odbierane
-	 * komunikaty - możliwość wystąpienia ConcurrentModificationException
+	 * komunikaty - możliwość wystąpienia ConcurrentModificationException.
 	 *
-	 * @param listener Słuchacz do dodania
+	 * @param listener słuchacz do dodania
 	 */
 	public void addSetListener(SetListener<E> listener)
 	{
@@ -146,9 +145,9 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 	 * Usuwa obserwatora kolekcji z listy powiadamianych.
 	 *
 	 * Nie powinno się usuwać słuchaczy, gdy są odbierane komunikaty
-	 * - możliwość wystąpienia ConcurrentModificationException
+	 * - możliwość wystąpienia ConcurrentModificationException.
 	 *
-	 * @param listener Słuchacz do usunięcia
+	 * @param listener słuchacz do usunięcia
 	 */
 	public void removeSetListener(SetListener<E> listener)
 	{
@@ -157,6 +156,12 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 		setListeners.remove(listener);
 	}
 
+	/**
+	 * Powiadamia słuchaczy o dodaniu nowego elementu, oraz sam dodaje się do
+	 * listy jego słuchaczy.
+	 *
+	 * @param elem dodany element
+	 */
 	protected void notifyAdded(E elem)
 	{
 		if (elem == null)
@@ -166,6 +171,12 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 			listener.itemAdded(elem);
 	}
 
+	/**
+	 * Powiadamia słuchaczy o usunięciu danego elementu, oraz sam usuwa się
+	 * z listy jego słuchaczy.
+	 *
+	 * @param elem usunięty element
+	 */
 	protected void notifyRemoved(E elem)
 	{
 		if (elem == null)

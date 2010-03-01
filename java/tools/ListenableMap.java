@@ -6,7 +6,7 @@ import java.util.*;
  * Zbiór par klucz - wartość, z możliwością dodania słuchaczy typu SetListener.
  * Wartości muszą dziedziczyć po klasie Observable - przekazują tak informację
  * o zmianie swojej zawartości (która jest przekazywana w metodzie
- * SetListener.itemUpdate()).
+ * SetListener.itemUpdated()).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  * @see SetListener
@@ -17,9 +17,9 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	/**
 	 * Dodanie elementu do kolekcji.
 	 *
-	 * @param key Klucz elementu
-	 * @param value Wartość do dodania
-	 * @return Poprzednia wartość zapisana pod podanym kluczem, lub null, jeżeli
+	 * @param key klucz elementu
+	 * @param value wartość do dodania
+	 * @return poprzednia wartość zapisana pod podanym kluczem, lub null, jeżeli
 	 * nie było
 	 */
 	@Override public V put(K key, V value)
@@ -40,7 +40,7 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	/**
 	 * Dodanie wielu elementów do kolekcji.
 	 *
-	 * @param m Kolekcja z elementami do dodania
+	 * @param m kolekcja z elementami do dodania
 	 */
 	@Override public void putAll(Map<? extends K, ? extends V> m)
 	{
@@ -51,8 +51,8 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	/**
 	 * Usuwa element o podanym kluczu z kolekcji.
 	 *
-	 * @param key Klucz do usunięcia
-	 * @return Element, który znajdował się pod podanym kluczem, lub null,
+	 * @param key klucz do usunięcia
+	 * @return element, który znajdował się pod podanym kluczem, lub null,
 	 * jeżeli nie istniał
 	 */
 	@Override public V remove(Object key)
@@ -87,8 +87,8 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Obsługa komunikatów od elementów znajdujących się w kolekcji. Metoda nie
 	 * powinna być wywoływana spoza kolekcji.
 	 *
-	 * @param o Obiekt z kolekcji, którego dotyczy powiadomienie
-	 * @param arg Parametry - ignorowane
+	 * @param o obiekt z kolekcji, którego dotyczy powiadomienie
+	 * @param arg parametry (ignorowane)
 	 */
 	public void update(Observable o, Object arg)
 	{
@@ -113,9 +113,9 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Dodaje nowego obserwatora kolekcji do listy powiadamianych.
 	 *
 	 * Nie powinno się dodawać słuchaczy, jak już zaczynają być odbierane
-	 * komunikaty - możliwość wystąpienia ConcurrentModificationException
+	 * komunikaty - możliwość wystąpienia ConcurrentModificationException.
 	 *
-	 * @param listener Słuchacz do dodania
+	 * @param listener słuchacz do dodania
 	 */
 	public void addSetListener(SetListener<V> listener)
 	{
@@ -132,9 +132,9 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Usuwa obserwatora kolekcji z listy powiadamianych.
 	 *
 	 * Nie powinno się usuwać słuchaczy, gdy są odbierane komunikaty
-	 * - możliwość wystąpienia ConcurrentModificationException
+	 * - możliwość wystąpienia ConcurrentModificationException.
 	 *
-	 * @param listener Słuchacz do usunięcia
+	 * @param listener słuchacz do usunięcia
 	 */
 	public void removeSetListener(SetListener<V> listener)
 	{

@@ -12,52 +12,76 @@ public abstract class Contact extends SimpleObservable
 	/**
 	 * Możliwe statusy użytkowników na liście kontaktów.
 	 */
-	public enum UserStatus { ONLINE, BUSY, OFFLINE }
+	public enum UserStatus
+	{
+		/**
+		 * Użytkownik jest dostępny.
+		 */
+		ONLINE,
+
+		/**
+		 * Użytkownik jest dostępny, ale zajęty.
+		 */
+		BUSY,
+
+		/**
+		 * Użytkownik jest niedostępny.
+		 */
+		OFFLINE
+	}
 
 	/**
 	 * Zwraca pełny identyfikator użytkownika,
-	 * w formie [unikalny-tekst]@[nazwa-protokołu]
+	 * w formie <code>[unikalny-tekst]@[nazwa-protokołu]</code>.
 	 *
-	 * @return Pełny identyfikator użytkownika
+	 * @return pełny identyfikator użytkownika
 	 */
 	public abstract String getID();
 
 	/**
-	 * Zwraca nazwę kontaktu (np. do wyświetlania)
+	 * Zwraca nazwę kontaktu (np. do wyświetlania).
 	 *
-	 * @return Nazwa kontaktu
+	 * @return nazwa kontaktu
 	 */
 	public abstract String getName();
 
 	/**
 	 * Zwraca grupę, do której jest zapisany użytkownik (kontakt). Metoda działa
-	 * tylko, jeżeli protokół obsługuje grupy
+	 * tylko, jeżeli protokół obsługuje grupy.
 	 *
-	 * @return Grupa kontaktu
+	 * @return grupa kontaktu
 	 */
 	public abstract String getGroup();
 
 	/**
 	 * Zwraca konto związane z kontaktem.
 	 *
-	 * @return Konto związane z kontaktem
+	 * @return konto
 	 */
 	public abstract Account getAccount();
 
 	/**
 	 * Zwraca aktualny status kontaktu.
 	 *
-	 * @return Status kontaktu
+	 * @return status kontaktu
 	 */
 	public abstract UserStatus getStatus();
 
 	/**
-	 * Zwraca tekstowy opis statusu
+	 * Zwraca tekstowy opis statusu.
 	 *
-	 * @return Tekstowy opis statusu, lub null, jeżeli nie ustawiony
+	 * @return tekstowy opis statusu, lub <code>null</code>, jeżeli nie
+	 * ustawiony
 	 */
 	public abstract String getTextStatus();
 
+	/**
+	 * Zamienia listę kontaktów w tekstową listę ich nazw.
+	 *
+	 * @param contacts lista kontaktów
+	 * @param glue separator łączący nazwy
+	 * @return połączona lista
+	 */
 	public static String join(Iterable<Contact> contacts, String glue)
 	{
 		StringBuilder joined = new StringBuilder();

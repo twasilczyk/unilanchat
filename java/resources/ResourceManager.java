@@ -20,7 +20,7 @@ public class ResourceManager
 	/**
 	 * Pobiera uchwyt do pliku dowolnego typu.
 	 * 
-	 * @param objname Nazwa pliku do pobrania
+	 * @param objname nazwa pliku do pobrania
 	 * @return URL pobranego pliku
 	 */
 	public static URL get(String objname)
@@ -38,8 +38,8 @@ public class ResourceManager
 	/**
 	 * Sprawdza, czy plik o podanej nazwie istnieje w zasobach.
 	 *
-	 * @param objname Nazwa pliku do sprawdzenia
-	 * @return Czy plik istnieje w zasobach
+	 * @param objname nazwa pliku do sprawdzenia
+	 * @return <code>true</code>, jeżeli plik istnieje w zasobach
 	 */
 	public static boolean exists(String objname)
 	{
@@ -51,8 +51,8 @@ public class ResourceManager
 	/**
 	 * Pobiera ikonę z zasobów.
 	 *
-	 * @param iconname Nazwa pliku z ikoną
-	 * @return Obiekt obrazka ikony
+	 * @param iconname nazwa pliku z ikoną
+	 * @return obrazek ikony
 	 */
 	public static ImageIcon getIcon(String iconname)
 	{
@@ -77,8 +77,8 @@ public class ResourceManager
 	/**
 	 * Pobiera obrazek z zasobów.
 	 *
-	 * @param imagename Nazwa obrazka do pobrania
-	 * @return Obiekt obrazka
+	 * @param imagename nazwa obrazka do pobrania
+	 * @return obrazek
 	 */
 	public static Image getImage(String imagename)
 	{
@@ -90,7 +90,7 @@ public class ResourceManager
 		URL u = get(imagename);
 		if (u == null)
 		{
-			images.put(imagename, null); //unchecked
+			images.put(imagename, null);
 			System.err.println("Ikona nie istnieje: " + imagename);
 			return null;
 		}
@@ -114,7 +114,7 @@ public class ResourceManager
 			}
 		}
 
-		images.put(imagename, i); //unchecked
+		images.put(imagename, i);
 
 		return i;
 	}

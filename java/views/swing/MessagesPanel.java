@@ -281,10 +281,20 @@ public class MessagesPanel extends JStickyScrollPane
 		}
 	}
 
+	/**
+	 * Co jest wyświetlane w komórce serwisowej danej wiadomości.
+	 */
 	public enum ServiceCellUsage
 	{
-		UNUSED, // komórka serwisowa niewidoczna
-		RECEIVERS // lista odbiorców
+		/**
+		 * Komórka serwisowa niewidoczna.
+		 */
+		UNUSED,
+		
+		/**
+		 * W komórce serwisowej wyświetlana jest lista odbiorców.
+		 */
+		RECEIVERS
 	};
 
 	class DisplayedMessage
@@ -293,7 +303,7 @@ public class MessagesPanel extends JStickyScrollPane
 
 		/**
 		 * Jeżeli wiadomość wychodząca i protokół obsługuje śledzenie dostarczania
-		 * wiadomości - element ikony statusu wiadomości
+		 * wiadomości - element ikony statusu wiadomości.
 		 */
 		public Element messageReceiversIconCell;
 

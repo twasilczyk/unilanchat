@@ -21,7 +21,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 * Zwraca iterator dla danej listy pokoi. Przy każdej iteracji po pokojach
 	 * trzeba ustawić synchronizację na obiekt listy.
 	 *
-	 * @return Iterator po kontaktach
+	 * @return iterator po kontaktach
 	 */
 	public Iterator<ChatRoom> iterator()
 	{
@@ -31,7 +31,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Dodaje nowy pokój do listy.
 	 *
-	 * @param chatRoom Dodawany pokój
+	 * @param chatRoom dodawany pokój
 	 */
 	public void add(ChatRoom chatRoom)
 	{
@@ -41,7 +41,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Usuwa pokój z listy.
 	 *
-	 * @param chatRoom Usuwany pokój
+	 * @param chatRoom usuwany pokój
 	 */
 	public void remove(ChatRoom chatRoom)
 	{
@@ -51,8 +51,9 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Sprawdza, czy dany pokój istnieje na liście.
 	 *
-	 * @param id Identyfikator sprawdzanego pokoju
-	 * @return Czy lista zawiera pokój o danym identyfikatorze
+	 * @param id identyfikator sprawdzanego pokoju
+	 * @return <code>true</code>, jeżeli lista zawiera pokój o danym
+	 * identyfikatorze
 	 */
 	public boolean exists(String id)
 	{
@@ -63,8 +64,8 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 * Pobiera pokój o danym identyfikatorze z listy. Jeżeli nie istnieje -
 	 * tworzy go.
 	 *
-	 * @param id Identyfikator pokoju do pobrania
-	 * @return Wybrany pokój rozmów
+	 * @param id identyfikator pokoju do pobrania
+	 * @return wybrany pokój rozmów
 	 */
 	public synchronized ChatRoom get(String id)
 	{
@@ -81,8 +82,8 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 * Pobiera z listy pokój prywatny, do rozmowy z danym kontaktem. Jeżeli
 	 * pokój nie istnieje - tworzy go.
 	 *
-	 * @param contact Kontakt, dla którego ma zostać pobrany pokój
-	 * @return Pokój prywatny
+	 * @param contact kontakt, dla którego ma zostać pobrany pokój
+	 * @return pokój prywatny
 	 */
 	public synchronized PrivateChatRoom get(Contact contact)
 	{
@@ -99,7 +100,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Pobiera główny pokój rozmów.
 	 *
-	 * @return Główny pokój rozmów
+	 * @return główny pokój rozmów
 	 */
 	public ChatRoom getMain()
 	{
@@ -109,7 +110,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Zwraca ilość pokoi na liście.
 	 *
-	 * @return Ilość pokoi na liście
+	 * @return ilość pokoi
 	 */
 	public int getSize()
 	{
@@ -117,9 +118,9 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	}
 
 	/**
-	 * Dodaje obserwatora zbioru pokoi do listy powiadamianych
+	 * Dodaje obserwatora zbioru pokoi do listy powiadamianych.
 	 *
-	 * @param listener Obserwator do dodania
+	 * @param listener obserwator do dodania
 	 */
 	public void addSetListener(SetListener<ChatRoom> listener)
 	{
@@ -127,9 +128,9 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	}
 
 	/**
-	 * Usuwa obserwatora zbioru pokoi z listy powiadamianych
+	 * Usuwa obserwatora zbioru pokoi z listy powiadamianych.
 	 *
-	 * @param listener Obserwator do usunięcia
+	 * @param listener obserwator do usunięcia
 	 */
 	public void removeSetListener(SetListener<ChatRoom> listener)
 	{

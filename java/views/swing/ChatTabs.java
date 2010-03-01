@@ -150,9 +150,9 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	}
 
 	/**
-	 * Obsługa zmiany wybranej zakładki
+	 * Obsługa zmiany wybranej zakładki.
 	 *
-	 * @param e Zdarzenie opisujące zmianę zakładki
+	 * @param e zdarzenie opisujące zmianę zakładki
 	 */
 	public void stateChanged(ChangeEvent e)
 	{
@@ -191,7 +191,7 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	/**
 	 * Aktualizuje tytuł i ikonkę okna. Może być wywoływany TYLKO w wątku AWT.
 	 *
-	 * @param room Pokój do aktualizacji
+	 * @param room pokój do aktualizacji
 	 */
 	protected void updateRoomTitle(ChatRoom room)
 	{

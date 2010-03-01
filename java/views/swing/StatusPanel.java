@@ -13,7 +13,7 @@ import resources.ResourceManager;
 
 /**
  * Komponent wyświetlający panel zmiany statusu (status Dostępny / Zaraz wracam
- * oraz status opisowy)
+ * oraz status opisowy).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

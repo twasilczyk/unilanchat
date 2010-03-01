@@ -20,10 +20,10 @@ public class HTMLUtilities
 
 	/**
 	 * Konwertuje znaki specjalne HTML na ich encje. Zamienia &amp;, &lt;, &gt;
-	 * i &quot;
+	 * i &quot;.
 	 * 
-	 * @param text Tekst do przekonwertowania
-	 * @return Tekst bezpieczny do umieszczenia w kodzie HTML
+	 * @param text tekst do przekonwertowania
+	 * @return tekst bezpieczny, do umieszczenia w kodzie HTML
 	 */
 	public static String escape(String text)
 	{
@@ -36,8 +36,8 @@ public class HTMLUtilities
 	/**
 	 * Zamienia wszystkie znaki końca linii na przełamanie wiersza w HTML.
 	 *
-	 * @param text Tekst do przetworzenia
-	 * @return Tekst z dodanymi ciągami &lt;br /&gt; w miejsce końców linii
+	 * @param text tekst do przetworzenia
+	 * @return tekst z dodanymi ciągami &lt;br /&gt; w miejsce końców linii
 	 */
 	public static String nl2br(String text)
 	{
@@ -49,11 +49,11 @@ public class HTMLUtilities
 	/**
 	 * Łączy ciągi podanym separatorem.
 	 *
-	 * @todo Funkcja nie jest ściśle związana z HTML, przydało by się ją
+	 * @todo funkcja nie jest ściśle związana z HTML, przydało by się ją
 	 * wydzielić do osobnej klasy
-	 * @param strings Tablica ciągów do złączenia
-	 * @param separator Separator
-	 * @return Połączony ciąg rozdzielony separatorami
+	 * @param strings tablica ciągów do złączenia
+	 * @param separator separator
+	 * @return połączony ciąg, rozdzielony separatorami
 	 */
 	public static String join(String[] strings, String separator)
 	{
@@ -79,8 +79,8 @@ public class HTMLUtilities
 	/**
 	 * Znajduje wszystkie adresy URL w tekście i zamienia je na łącza.
 	 *
-	 * @param text Tekst zawierający adresy
-	 * @return Tekst z adresami zamienionymi w łącza
+	 * @param text tekst zawierający adresy
+	 * @return tekst z adresami zamienionymi w łącza
 	 */
 	public static String tagURLs(String text)
 	{
@@ -120,11 +120,10 @@ public class HTMLUtilities
 	/**
 	 * Otwiera podany URL w przeglądarce zainstalowanej w systemie użytkownika.
 	 *
-	 * Bare Bones Browser Launch 
-	 * Public Domain Software -- Free to Use as You Like
-	 *
-	 * @author Dem Pilafian
-	 * @version 2.0 (May 26, 2009)
+	 * Bare Bones Browser Launch;
+	 * Public Domain Software - Free to Use as You Like;
+	 * Autor: Dem Pilafian;
+	 * Wersja: 2.0 (May 26, 2009).
 	 *
 	 * @param url URL do otworzenia w przeglądarce
 	 */
@@ -166,6 +165,12 @@ public class HTMLUtilities
 		}
 	}
 
+	/**
+	 * Wczytuje plik css z URL do podanego arkusza styli.
+	 *
+	 * @param ss arkusz, do którego ma zostać wczytany plik
+	 * @param sheet URL, który ma zostać wczytany
+	 */
 	public static void loadCSSRules(StyleSheet ss, URL sheet)
 	{
 		try
@@ -177,6 +182,12 @@ public class HTMLUtilities
 		}
 	}
 
+	/**
+	 * Umieszcza kod HTML przed końcem podanego elementu.
+	 *
+	 * @param elem element
+	 * @param html kod HTML
+	 */
 	public static void insertBeforeEnd(final Element elem, final String html)
 	{
 		GUIUtilities.swingInvokeAndWait(new Runnable()
@@ -207,6 +218,12 @@ public class HTMLUtilities
 		});
 	}
 
+	/**
+	 * Umieszcza kod HTML po końcu podanego elementu.
+	 *
+	 * @param elem element
+	 * @param html kod HTML
+	 */
 	public static void insertAfterEnd(final Element elem, final String html)
 	{
 		GUIUtilities.swingInvokeAndWait(new Runnable()
@@ -230,6 +247,13 @@ public class HTMLUtilities
 		});
 	}
 
+	/**
+	 * Ustawia nową zawartość (HTML) podanego elementu.
+	 *
+	 * @param elem element
+	 * @param html kod HTML
+	 * @param waitForSwing czy bieżący wątek ma czekać na wykonanie podmiany
+	 */
 	public static void setInnerHTML(final Element elem, final String html,
 			boolean waitForSwing)
 	{
@@ -259,6 +283,11 @@ public class HTMLUtilities
 			SwingUtilities.invokeLater(r);
 	}
 
+	/**
+	 * Usuwa podany element z dokumentu.
+	 *
+	 * @param elem element
+	 */
 	public static void remove(final Element elem)
 	{
 		GUIUtilities.swingInvokeAndWait(new Runnable()

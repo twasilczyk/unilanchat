@@ -4,7 +4,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 /**
- * Komponent wyświetlający główne menu programu
+ * Komponent wyświetlający główne menu programu.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

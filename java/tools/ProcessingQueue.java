@@ -23,7 +23,7 @@ public class ProcessingQueue
 	 * Kolejkuje zadanie do wykonania w osobnym wątku. Zadania wykonywane są
 	 * po kolei, nie są tworzone dodatkowe wątki.
 	 *
-	 * @param doRun Zadanie do wykonania
+	 * @param doRun zadanie do wykonania
 	 */
 	public void invokeLater(Runnable doRun)
 	{

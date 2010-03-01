@@ -8,3 +8,6 @@ feature request:
 - tylko jedna instancja programu
 - przygotować jakąś oryginalną ikonkę
 - obsługa bibliotek JNI pod linuxem 64bit
+
+inne:
+- uzupełnić komentarze w pakiecie views.swing

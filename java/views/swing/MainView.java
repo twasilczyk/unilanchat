@@ -10,7 +10,7 @@ import resources.ResourceManager;
 import tools.GUIUtilities;
 
 /**
- * Widok odpowiadający za główne okno programu
+ * Widok odpowiadający za główne okno programu.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -24,15 +24,15 @@ public class MainView extends JFrame
 	protected TrayIcon trayIcon = null;
 	protected boolean trayModeShowUnread = false;
 
-	protected final MainViewListener mainViewListener =
+	private final MainViewListener mainViewListener =
 		new MainViewListener();
 
 	/**
 	 * Główny konstruktor. Aby utworzyć nową instancję widoku, należy skorzystać
-	 * z metody init()
+	 * z metody {@link #init(MainController)}.
 	 *
-	 * @see #init(controllers.MainController)
-	 * @param mainController
+	 * @see #init(MainController)
+	 * @param mainController główny kontroler, z którym powiązany jest widok
 	 */
 	protected MainView(MainController mainController)
 	{
@@ -81,8 +81,8 @@ public class MainView extends JFrame
 	 * metodę. W przypadku niepowodzenia (np. po próbie uruchomienia aplikacji
 	 * Swing w środowisku bez okien) zwraca fałsz.
 	 *
-	 * @param mainController Obiekt głównego kontrolera
-	 * @return Czy zakończono powodzeniem
+	 * @param mainController obiekt głównego kontrolera
+	 * @return <code>true</code>, jeżeli zakończono powodzeniem
 	 */
 	public static boolean init(MainController mainController)
 	{
@@ -104,7 +104,7 @@ public class MainView extends JFrame
 
 	/**
 	 * Klasa odpowiada za obserwowanie, czy nie pojawiły się (lub zniknęły)
-	 * nie przeczytane wiadomości -- jeżeli tak, zmieniamy tryb ikonki w trayu
+	 * nie przeczytane wiadomości - jeżeli tak, zmieniamy tryb ikonki w trayu.
 	 */
 	class ChatRoomsViewObserver implements Observer
 	{
@@ -224,7 +224,7 @@ public class MainView extends JFrame
 
 /**
  * Pomocnicza klasa dla wątku odpowiedzialnego za utworzenie nowej instancji
- * głównego widoku
+ * głównego widoku.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

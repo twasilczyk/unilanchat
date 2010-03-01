@@ -11,7 +11,7 @@ import resources.ResourceManager;
 import views.ContactListModel;
 
 /**
- * Komponent wyświetlający listę kontaktów
+ * Komponent wyświetlający listę kontaktów.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -86,7 +86,7 @@ public class ContactListPanel extends JScrollPane
 			if (status != null)
 				tooltip += ", opis: \"" + status + "\"";
 
-            return tooltip;
+			return tooltip;
 		}
 	}
 

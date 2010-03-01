@@ -21,7 +21,9 @@ public class ChatController
 	protected final ChatRoomList chatRoomList = new ChatRoomList();
 
 	/**
-	 * @param mainController Główny kontroler danej instancji aplikacji
+	 * Główny konstruktor.
+	 *
+	 * @param mainController główny kontroler danej instancji aplikacji
 	 */
 	public ChatController(MainController mainController)
 	{
@@ -31,7 +33,7 @@ public class ChatController
 	/**
 	 * Zwraca główny kontroler związany z daną instancją aplikacji.
 	 *
-	 * @return Główny kontroler
+	 * @return główny kontroler
 	 */
 	public MainController getMainController()
 	{
@@ -41,7 +43,7 @@ public class ChatController
 	/**
 	 * Zwraca listę otworzonych pokoi rozmów (w danej instancji aplikacji).
 	 *
-	 * @return Lista otworzonych pokoi rozmów
+	 * @return lista otworzonych pokoi rozmów
 	 */
 	public ChatRoomList getChatRoomList()
 	{
@@ -51,8 +53,8 @@ public class ChatController
 	/**
 	 * Zwraca (ewentualnie tworzy) pokój prywatny do rozmowy z danym kontaktem.
 	 *
-	 * @param contact Kontakt, dla którego chcemy uzyskać pokój
-	 * @return Prywatny pokój rozmów
+	 * @param contact kontakt, dla którego chcemy uzyskać pokój
+	 * @return prywatny pokój rozmów
 	 */
 	public ChatRoom getPrivateChatRoom(Contact contact)
 	{
@@ -65,7 +67,7 @@ public class ChatController
 	 * Zwraca główny pokój rozmów, do komunikacji z wszystkimi kontaktami ze
 	 * wszystkich protokołów, na kanale publicznym.
 	 *
-	 * @return Publiczny pokój rozmów
+	 * @return publiczny pokój rozmów
 	 */
 	public ChatRoom getMainChatRoom()
 	{
@@ -75,8 +77,8 @@ public class ChatController
 	/**
 	 * Próbuje wysłać wiadomość po kolei za pomocą wszystkich kont.
 	 *
-	 * @param room Pokój, w którym jest nadawana wiadomość
-	 * @param message Treść wiadomości
+	 * @param room pokój, w którym jest nadawana wiadomość
+	 * @param message treść wiadomości
 	 */
 	public void sendMessage(ChatRoom room, String message)
 	{

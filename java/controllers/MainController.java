@@ -5,6 +5,7 @@ import java.util.*;
 import protocols.*;
 import protocols.ipmsg.IpmsgAccount;
 import tools.*;
+import main.Main;
 
 /**
  * Główny kontroler aplikacji.
@@ -39,7 +40,7 @@ public class MainController extends SimpleObservable implements Observer
 	/**
 	 * Zwraca kontroler pokoi rozmów, związany z daną instancją aplikacji.
 	 *
-	 * @return Kontroler pokoi rozmów
+	 * @return kontroler pokoi rozmów
 	 */
 	public ChatController getChatController()
 	{
@@ -53,84 +54,15 @@ public class MainController extends SimpleObservable implements Observer
 	 */
 	protected Contact.UserStatus currentStatus = Contact.UserStatus.OFFLINE;
 
-	private StatusControlThread statusControlThread = new StatusControlThread();
-
 	/**
 	 * Aktualnie ustawiony status opisowy.
 	 */
 	protected String currentTextStatus = "";
 
 	/**
-	 * Klasa kontroli statusu przyjmuje zlecenia zmiany statusu. Dzięki
-	 * wydzieleniu tego do oddzielnego wątku, główny wątek wykonania programu
-	 * nie jest zatrzymywany.
-	 */
-	class StatusControlThread extends Thread
-	{
-		/**
-		 * Jakiego statusu zażądał użytkownik. Po odebraniu żądania ustawiany jest na NULL
-		 */
-		protected Contact.UserStatus requestedStatus = null;
-		protected final Object requestedStatusLock = new Object();
-
-		public StatusControlThread()
-		{
-			super("ULC-StatusControlThread");
-			setDaemon(true);
-			start();
-		}
-
-		@Override public void run()
-		{
-			Contact.UserStatus newStatus = null;
-			while (true)
-			{
-				synchronized (requestedStatusLock)
-				{
-					if (requestedStatus == null)
-						try
-						{
-							requestedStatusLock.wait();
-						}
-						catch (InterruptedException e)
-						{
-							return;
-						}
-					if (requestedStatus == null)
-						continue;
-					newStatus = requestedStatus;
-					requestedStatus = null;
-				}
-
-				for (Account account : accounts)
-					account.setStatus(newStatus);
-				notifyObservers("status");
-			}
-		}
-
-		/**
-		 * Ustawia żądanie zmieny statusu (zostanie ono wykonane w osobnym
-		 * wątku). Po zmianie statusu główny kontoler powiadamia wszystkich
-		 * swoich obserwatowów (wiadomością "status").
-		 *
-		 * @param status Nowy status
-		 */
-		public void requestStatus(Contact.UserStatus status)
-		{
-			if (status == null)
-				throw new NullPointerException();
-			synchronized (requestedStatusLock)
-			{
-				requestedStatus = status;
-				requestedStatusLock.notifyAll();
-			}
-		}
-	}
-
-	/**
 	 * Zwraca aktualnie ustawiony (nie żądany) status użytkownika.
 	 *
-	 * @return Aktualny status
+	 * @return aktualny status
 	 */
 	public Contact.UserStatus getStatus()
 	{
@@ -138,20 +70,31 @@ public class MainController extends SimpleObservable implements Observer
 	}
 
 	/**
-	 * Ustawia żądanie zmiany statusu.
+	 * Ustawia nowy status (w tle).
 	 *
-	 * @param status Nowy status
-	 * @see StatusControlThread
+	 * @param status nowy status
 	 */
-	public void setStatus(Contact.UserStatus status)
+	public void setStatus(final Contact.UserStatus status)
 	{
-		statusControlThread.requestStatus(status);
+		Main.backgroundProcessing.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				for (Account account : accounts)
+				{
+					if (account.getStatus().equals(status))
+						continue;
+					account.setStatus(status);
+				}
+				notifyObservers("status");
+			}
+		});
 	}
 
 	/**
 	 * Wykonywane, jeżeli istnieje podejrzenie, że jedno z kont zmieniło status.
 	 *
-	 * @param account Podejrzane konto
+	 * @param account podejrzane konto
 	 */
 	protected void accountStatusProbablyChanged(Account account)
 	{
@@ -168,7 +111,7 @@ public class MainController extends SimpleObservable implements Observer
 	/**
 	 * Pobiera status opisowy, ustawiony przez użytkownika.
 	 *
-	 * @return Status opisowy
+	 * @return status opisowy
 	 */
 	public String getTextStatus()
 	{
@@ -197,7 +140,7 @@ public class MainController extends SimpleObservable implements Observer
 	/**
 	 * Pobiera listę kontaktów (jako referencję, nie kopię).
 	 *
-	 * @return Obiekt listy kontaktów
+	 * @return obiekt listy kontaktów
 	 */
 	public ContactList getContactList()
 	{
@@ -207,7 +150,7 @@ public class MainController extends SimpleObservable implements Observer
 	/**
 	 * Pobiera listę kont. NIE jest to kopia - nie wolno zmieniać jej zawartości.
 	 *
-	 * @return Lista kont. 
+	 * @return lista kont.
 	 * @todo rozwiązać to ładniej
 	 */
 	public Vector<Account> getAccountsVector()

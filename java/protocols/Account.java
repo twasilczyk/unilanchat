@@ -14,21 +14,21 @@ public abstract class Account extends SimpleObservable
 	/**
 	 * Ustawia status dostępności konta.
 	 *
-	 * @param status Nowy status
+	 * @param status nowy status
 	 */
 	public abstract void setStatus(Contact.UserStatus status);
 
 	/**
 	 * Pobiera status dostępności konta.
 	 *
-	 * @return Status użytkownika dla danego konta
+	 * @return status użytkownika dla danego konta
 	 */
 	public abstract Contact.UserStatus getStatus();
 
 	/**
 	 * Ustawia status opisowy konta.
 	 *
-	 * @param textStatus Nowy status opisowy
+	 * @param textStatus nowy status opisowy
 	 */
 	public abstract void setTextStatus(String textStatus);
 
@@ -36,7 +36,8 @@ public abstract class Account extends SimpleObservable
 	 * Stwierdza, czy konto wspiera przypisywanie grup kontaktom. Zazwyczaj
 	 * wspólne dla całego protokołu.
 	 *
-	 * @return konto wspiera przypisywanie grup kontaktom
+	 * @return <code>true</code>, jeżeli konto wspiera przypisywanie grup
+	 * kontaktom
 	 */
 	public boolean isGroupsSupported()
 	{
@@ -49,9 +50,9 @@ public abstract class Account extends SimpleObservable
 	 * Należy przede wszystkim sprawdzić, czy powinna zostać wysłana za pomocą
 	 * tego konta (robi to klasa implementująca protokół).
 	 *
-	 * @param message Obiekt wiadomości (zawiera m.in. obiekt pokoju rozmów)
-	 * @return Czy wiadomość powinna zostać wysłana za pomocą danego konta.
-	 *         NIE oznacza to powodzenia wysyłania wiadomości!
+	 * @param message obiekt wiadomości (zawiera m.in. obiekt pokoju rozmów)
+	 * @return <code>true</code>, jeżeli wiadomość powinna zostać wysłana za
+	 * pomocą danego konta, NIE oznacza to powodzenia wysyłania wiadomości
 	 */
 	public abstract boolean postMessage(OutgoingMessage message);
 }

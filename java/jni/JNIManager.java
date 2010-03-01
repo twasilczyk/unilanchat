@@ -10,6 +10,13 @@ import java.net.URL;
  */
 public abstract class JNIManager
 {
+	/**
+	 * Wczytanie biblioteki natywnej z pliku jar. Nazwa pliku binarnego
+	 * biblioteki jest automatycznie generowana z nazwy biblioteki.
+	 *
+	 * @param libname nazwa biblioteki
+	 * @throws NativeLibraryLoadFailed jeżeli nie udało się załadować biblioteki
+	 */
 	public static void loadLibrary(String libname) throws NativeLibraryLoadFailed
 	{
 		if (libname == null)
@@ -18,8 +25,8 @@ public abstract class JNIManager
 		String libFileName = System.mapLibraryName(libname);
 
 		URL liburl = JNIManager.class.getResource(libFileName);
-                if (liburl == null)
-                    throw new NativeLibraryLoadFailed(libname);
+		if (liburl == null)
+			throw new NativeLibraryLoadFailed(libname);
 
 		File libTempFile;
 		try
@@ -61,6 +68,13 @@ public abstract class JNIManager
 		}
 	}
 
+	/**
+	 * Próbuje załadować bibliotekę.
+	 *
+	 * @see #loadLibrary(String)
+	 * @param libname nazwa biblioteki
+	 * @return <code>true</code>, jeżeli udało się załadować bibliotekę
+	 */
 	public static boolean tryLoadLibrary(String libname)
 	{
 		try

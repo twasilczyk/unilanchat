@@ -10,21 +10,21 @@ public interface SetListener<E>
 	/**
 	 * Powiadomienie o dodaniu obiektu do kolekcji.
 	 *
-	 * @param item Dodany obiekt
+	 * @param item dodany obiekt
 	 */
 	public void itemAdded(E item);
 
 	/**
 	 * Powiadomienie o usunięciu obiektu z kolekcji.
 	 *
-	 * @param item Usunięty obiekt
+	 * @param item usunięty obiekt
 	 */
 	public void itemRemoved(E item);
 
 	/**
 	 * Powiadomienie o uaktualnieniu obiektu znajdującego się w kolekcji.
 	 *
-	 * @param item Uaktualniony obiekt
+	 * @param item uaktualniony obiekt
 	 */
 	public void itemUpdated(E item);
 }

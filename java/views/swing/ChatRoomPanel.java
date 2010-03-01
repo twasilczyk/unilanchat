@@ -8,7 +8,7 @@ import protocols.*;
 import tools.SetListener;
 
 /**
- * Panel pokoju rozmów, zawierający listę wiadomości oraz pole do ich wysyłania
+ * Panel pokoju rozmów, zawierający listę wiadomości oraz pole do ich wysyłania.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

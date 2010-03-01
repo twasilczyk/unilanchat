@@ -11,7 +11,7 @@ import resources.ResourceManager;
 import tools.*;
 
 /**
- * Widok jest w istocie kolekcją paneli rozmów, pogrupowanych w zakładkach
+ * Widok jest w istocie kolekcją paneli rozmów, pogrupowanych w zakładkach.
  *
  * @see ChatRoomPanel
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)

@@ -1,0 +1,13 @@
+Zasady formatowania, używane w tym projekcie:
+
+- wcięcia tabulacjami;
+- pusta linia na końcu pliku, bez białych znaków na końcach linii (również pustych);
+- klamry otwierające i zamykające w nowej linii, w tej samej kolumnie co blok
+  nadrzędny, blok podrzędny wcięty o jedną tabulację;
+- komentarze javadoc:
+  - opis metody z dużej litery, zakończony kropką;
+  - opisy parametrów i zwracanych wartości z małej litery, bez kropki na końcu;
+  - deklaracje zwracanych wartości boolean:
+    "@return <code>true</code>, jeżeli (...)";
+- importowane paczki w dwóch oddzielonych pustą linią sekcjach: java[x] oraz
+  reszta.

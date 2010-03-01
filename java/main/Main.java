@@ -11,34 +11,43 @@ import tools.*;
 public abstract class Main
 {
 	/**
-	 * Nick użytkownika (tylko tymczasowo, dopóki nie będzie okien konfiguracyjnych).
-	 *
-	 * @todo nick ma być ustawiany w okienku konfiguracji
+	 * Główna kolejka dla zadań do wykonania w tle.
 	 */
-	public static String tmpNick = System.getProperty("user.name", "anonim");
-
 	public static ProcessingQueue backgroundProcessing = new ProcessingQueue();
 
 	/**
 	 * Oznaczenie numeru wersji w formacie:
-	 * <numer główny>.<numer dodatkowy>[.<numer wydania>]
+	 * <code>&lt;numer główny&gt;.&lt;numer dodatkowy&gt;[.&lt;numer wydania&gt;]</code>.
 	 */
 	public static final String version = "0.1";
 
 	/**
-	 * Stabilne wydania mają ustawioną tą flagę na false.
+	 * Czy jest to build testowy. Stabilne wydania mają ustawioną tą flagę
+	 * na false.
 	 */
 	public static final boolean isNightly = true;
 
+	/**
+	 * Nazwa aplikacji (krótka).
+	 *
+	 * @see #applicationFullName
+	 */
 	public static final String applicationName = "UniLANChat";
 
+	/**
+	 * Pełna nazwa aplikacji, wraz z numerem wersji.
+	 *
+	 * @see #applicationName
+	 * @see #version
+	 * @see #isNightly
+	 */
 	public static final String applicationFullName =
 		applicationName + " " + version + (isNightly?" (nightly)":"");
 
 	/**
 	 * Uruchomienie aplikacji z konsoli.
 	 *
-	 * @param args Argumenty podane z konsoli.
+	 * @param args argumenty podane z konsoli.
 	 */
 	public static void main(String[] args)
 	{
@@ -58,11 +67,10 @@ public abstract class Main
 
 		for (int i = 0; i < args.length; i++)
 		{
-			if (args[i].equals("--nick"))
-			{
-				if (i + 1 < args.length)
-					tmpNick = args[++i];
-			}
+			if (args[i].equals("--nick") && i + 1 < args.length)
+				Configuration.getInstance().setNick(args[++i]);
+
+			Configuration.getInstance().notifyObservers();
 		}
 
 		final MainController mainController = new MainController();

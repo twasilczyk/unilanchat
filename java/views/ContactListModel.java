@@ -8,33 +8,69 @@ import tools.SetListener;
 import protocols.*;
 
 /**
- * Model przedstawiający listę kontaktów w wybranym porządku
+ * Model przedstawiający (opakowujący) listę kontaktów w wybranym porządku.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class ContactListModel extends AbstractListModel implements SetListener<Contact>
+public class ContactListModel extends AbstractListModel
 {
+	/**
+	 * Opakowywana lista kontaktów.
+	 */
 	protected final ContactList contactList;
-	protected final ArrayList<Contact> orderedContactList = new ArrayList<Contact>();
 
+	private final ArrayList<Contact> orderedContactList = new ArrayList<Contact>();
+
+	private final ContactListListener contactListListener = new ContactListListener();
+
+	/**
+	 * Sposób sortowania - według nazwy.
+	 */
 	protected final static Comparator<Contact> orderByName = new ContactOrderByName();
+
+	/**
+	 * Sposób sortowania - według statusu, a następnie według nazwy.
+	 */
 	protected final static Comparator<Contact> orderByStatus = new ContactOrderByStatus();
 
+	/**
+	 * Bieżący sposób sortowania. Po zmianie należy wywołać {@link #refreshList()}.
+	 *
+	 * @todo dać możliwość zmiany sposobu sortowania z poziomu interfejsu
+	 * użytkownika
+	 */
 	protected Comparator<Contact> orderComparator = orderByStatus;
 
+	/**
+	 * Główny konstruktor.
+	 *
+	 * @param contactList lista kontaktów, do opakowania
+	 */
 	public ContactListModel(ContactList contactList)
 	{
 		if (contactList == null)
 			throw new NullPointerException();
 		this.contactList = contactList;
-		contactList.addSetListener(this);
+		contactList.addSetListener(contactListListener);
 	}
 
+	/**
+	 * Zwraca ilość kontaktów na liście.
+	 *
+	 * @return ilość kontaktów
+	 */
 	public int getSize()
 	{
 		return orderedContactList.size();
 	}
 
+	/**
+	 * Zwraca kontakt znajdujący się pod wybraną pozycją, według bieżącego
+	 * sposobu sortowania.
+	 *
+	 * @param index pozycja na liście
+	 * @return kontakt
+	 */
 	public Contact getElementAt(int index)
 	{
 		try
@@ -48,40 +84,49 @@ public class ContactListModel extends AbstractListModel implements SetListener<C
 		}
 	}
 
-	public void itemAdded(Contact contact)
+	/**
+	 * Klasa śledząca zmiany w opakowywanej liście kontaktów.
+	 */
+	class ContactListListener implements SetListener<Contact>
 	{
-		if (contact == null)
-			throw new NullPointerException();
-		synchronized (orderedContactList)
+		public void itemAdded(Contact contact)
 		{
-			orderedContactList.add(contact);
-			Collections.sort(orderedContactList, orderComparator);
+			if (contact == null)
+				throw new NullPointerException();
+			synchronized (orderedContactList)
+			{
+				orderedContactList.add(contact);
+				Collections.sort(orderedContactList, orderComparator);
+			}
+			refreshList();
 		}
-		refreshList();
+
+		public void itemRemoved(Contact contact)
+		{
+			if (contact == null)
+				throw new NullPointerException();
+			synchronized (orderedContactList)
+			{
+				orderedContactList.remove(contact);
+			}
+			refreshList();
+		}
+
+		public void itemUpdated(Contact contact)
+		{
+			if (contact == null)
+				throw new NullPointerException();
+			synchronized (orderedContactList)
+			{
+				Collections.sort(orderedContactList, orderComparator);
+			}
+			refreshList();
+		}
 	}
 
-	public void itemRemoved(Contact contact)
-	{
-		if (contact == null)
-			throw new NullPointerException();
-		synchronized (orderedContactList)
-		{
-			orderedContactList.remove(contact);
-		}
-		refreshList();
-	}
-
-	public void itemUpdated(Contact contact)
-	{
-		if (contact == null)
-			throw new NullPointerException();
-		synchronized (orderedContactList)
-		{
-			Collections.sort(orderedContactList, orderComparator);
-		}
-		refreshList();
-	}
-
+	/**
+	 * Wymusza odświeżenie komponentów korzystających z listy.
+	 */
 	protected void refreshList()
 	{
 		final ContactListModel model = this;
@@ -96,7 +141,7 @@ public class ContactListModel extends AbstractListModel implements SetListener<C
 }
 
 /**
- * Porządek listy kontaktów według nazwy
+ * Porządek listy kontaktów według nazwy.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -109,7 +154,7 @@ class ContactOrderByName implements Comparator<Contact>
 }
 
 /**
- * Porządek listy kontaktów według statusu, następnie według nazwy
+ * Porządek listy kontaktów według statusu, następnie według nazwy.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

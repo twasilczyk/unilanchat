@@ -4,7 +4,7 @@ import java.net.*;
 import java.util.*;
 
 /**
- * Klasa pomocnicza dla protokołu IPv4
+ * Klasa pomocnicza dla protokołu IPv4.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -27,7 +27,7 @@ public class IP4Utilities
 	/**
 	 * Czy adresy zostały wczytane.
 	 *
-	 * @todo Może zrobić jakieś odświeżanie?
+	 * @todo może zrobić jakieś odświeżanie?
 	 * @see #ifaceAdresses
 	 * @see #broadcastAdresses
 	 */
@@ -36,8 +36,8 @@ public class IP4Utilities
 	/**
 	 * Sprawdza, czy podany adres IP jest przypisany do jednego z interfejsów.
 	 *
-	 * @param ip Adres IP w postaci xxx.xxx.xxx.xxx
-	 * @return Czy podany adres jest lokalny
+	 * @param ip adres IP w postaci <code>xxx.xxx.xxx.xxx</code>
+	 * @return <code>true</code>, jeżeli podany adres jest lokalny
 	 */
 	public static boolean isLocalAdress(String ip)
 	{
@@ -52,7 +52,7 @@ public class IP4Utilities
 	/**
 	 * Pobiera listę adresów lokalnych interfejsów.
 	 *
-	 * @return Lista adresów IPv4
+	 * @return lista adresów IPv4
 	 */
 	public static List<Inet4Address> getLocalAdresses()
 	{
@@ -63,7 +63,7 @@ public class IP4Utilities
 	/**
 	 * Pobiera listę adresów broadcast lokalnych interfejsów.
 	 *
-	 * @return Lista adresów IPv4
+	 * @return lista adresów IPv4
 	 */
 	public static List<Inet4Address> getBroadcastAdresses()
 	{
@@ -138,9 +138,9 @@ public class IP4Utilities
 	/**
 	 * Zamienia adres IP w formie tekstowej na obiekt typu InetAddress.
 	 *
-	 * @param ip Adres IPv4 w postaci xxx.xxx.xxx.xxx
-	 * @return Adres typu InetAddress
-	 * @throws UnknownHostException Jeżeli podany adres jest nieprawidłowy
+	 * @param ip adres IPv4 w postaci <code>xxx.xxx.xxx.xxx</code>
+	 * @return adres typu InetAddress
+	 * @throws UnknownHostException jeżeli podany adres jest nieprawidłowy
 	 */
 	public static InetAddress getIPAddress(String ip) throws UnknownHostException
 	{
@@ -166,6 +166,11 @@ public class IP4Utilities
 		return Inet4Address.getByAddress(oByte);
 	}
 
+	/**
+	 * Zwraca nazwę hosta komputera, na którym jest uruchomiona aplikacja.
+	 *
+	 * @return nazwa hosta
+	 */
 	public static String getLocalHostName()
 	{
 		try

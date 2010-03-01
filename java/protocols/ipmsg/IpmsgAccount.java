@@ -1,23 +1,35 @@
 package protocols.ipmsg;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-import main.Main;
+import main.Configuration;
 import protocols.*;
 import tools.IP4Utilities;
 
 /**
- * Implementacja protokołu IPMsg
+ * Implementacja protokołu IPMsg.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
 public class IpmsgAccount extends Account
 {
+	/**
+	 * Lista kontaktów, z której ma korzystać konto.
+	 */
 	protected final ContactList contactList;
+
+	/**
+	 * Lista pokoi, z której ma korzystać konto.
+	 */
 	public final ChatRoomList chatRoomList;
 
+	/**
+	 * Główny konstruktor.
+	 *
+	 * @param contactList lista kontaktów, z której ma korzystać konto
+	 * @param chatRoomList lista pokoi, z której ma korzystać konto
+	 */
 	public IpmsgAccount(ContactList contactList, ChatRoomList chatRoomList)
 	{
 		this.contactList = contactList;
@@ -31,135 +43,12 @@ public class IpmsgAccount extends Account
 
 	// <editor-fold defaultstate="collapsed" desc="Wątek połączenia">
 
-	protected final static int port = 2425;
-	protected final static int socketTimeout = 1000; //ms
-
-	protected IpmsgConnectionThread connectionThread;
+	private IpmsgConnectionThread connectionThread;
 
 	/**
-	 * Wątek połączenia IPMsg. Dokładniej mówiąc, nie jest to połączenie, tylko
-	 * otwarcie portu UDP, do odbioru i wysyłania pakietów protokołu IPMsg.
-	 */
-	protected class IpmsgConnectionThread extends Thread
-	{
-		protected DatagramSocket sock;
-		protected final Object sockSendLocker = new Object();
-		public boolean isConnected = false, failedConnecting = false;
-		protected final byte[] readBuff = new byte[1024];
-
-		public IpmsgConnectionThread()
-		{
-			super("ULC-Ipmsg-IpmsgConnectionThread");
-			this.setDaemon(true);
-			this.start();
-		}
-
-		@Override public void run()
-		{
-			try
-			{
-				sock = new DatagramSocket(port);
-				sock.setSoTimeout(socketTimeout);
-			}
-			catch (SocketException e)
-			{
-				failedConnecting = true;
-				return;
-			}
-
-			isConnected = true;
-
-			while (true)
-			{
-				try
-				{
-					Thread.sleep(1);
-				}
-				catch (InterruptedException e)
-				{
-					break;
-				}
-				
-				DatagramPacket packet = new DatagramPacket(readBuff, readBuff.length);
-				try
-				{
-					sock.receive(packet);
-
-					IpmsgPacket ipmsgPacket;
-
-					try
-					{
-						ipmsgPacket = IpmsgPacket.fromRAWData(
-								packet.getData(), packet.getLength());
-						ipmsgPacket.ip = packet.getAddress().getHostAddress();
-					}
-					catch (IllegalArgumentException e)
-					{
-						System.err.println(e.getMessage());
-						System.err.println(
-							"Pakiet od " + packet.getAddress().getHostAddress() + ", " +
-							"Dane: [" + new String(packet.getData(), 0, packet.getLength()) + "]"
-							);
-						continue;
-					}
-
-					handlePacket(ipmsgPacket);
-				}
-				catch (SocketTimeoutException e)
-				{
-				}
-				catch (IOException e)
-				{
-					break;
-				}
-			}
-
-			sock.close();
-			isConnected = false;
-//			System.err.println("disconnected");
-		}
-
-		/**
-		 * Zamyka port i kończy wątek połączenia
-		 */
-		public void disconnect()
-		{
-			isConnected = false;
-			this.interrupt();
-		}
-
-		/**
-		 * Wysyła pakiet za pomocą otwartego portu UDP
-		 *
-		 * @param packet Pakiet do wysłania
-		 */
-		public void send(DatagramPacket packet)
-		{
-			if (packet == null)
-				throw new NullPointerException();
-			if (!isConnected)
-				return;
-			synchronized(sockSendLocker)
-			{
-				if (!isConnected)
-					return;
-				try
-				{
-					sock.send(packet);
-				}
-				catch (SocketTimeoutException e)
-				{
-				}
-				catch (IOException e)
-				{
-					disconnect();
-				}
-			}
-		}
-	}
-
-	/**
-	 * @return Czy połączenie jest nawiązane
+	 * Sprawdza, czy połączenie jest nawiązane.
+	 *
+	 * @return <code>true</code>, jeżeli połączono
 	 */
 	protected boolean isConnected()
 	{
@@ -167,10 +56,10 @@ public class IpmsgAccount extends Account
 	}
 
 	/**
-	 * Zakłada lub usuwa połączenie (gniazdo UDP)
+	 * Zakłada lub usuwa połączenie (gniazdo UDP).
 	 *
-	 * @param setConnected Czy ma zostać utworzone gniazdo
-	 * @return Czy się udało
+	 * @param setConnected czy ma zostać utworzone gniazdo
+	 * @return <code>true</code>, jeżeli się udało
 	 */
 	protected synchronized boolean setConnected(boolean setConnected)
 	{
@@ -178,7 +67,7 @@ public class IpmsgAccount extends Account
 			return true;
 		if (setConnected)
 		{
-			connectionThread = new IpmsgConnectionThread();
+			connectionThread = new IpmsgConnectionThread(this);
 			while (!connectionThread.isConnected &&
 					!connectionThread.failedConnecting)
 			{
@@ -193,8 +82,8 @@ public class IpmsgAccount extends Account
 			}
 			if (connectionThread.isConnected)
 			{
-				postMessageThread = new PostMessageThread();
-				garbageContactsCollector = new GarbageContactsCollector();
+				postMessageThread = new IpmsgPostMessageThread(this);
+				garbageContactsCollector = new IpmsgGarbageContactsCollector(this);
 				return true;
 			}
 			return false;
@@ -213,9 +102,9 @@ public class IpmsgAccount extends Account
 	// <editor-fold defaultstate="collapsed" desc="Wysyłanie i odbieranie pakietów IpmsgPacket">
 
 	/**
-	 * Wysyła pakiet protokołu IPMsg przez UDP
+	 * Wysyła pakiet protokołu IPMsg przez UDP.
 	 *
-	 * @param packet Pakiet do wysłania
+	 * @param packet pakiet do wysłania
 	 */
 	protected void sendPacket(IpmsgPacket packet)
 	{
@@ -228,7 +117,7 @@ public class IpmsgAccount extends Account
 
 		DatagramPacket udpPacket = new DatagramPacket(
 				rawPacketData, rawPacketData.length);
-		udpPacket.setPort(port);
+		udpPacket.setPort(IpmsgConnectionThread.port);
 
 		if (packet.ip == null) // wysyłamy na broadcast
 		{
@@ -255,12 +144,12 @@ public class IpmsgAccount extends Account
 	}
 
 	/**
-	 * Obsługa przychodzących pakietów. Wywoływane z wątku połączenia
+	 * Obsługa przychodzących pakietów. Wywoływane z wątku połączenia.
 	 *
-	 * @param packet Odebrany pakiet
+	 * @param packet odebrany pakiet
 	 * @see IpmsgConnectionThread
 	 */
-	private void handlePacket(IpmsgPacket packet)
+	protected void handlePacket(IpmsgPacket packet)
 	{
 		if (packet == null)
 			throw new NullPointerException();
@@ -349,145 +238,20 @@ public class IpmsgAccount extends Account
 	// </editor-fold>
 
 	// <editor-fold desc="Implementacja protokołu IPMsg">
+	
+	private final String groupName = "UniLANChat";
 
-	protected String userName = Main.tmpNick;
-	protected String groupName = "UniLANChat";
+		// <editor-fold defaultstate="collapsed" desc="Lista kontaktów">
 
-	// <editor-fold defaultstate="collapsed" desc="Lista kontaktów">
-
-	private GarbageContactsCollector garbageContactsCollector;
+	private IpmsgGarbageContactsCollector garbageContactsCollector;
 
 	/**
-	 * Wątek sprawdzania dostępności jest inicjowany i kończony w ramach
-	 * zarządzania wątkiem połączenia. Służy do filtrowania listy z kontaktów,
-	 * które stały się niedostępne, ale nie poinformowały o tym. Przy okazji
-	 * znajduje kontakty, których ogłoszenia o dostępności nie dotarły.
+	 * Pobiera kontakt powiązany z podanym adresem IP. Jeżeli nie istnieje -
+	 * tworzy nowy.
 	 *
-	 * @see #setConnected(boolean)
+	 * @param ip adres IP
+	 * @return powiązany kontakt
 	 */
-	class GarbageContactsCollector extends Thread
-	{
-		/**
-		 * Ile czasu w ms ma być pomiędzy kolejnymi akcjami czyszczenia listy
-		 */
-		protected final static int collectorInterval = 60000;
-
-		/**
-		 * Osobne ustawienie czasu oczekiwania dla pierwszego czyszczenia
-		 *
-		 * @see GarbageContactsCollector.collectorInterval
-		 */
-		protected final static int collectorFirstInterval = 5000;
-
-		/**
-		 * Ile czasu ma kontakt na odpowiedź. Odpowiedź na poprzednie zapytanie
-		 * (z tego samego przebiegu akcji czyszczenia) liczy się jak bieżąca
-		 * odpowiedź
-		 */
-		protected final static int confirmTimeout = 2000;
-
-		/**
-		 * Ile razy kontakt jest odpytywany (bez powodzenia) przed skreśleniem
-		 * z listy
-		 */
-		protected final static int confirmMaxCount = 5;
-
-		/**
-		 * Lista nie potwierdzonych (w danej akcji czyszczenia) kontaktów
-		 */
-		private final HashMap<String, IpmsgContact> unconfirmedContacts =
-				new HashMap<String, IpmsgContact>();
-
-		/**
-		 * Cache, mirror unconfirmedContacts, aby nie blokować metody
-		 * potwierdzania kontaktów online (i wątku połączenia).
-		 *
-		 * @see confirmContact()
-		 */
-		private final Vector<IpmsgContact> notifyPersonally =
-				new Vector<IpmsgContact>();
-
-		public GarbageContactsCollector()
-		{
-			super("ULC-Ipmsg-GarbageContactsCollector");
-			setDaemon(true);
-			start();
-		}
-
-		@Override public synchronized void run()
-		{
-			try
-			{
-				wait(collectorFirstInterval);
-
-				while (true)
-				{
-					if (isConnected()) //nie koniecznie musi trwać przez całą pętlę
-					{
-						// przygotowanie listy kontaktów do sprawdzenia
-						synchronized (unconfirmedContacts)
-						{
-							unconfirmedContacts.clear();
-							Vector<IpmsgContact> online = getOnlineContacts();
-							for (IpmsgContact contact : online)
-								unconfirmedContacts.put(contact.getID(), contact);
-						}
-
-						// wysłanie powiadomienia do wszystkich
-						statusNotify(IpmsgPacket.COMM_ENTRY);
-						wait(confirmTimeout);
-
-						// wysyłanie powiadomień osobno, do opornych
-						for (int i = 0; i < confirmMaxCount; i++)
-						{
-							if (unconfirmedContacts.isEmpty())
-								break;
-							notifyPersonally.clear();
-							synchronized (unconfirmedContacts)
-							{
-								notifyPersonally.addAll(unconfirmedContacts.values());
-							}
-							for (IpmsgContact contact : notifyPersonally)
-								statusNotify(IpmsgPacket.COMM_ENTRY, contact.getIP());
-							wait(confirmTimeout);
-						}
-
-						// usuwanie nie potwierdzonych kontaktów
-						synchronized (unconfirmedContacts)
-						{
-							for (IpmsgContact contact : unconfirmedContacts.values())
-								contact.setStatus(Contact.UserStatus.OFFLINE);
-							unconfirmedContacts.clear();
-						}
-					}
-					
-					wait(collectorInterval);
-				}
-			}
-			catch (InterruptedException e)
-			{
-				return;
-			}
-		}
-
-		/**
-		 * Potwierdzanie dostępności kontaktu. Wywołana, jeżeli kontakt wysłał
-		 * pakiet typu COMM_ANSENTRY
-		 *
-		 * @param contact Potwierdzany kontakt
-		 */
-		public void confirmContact(IpmsgContact contact)
-		{
-			if (unconfirmedContacts.isEmpty() ||
-				!unconfirmedContacts.containsKey(contact.getID()))
-				return;
-			synchronized (unconfirmedContacts)
-			{
-				unconfirmedContacts.remove(contact.getID());
-			}
-		}
-	}
-
 	protected IpmsgContact getOrCreateContact(String ip)
 	{
 		synchronized (contactList)
@@ -510,9 +274,9 @@ public class IpmsgAccount extends Account
 
 	/**
 	 * Zwraca listę kontaktów, które mają status inny niż OFFLINE. Zwrócony
-	 * wektor można modyfikować
+	 * wektor można modyfikować.
 	 *
-	 * @return Dostępne kontakty
+	 * @return dostępne kontakty
 	 */
 	protected Vector<IpmsgContact> getOnlineContacts()
 	{
@@ -531,21 +295,31 @@ public class IpmsgAccount extends Account
 		return online;
 	}
 
-	// </editor-fold>
+		// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Ustawianie statusu">
+		// <editor-fold defaultstate="collapsed" desc="Ustawianie statusu">
 
+	/**
+	 * Maksymalna długość statusu opisowego.
+	 */
 	protected final static int maxTextStatusLength = 30;
 
+	/**
+	 * Bieżący status tego konta.
+	 */
 	protected Contact.UserStatus userStatus = Contact.UserStatus.OFFLINE;
+
+	/**
+	 * Bieżący status opisowy tego konta.
+	 */
 	protected String textStatus = "";
 
 	/**
 	 * Ustawia status konta. Jeżeli zmiana następuje między grupami (OFFLINE),
-	 * a (ONLINE, BUSY), połączenie zostaje -- odpowiednio -- nawiązane lub
-	 * przerwane
+	 * a (ONLINE, BUSY), połączenie zostaje - odpowiednio - nawiązane lub
+	 * przerwane.
 	 *
-	 * @param status Nowy status
+	 * @param status nowy status
 	 */
 	public synchronized void setStatus(Contact.UserStatus status)
 	{
@@ -591,6 +365,11 @@ public class IpmsgAccount extends Account
 		notifyObservers();
 	}
 
+	/**
+	 * Pobiera status konta.
+	 *
+	 * @return status
+	 */
 	public Contact.UserStatus getStatus()
 	{
 		return userStatus;
@@ -600,7 +379,7 @@ public class IpmsgAccount extends Account
 	 * Ustawia status opisowy. Jeżeli nawiązane jest połączenie, powiadamia o
 	 * tym wszystkich w sieci.
 	 *
-	 * @param textStatus Nowy status opisowy
+	 * @param textStatus nowy status opisowy
 	 */
 	public synchronized void setTextStatus(String textStatus)
 	{
@@ -617,9 +396,10 @@ public class IpmsgAccount extends Account
 	}
 
 	/**
-	 * Powiadomienie wszystkich o statusie konta
+	 * Powiadomienie wszystkich o statusie konta.
 	 *
-	 * @param command Rodzaj polecenia powiadamiającego (COMM_ENTRY, COMM_ABSENCE, COMM_ANSENTRY lub COMM_EXIT)
+	 * @param command rodzaj polecenia powiadamiającego (COMM_ENTRY,
+	 * COMM_ABSENCE, COMM_ANSENTRY lub COMM_EXIT)
 	 * @see #statusNotify(int, String)
 	 */
 	protected void statusNotify(int command)
@@ -630,8 +410,9 @@ public class IpmsgAccount extends Account
 	/**
 	 * Powiadamia wybraną osobę o statusie konta.
 	 * 
-	 * @param command Rodzaj polecenia powiadamiającego (COMM_ENTRY, COMM_ABSENCE, COMM_ANSENTRY lub COMM_EXIT)
-	 * @param ip IP osoby powiadamianej
+	 * @param command rodzaj polecenia powiadamiającego (COMM_ENTRY,
+	 * COMM_ABSENCE, COMM_ANSENTRY lub COMM_EXIT)
+	 * @param ip IP osoby powiadamianej (<code>null</code>, jeżeli broadcast)
 	 */
 	protected void statusNotify(int command, String ip)
 	{
@@ -640,6 +421,8 @@ public class IpmsgAccount extends Account
 			command != IpmsgPacket.COMM_ANSENTRY &&
 			command != IpmsgPacket.COMM_EXIT)
 			throw new IllegalArgumentException();
+
+		String userName = Configuration.getInstance().getNick();
 
 		IpmsgPacket packet = new IpmsgPacket(userName);
 		packet.ip = ip;
@@ -657,26 +440,40 @@ public class IpmsgAccount extends Account
 		sendPacket(packet);
 	}
 
-	// </editor-fold>
+		// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Odbieranie wiadomośći">
+		// <editor-fold defaultstate="collapsed" desc="Odbieranie wiadomośći">
 
 	/**
-	 * Potwierdzone pakiety -- kluczem jest "[id pakietu]/[id usera]", wartością
-	 * czas potwierdzenia (unix timestamp). Jeżeli minął confirmedMessagesTimeout,
-	 * potwierdzenie jest nieaktualne (powinno być zignorowane, może być usunięte)
+	 * Potwierdzone pakiety - kluczem jest <code>[id pakietu]/[id usera]</code>,
+	 * wartością czas potwierdzenia (unix timestamp). Jeżeli minął
+	 * confirmedMessagesTimeout, potwierdzenie jest nieaktualne (powinno być
+	 * zignorowane, może być usunięte).
+	 *
+	 * @todo czyszczenie, co jakiś czas
 	 */
-	//TODO: czyszczenie, co jakiś czas
 	protected final HashMap<String, Long> confirmedMessages =
 			new HashMap<String, Long>();
+
+	/**
+	 * Czas, po którym potwierdzenia pakietów tracą ważność. Po tym czasie
+	 * pakiet o tym samym identyfikatorze zostanie znowu przyjęty.
+	 */
 	protected static final int confirmedMessagesTimeout = 300000; //5 minut
 
-	protected void gotMessage(IpmsgPacket packet)
+	/**
+	 * Obsługa odbieranych wiadomości.
+	 *
+	 * @param packet odebrany pakiet z wiadomością
+	 */
+	private void gotMessage(IpmsgPacket packet)
 	{
 		boolean sendCheck = packet.getFlag(IpmsgPacket.FLAG_SENDCHECK);
 		boolean broadcast =
 				packet.getFlag(IpmsgPacket.FLAG_MULTICAST) ||
+				packet.getFlag(IpmsgPacket.FLAG_MULTICAST_NEW) ||
 				packet.getFlag(IpmsgPacket.FLAG_BROADCAST);
+		String userName = Configuration.getInstance().getNick();
 
 		if (sendCheck)
 		{
@@ -701,6 +498,11 @@ public class IpmsgAccount extends Account
 			}
 		}
 
+		//ignorujemy wiadomość odsyłaną automatycznie
+		if (Configuration.getInstance().getIgnoreAutoResponses() &&
+			packet.getFlag(IpmsgPacket.FLAG_AUTORET))
+			return;
+
 		Contact contact = contactList.get(packet.ip + "@ipmsg");
 		String authorName;
 		if (contact == null)
@@ -714,7 +516,7 @@ public class IpmsgAccount extends Account
 		else
 			chatRoom = chatRoomList.get(contact);
 
-		// wiadomości z załącznikami -- obcinanie informacji o załączniku
+		// wiadomości z załącznikami - obcinanie informacji o załączniku
 		String messageRAWContents;
 		if (packet.data.indexOf('\0') < 0)
 			messageRAWContents = packet.data;
@@ -739,180 +541,18 @@ public class IpmsgAccount extends Account
 		chatRoom.gotMessage(message);
 	}
 
-	// </editor-fold>
+		// </editor-fold>
 
-	// <editor-fold defaultstate="collapsed" desc="Wysyłanie wiadomości">
+		// <editor-fold defaultstate="collapsed" desc="Wysyłanie wiadomości">
 
-	private PostMessageThread postMessageThread;
+	private IpmsgPostMessageThread postMessageThread;
 
 	/**
-	 * Wątek wysyłania wiadomości jest inicjowany i kończony w ramach
-	 * zarządzania wątkiem połączenia
+	 * Kolejkuje wiadomość do wysłania.
 	 *
-	 * @see #setConnected(boolean)
-	 */
-	class PostMessageThread extends Thread
-	{
-		/**
-		 * Lista wiadomości do wysłania
-		 * Klucz: id pakietu
-		 * Wartość: obiekt wiadomości (zawiera także wspomniany klucz)
-		 */
-		protected final HashMap<Long, IpmsgMessagePacket> messages =
-				new HashMap<Long, IpmsgMessagePacket>();
-
-		public PostMessageThread()
-		{
-			super("ULC-Ipmsg-PostMessageThread");
-			setDaemon(true);
-			start();
-		}
-
-		@Override public synchronized void run()
-		{
-			Vector<IpmsgMessagePacket> removeMessages = new Vector<IpmsgMessagePacket>();
-			
-			while (true) //TODO: wychodzić, jak konto nie istnieje? a moze przez interrupt?
-			{
-				if (isConnected())
-				{
-					removeMessages.clear();
-					for (IpmsgMessagePacket messagePacket : messages.values())
-						if (!messagePacket.isNextTryAvailable())
-						{
-							removeMessages.add(messagePacket);
-							
-							for (IpmsgContact receiver : messagePacket.receivers)
-								receiver.setStatus(Contact.UserStatus.OFFLINE);
-							messagePacket.message.notifyReceiversFailed(messagePacket.receivers);
-						}
-					for (IpmsgMessagePacket messagePacket : removeMessages)
-						messages.remove(messagePacket.getID());
-					for (IpmsgMessagePacket messagePacket : messages.values())
-						for (IpmsgContact receiver : messagePacket.receivers)
-						{
-							messagePacket.packet.ip = receiver.getIP();
-							
-							// TODO: obsłużyć błędy, jeżeli nie połączony
-							// (isConnected() nie koniecznie musi trwać przez
-							// całą pętlę)
-							sendPacket(messagePacket.packet);
-						}
-				}
-
-				try
-				{
-					if (messages.isEmpty())
-						wait();
-					else
-						wait(1000);
-				}
-				catch (InterruptedException e)
-				{
-					return;
-				}
-			}
-		}
-
-		/**
-		 * Dodaje pakiet do listy wysyłanych. Po dodaniu pakiet (szczególnie
-		 * lista odbiorców) nie powinna być modyfikowana.
-		 *
-		 * @param messagePacket Wiadomość do wysłania
-		 */
-		public synchronized void enqueueMessagePacket(IpmsgMessagePacket messagePacket)
-		{
-			messages.put(messagePacket.getID(), messagePacket);
-			if (getState().equals(Thread.State.WAITING)) // WAITING - bez ustawionego timeoutu
-				notifyAll();
-		}
-
-		/**
-		 * Potwierdza odebranie wiadomości. Wywołana, jeżeli kontakt wysłał COMM_RECVMSG
-		 *
-		 * @param contact Kontakt, który potwierdza odebranie wiadomości
-		 * @param id ID potwierdzanej wiadomości
-		 */
-		public synchronized void confirmMessage(IpmsgContact contact, long id)
-		{
-			IpmsgMessagePacket messagePacket = messages.get(id);
-			if (messagePacket == null)
-				return;
-			if (messagePacket.receivers.remove(contact)) // true, jeżeli wcześniej nie potwierdzone
-				messagePacket.message.notifyReceiverGot(contact);
-			if (messagePacket.receivers.isEmpty())
-				messages.remove(id);
-		}
-	}
-
-	/**
-	 * Klasa pomocnicza przechowująca wiadomość do wysłania, listę odbiorców
-	 * oraz licznik prób
-	 */
-	class IpmsgMessagePacket
-	{
-		protected final static int maxSendTries = 5;
-
-		public final IpmsgPacket packet;
-		public final Vector<IpmsgContact> receivers = new Vector<IpmsgContact>();
-		public final OutgoingMessage message;
-		protected int sendTries = 0;
-
-		public IpmsgMessagePacket(OutgoingMessage message)
-		{
-			this.message = message;
-			ChatRoom room = message.getChatRoom();
-			packet = new IpmsgPacket(userName);
-
-			if (room.id.isEmpty())
-			{
-				receivers.addAll(getOnlineContacts()); //TODO: contactList ma być pobierana z chatRoom jako członkowie rozmowy
-				packet.setFlag(IpmsgPacket.FLAG_MULTICAST, true); // FLAG_BROADCAST ignoruje flagę FLAG_SENDCHECK
-			}
-			else
-			{
-				assert(room.id.endsWith("@ipmsg"));
-				if (room instanceof PrivateChatRoom)
-					receivers.add((IpmsgContact)((PrivateChatRoom)room).getContact());
-				else
-					throw new UnsupportedOperationException("Aktualnie nie są obsługiwane pokoje multicast");
-			}
-			message.notifyReceiversAdded(receivers);
-
-			packet.setCommand(IpmsgPacket.COMM_SENDMSG);
-			packet.setFlag(IpmsgPacket.FLAG_SENDCHECK, true);
-
-			packet.data = message.getContents();
-		}
-
-		/**
-		 * @return Identyfikator wiadomości (czyli pakietu wychodzącego)
-		 */
-		public long getID()
-		{
-			return packet.packetNo;
-		}
-
-		/**
-		 * Sprawdza, czy można jeszcze raz spróbować wysłać wiadomość -- jeżeli
-		 * tak, zaznacza kolejną próbę jako wykonaną
-		 *
-		 * @return Można wykonać próbę
-		 */
-		public synchronized boolean isNextTryAvailable()
-		{
-			if (sendTries >= maxSendTries)
-				return false;
-			sendTries++;
-			return true;
-		}
-	}
-
-	/**
-	 * Kolejkuje wiadomość do wysłania
-	 *
-	 * @param message Wiadomość do wysłania
-	 * @return Czy wiadomość może być przesłana tym protokołem
+	 * @param message wiadomość do wysłania
+	 * @return <code>true</code>, jeżeli wiadomość może być przesłana tym
+	 * protokołem
 	 */
 	public boolean postMessage(OutgoingMessage message)
 	{
@@ -920,11 +560,11 @@ public class IpmsgAccount extends Account
 		if (!room.id.isEmpty() && !room.id.endsWith("@ipmsg"))
 			return false;
 
-		postMessageThread.enqueueMessagePacket(new IpmsgMessagePacket(message));
+		postMessageThread.enqueueMessagePacket(new IpmsgMessagePacket(this, message));
 		return true;
 	}
 
-	// </editor-fold>
+		// </editor-fold>
 
 	// </editor-fold>
 }

@@ -22,9 +22,25 @@ public class JStickyScrollPane extends JScrollPane
 
 	private final ScrollBarListener verticalScrollBarListener = new ScrollBarListener();
 
+	/**
+	 * Nowe pole, bez ustalonego komponentu z zawartością.
+	 *
+	 * @see #setViewportView(Component)
+	 */
 	public JStickyScrollPane()
 	{
 		this.getVerticalScrollBar().addAdjustmentListener(verticalScrollBarListener);
+	}
+
+	/**
+	 * Nowe pole, z ustalonym komponentem z zawartością.
+	 *
+	 * @param c zawartość
+	 */
+	public JStickyScrollPane(Component c)
+	{
+		this();
+		this.setViewportView(c);
 	}
 	
 	class ScrollBarListener implements AdjustmentListener

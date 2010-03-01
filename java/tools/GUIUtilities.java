@@ -29,7 +29,7 @@ public abstract class GUIUtilities
 	 * Ustawia najlepszy wygląd (Look and Feel) według ustalonych priorytetów.
 	 *
 	 * @see #lookAndFeelPriority
-	 * @return Nazwa ustawionego Look and Feel
+	 * @return nazwa ustawionego Look and Feel
 	 */
 	public static String setBestLookAndFeel()
 	{
@@ -51,8 +51,8 @@ public abstract class GUIUtilities
 	 * Zmienia nazwę aplikacji - wykorzystywana m.in. podczas grupowania okien
 	 * na pasku zadań.
 	 *
-	 * @param applicationName Nowa nazwa aplikacji
-	 * @return Czy zakończono powodzeniem
+	 * @param applicationName nowa nazwa aplikacji
+	 * @return <code>true</code>, jeżeli zakończono powodzeniem
 	 */
 	public static boolean setApplicationName(String applicationName)
 	{
@@ -79,7 +79,7 @@ public abstract class GUIUtilities
 	/**
 	 * Wyśrodkowuje okno na ekranie.
 	 *
-	 * @param window Okno do wyśrodkowania
+	 * @param window okno
 	 */
 	public static void centerWindow(Window window)
 	{
@@ -105,8 +105,8 @@ public abstract class GUIUtilities
 	 * z EventDispatcherThread. Przechwycone są też wyjątki InterruptedException
 	 * oraz InvocationTargetException - po ich wystąpieniu, metoda zwraca fałsz.
 	 *
-	 * @param runnable Kod do wykonania w wątku AWT
-	 * @return Czy zakończony powodzeniem
+	 * @param runnable kod do wykonania w wątku AWT
+	 * @return <code>true</code>, jeżeli zakończony powodzeniem
 	 */
 	public static boolean swingInvokeAndWait(Runnable runnable)
 	{
@@ -134,25 +134,40 @@ public abstract class GUIUtilities
 	 * Podmienia RepaintManager na pilnujący dostępu do tych zasobów Swing, do
 	 * których dostęp powinien być tylko z EventDispatchThread.
 	 *
-	 * @param crashOnErrors Czy w przypadku niedozwolonego dostępu rzucać
+	 * @param crashOnErrors czy w przypadku niedozwolonego dostępu rzucać
 	 * wyjątek (czy tylko wyświetlić ostrzeżenie na stderr)
 	 */
 	public static void installCarefulRepaintManager(boolean crashOnErrors)
 	{
 		RepaintManager.setCurrentManager(new CarefulRepaintManager(crashOnErrors));
-
 	}
 }
 
+/**
+ * RepaintManager sprawdzający, czy wątek mający dostęp do obiektów swing, jest
+ * do tego uprawniony.
+ *
+ * @author Tomasz Wasilczyk (www.wasilczyk.pl)
+ */
 class CarefulRepaintManager extends RepaintManager
 {
 	protected final boolean crashOnErrors;
 
+	/**
+	 * Główny konstruktor.
+	 *
+	 * @param crashOnErrors czy w przypadku modyfikacji obiektu Swing z
+	 * nieuprawnionego wątku, wywołać wyjątek
+	 */
 	public CarefulRepaintManager(boolean crashOnErrors)
 	{
 		this.crashOnErrors = crashOnErrors;
 	}
 
+	/**
+	 * Sprawdzenie, czy bieżący wątek jest uprawniony do modyfikowania obiektów
+	 * swing.
+	 */
 	protected void doThreadCheck()
 	{
 		if (SwingUtilities.isEventDispatchThread())

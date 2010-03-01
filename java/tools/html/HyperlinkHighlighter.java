@@ -1,23 +1,55 @@
 package tools.html;
 
 import java.awt.event.*;
+import java.util.Vector;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 
 /**
- * Klasa implementująca funkcjonalność CSS a:hover oraz wyświetlająca tooltip
- * alt tagu img (w implementacji DOM w javie mógłby być problem z title).
+ * Klasa implementująca funkcjonalność CSS <code>a:hover</code> oraz
+ * wyświetlająca tooltip <code>alt</code> tagu <code>img</code> (w implementacji
+ * DOM w javie mógłby być problem z <code>title</code>).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
 public class HyperlinkHighlighter
 {
+	/**
+	 * Komponent, którego zawartość ma być podświetlana.
+	 */
 	protected final JTextComponent pane;
-	protected final HTMLDocument doc;
-	private final PaneListener paneListener = new PaneListener();
-	protected Element highlightedHyperlink;
-	protected final Style styleHover, styleNormal;
 
+	/**
+	 * Dokument HTML, związany z komponentem.
+	 *
+	 * @see #pane
+	 */
+	protected final HTMLDocument doc;
+
+	private final PaneListener paneListener = new PaneListener();
+
+	/**
+	 * Aktualnie podświetlony link.
+	 */
+	protected Element highlightedHyperlink;
+
+	/**
+	 * Styl dla linków nie podświetlonych. Musi nadpisywać parametry ze stylu
+	 * dla linków podświetlonych, aby po usunięciu podświetlenia link powrócił
+	 * do poprzedniego wyglądu.
+	 */
+	protected final Style styleNormal;
+
+	/**
+	 * Styl dla linków podświetlonych
+	 */
+	protected final Style styleHover;
+
+	/**
+	 * Główny konstruktor.
+	 *
+	 * @param pane komponent, którego zawartość ma być podświetlana
+	 */
 	public HyperlinkHighlighter(JTextComponent pane)
 	{
 		if (pane == null)
@@ -41,7 +73,6 @@ public class HyperlinkHighlighter
 
 	class PaneListener implements MouseListener, MouseMotionListener
 	{
-
 		public void mouseClicked(MouseEvent arg0) { }
 		public void mousePressed(MouseEvent arg0) { }
 		public void mouseReleased(MouseEvent arg0) { }
@@ -82,6 +113,9 @@ public class HyperlinkHighlighter
 				removeHyperlinkHighlight();
 		}
 
+		/**
+		 * Usuwa styl z podświetlonego linku.
+		 */
 		private synchronized void removeHyperlinkHighlight()
 		{
 			if (highlightedHyperlink == null)
@@ -90,6 +124,11 @@ public class HyperlinkHighlighter
 			highlightedHyperlink = null;
 		}
 
+		/**
+		 * Ustawia podświetlenie na wybrany link.
+		 * 
+		 * @param hyperlinkElement Link do podświetlenia
+		 */
 		private synchronized void highlightHyperlink(Element hyperlinkElement)
 		{
 			if (hyperlinkElement == null)
@@ -102,6 +141,12 @@ public class HyperlinkHighlighter
 			}
 		}
 
+		/**
+		 * Zmienia styl podświetlenia wybranego linku.
+		 *
+		 * @param el Link do zmiany stylu
+		 * @param highlight Czy podświetlić
+		 */
 		private void changeHightlightStyle(Element el, boolean highlight)
 		{
 			if (el == null)

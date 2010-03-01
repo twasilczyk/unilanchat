@@ -11,15 +11,21 @@ public abstract class X11StartupNotification
 {
 	/**
 	 * Czy system obsługuje powiadamianie i odpowiednia biblioteka natywna
-	 * została załadowana
+	 * została załadowana.
 	 */
 	public static final boolean isSupported =
 		JNIManager.tryLoadLibrary("tools_X11StartupNotification");
-	
+
+	/**
+	 * Nazwa zmiennej systemowej, przechowującej ID uruchomionej aplikacji.
+	 */
 	protected static final String startupIDEnvName = "DESKTOP_STARTUP_ID";
 
 	private X11StartupNotification() { }
 
+	/**
+	 * Powiadomienie o uruchomieniu bieżącej aplikacji.
+	 */
 	public static void notifyStartupComplete()
 	{
 		if (!isSupported)
@@ -35,6 +41,11 @@ public abstract class X11StartupNotification
 
 	private static native void notifyStartupCompleteNative(String startupID);
 
+	/**
+	 * Powiadomienie o uruchomieniu aplikacji o podanym ID.
+	 *
+	 * @param startupID ID uruchomionej aplikacji
+	 */
 	public static void notifyStartupComplete(String startupID)
 	{
 		if (startupID == null)
