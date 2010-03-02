@@ -2,14 +2,14 @@ package jni;
 
 /**
  * Klasa wyjątku oznaczającego błąd ładowania biblioteki natywnej (za pomocą
- * klasy JNIManager).
+ * klasy {@link JNIManager}).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
 public class NativeLibraryLoadFailed extends UnsatisfiedLinkError
 {
 	/**
-	 * Błąd ładowania spowodowany w klasie JNIManager.
+	 * Błąd ładowania spowodowany w klasie {@link JNIManager}.
 	 *
 	 * @param libname nazwa ładowanej biblioteki
 	 */

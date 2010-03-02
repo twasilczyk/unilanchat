@@ -4,10 +4,10 @@ import java.util.*;
 
 /**
  * Zbiór elementów o określonej kolejności, z możliwością dodania słuchaczy typu
- * SetListener.
- * Wartości muszą dziedziczyć po klasie Observable - przekazują tak informację
- * o zmianie swojej zawartości (która jest przekazywana w metodzie
- * SetListener.itemUpdate().
+ * {@link SetListener}.
+ * Wartości muszą dziedziczyć po klasie {@link Observable} - przekazują tak
+ * informację o zmianie swojej zawartości (która jest przekazywana w metodzie
+ * {@link SetListener#itemUpdated(Object)}.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

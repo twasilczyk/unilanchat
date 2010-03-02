@@ -3,10 +3,10 @@ package tools;
 import java.util.*;
 
 /**
- * Zbiór par klucz - wartość, z możliwością dodania słuchaczy typu SetListener.
- * Wartości muszą dziedziczyć po klasie Observable - przekazują tak informację
- * o zmianie swojej zawartości (która jest przekazywana w metodzie
- * SetListener.itemUpdated()).
+ * Zbiór par klucz - wartość, z możliwością dodania słuchaczy typu
+ * {@link SetListener}. Wartości muszą dziedziczyć po klasie Observable -
+ * przekazują tak informację o zmianie swojej zawartości (która jest
+ * przekazywana w metodzie {@link SetListener#itemUpdated(Object)}).
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  * @see SetListener
@@ -19,8 +19,8 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 *
 	 * @param key klucz elementu
 	 * @param value wartość do dodania
-	 * @return poprzednia wartość zapisana pod podanym kluczem, lub null, jeżeli
-	 * nie było
+	 * @return poprzednia wartość zapisana pod podanym kluczem, lub
+	 * <code>null</code>, jeżeli nie było
 	 */
 	@Override public V put(K key, V value)
 	{
@@ -52,8 +52,8 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Usuwa element o podanym kluczu z kolekcji.
 	 *
 	 * @param key klucz do usunięcia
-	 * @return element, który znajdował się pod podanym kluczem, lub null,
-	 * jeżeli nie istniał
+	 * @return element, który znajdował się pod podanym kluczem, lub
+	 * <code>null</code>, jeżeli nie istniał
 	 */
 	@Override public V remove(Object key)
 	{
@@ -113,7 +113,7 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Dodaje nowego obserwatora kolekcji do listy powiadamianych.
 	 *
 	 * Nie powinno się dodawać słuchaczy, jak już zaczynają być odbierane
-	 * komunikaty - możliwość wystąpienia ConcurrentModificationException.
+	 * komunikaty - możliwość wystąpienia {@link ConcurrentModificationException}.
 	 *
 	 * @param listener słuchacz do dodania
 	 */
@@ -132,7 +132,7 @@ public class ListenableMap<K, V extends Observable> extends Hashtable<K, V>
 	 * Usuwa obserwatora kolekcji z listy powiadamianych.
 	 *
 	 * Nie powinno się usuwać słuchaczy, gdy są odbierane komunikaty
-	 * - możliwość wystąpienia ConcurrentModificationException.
+	 * - możliwość wystąpienia {@link ConcurrentModificationException}.
 	 *
 	 * @param listener słuchacz do usunięcia
 	 */

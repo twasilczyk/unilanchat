@@ -25,7 +25,7 @@ public class OutgoingMessage extends Message
 	protected final String selfName = "Ja";
 
 	/**
-	 * Autor wiadomości - zawsze wartość selfName
+	 * Autor wiadomości - zawsze wartość {@link #selfName}.
 	 *
 	 * @return autor wiadomości - {@link #selfName}
 	 */

@@ -4,7 +4,7 @@ import java.util.Observable;
 
 /**
  * Klasa prostego obiektu obserwowanego. Wysyła powiadomienia zawsze,
- * niezależnie od stanu hasChanged.
+ * niezależnie od stanu {@link #hasChanged()}.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */

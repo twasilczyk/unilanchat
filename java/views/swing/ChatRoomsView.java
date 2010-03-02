@@ -43,7 +43,7 @@ public class ChatRoomsView extends JFrame
 		this.add(chatTabs, BorderLayout.CENTER);
 
 		this.pack();
-		GUIUtilities.centerWindow(this);
+		setLocationRelativeTo(null); //wyśrodkowanie okna
 	}
 
 	public void showView()
@@ -132,24 +132,7 @@ public class ChatRoomsView extends JFrame
 		boolean selectedPanelWasUnread =
 				((ChatRoomPanel)chatTabs.getSelectedComponent()).isUnread();
 		
-		if (isVisible())
-		{
-			if (getState() == Frame.ICONIFIED)
-			{
-				setState(Frame.NORMAL);
-				setVisible(true);
-			}
-			else if (!isActive())
-			{
-				setVisible(false);
-				setVisible(true);
-			}
-		}
-		else
-			setVisible(true);
-		toFront();
-		requestFocus();
-
+		GUIUtilities.bringWindowToFront(this);
 		if (selectedPanelWasUnread)
 			return;
 

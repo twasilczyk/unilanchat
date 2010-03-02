@@ -1,8 +1,6 @@
 bugi:
 - JEditorPane nie zawija zbyt szerokich wiadomości
-- jeżeli program uruchomiono na jednym pulpicie, po aktywacji z traya nie przeskakuje na inny
 - przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt (zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają)
-- przy wywoływaniu z traya, program nie zawsze uzyskuje focus
 
 feature request:
 - tylko jedna instancja programu

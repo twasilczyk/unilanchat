@@ -28,6 +28,11 @@ public class MainView extends JFrame
 		new MainViewListener();
 
 	/**
+	 * Kiedy ostatnio (unix timestamp) okno <strong>utraciło</strong> aktywność.
+	 */
+	private long wasActive = 0;
+
+	/**
 	 * Główny konstruktor. Aby utworzyć nową instancję widoku, należy skorzystać
 	 * z metody {@link #init(MainController)}.
 	 *
@@ -42,28 +47,30 @@ public class MainView extends JFrame
 		chatRoomsView = new ChatRoomsView(mainController.getChatController());
 		chatRoomsView.addObserver(new ChatRoomsViewObserver());
 
-		this.setMinimumSize(new Dimension(100, 200));
-		this.setPreferredSize(new Dimension(200, 450));
-		this.setLayout(new BorderLayout(0, 3));
-		this.setIconImage(ResourceManager.getIcon("icon.png").getImage());
+		setMinimumSize(new Dimension(100, 200));
+		setPreferredSize(new Dimension(200, 450));
+		setLayout(new BorderLayout(0, 3));
+		setIconImage(ResourceManager.getIcon("icon.png").getImage());
 
-		this.setJMenuBar(new MainMenu(this));
+		addWindowListener(mainViewListener);
+
+		setJMenuBar(new MainMenu(this));
 
 		JButton mainRoomButton = new JButton("Pokój główny");
 		mainRoomButton.setActionCommand("openMainRoom");
 		mainRoomButton.addActionListener(mainViewListener);
 
-		this.add(mainRoomButton, BorderLayout.NORTH);
-		this.add(new ContactListPanel(this), BorderLayout.CENTER);
-		this.add(new StatusPanel(mainController), BorderLayout.SOUTH);
+		add(mainRoomButton, BorderLayout.NORTH);
+		add(new ContactListPanel(this), BorderLayout.CENTER);
+		add(new StatusPanel(mainController), BorderLayout.SOUTH);
 
-		this.pack();
-		GUIUtilities.centerWindow(this);
+		pack();
+		setLocationRelativeTo(null); //wyśrodkowanie okna
 
 		new TrayInitThread();
 	}
 
-	class MainViewListener implements ActionListener
+	class MainViewListener implements ActionListener, WindowListener
 	{
 		public void actionPerformed(ActionEvent e)
 		{
@@ -73,6 +80,18 @@ public class MainView extends JFrame
 					mainView.getMainController().getChatController().getMainChatRoom());
 			else
 				throw new RuntimeException("Nieznane polecenie: " + cmd);
+		}
+
+		public void windowOpened(WindowEvent e) { }
+		public void windowClosing(WindowEvent e) { }
+		public void windowClosed(WindowEvent e) { }
+		public void windowIconified(WindowEvent e) { }
+		public void windowDeiconified(WindowEvent e) { }
+		public void windowActivated(WindowEvent e) { }
+
+		public void windowDeactivated(WindowEvent e)
+		{
+			wasActive = (new Date()).getTime();
 		}
 	}
 
@@ -140,40 +159,29 @@ public class MainView extends JFrame
 	{
 		public void mouseEntered(MouseEvent e) { }
 		public void mouseExited(MouseEvent e) { }
-		public void mousePressed(MouseEvent e) { }
 		public void mouseReleased(MouseEvent e) { }
+		public void mouseClicked(MouseEvent e) {}
 
-		public void mouseClicked(MouseEvent e)
+		public void mousePressed(MouseEvent e)
 		{
 			if (e.getButton() == MouseEvent.BUTTON1)
 			{
 				if (trayModeShowUnread)
 					chatRoomsView.showAnyUnread();
-				else if (mainView.isVisible())
-				{
-					if (mainView.getState() == Frame.ICONIFIED)
-					{
-						mainView.setState(Frame.NORMAL);
-						mainView.setVisible(true);
-						mainView.toFront();
-						mainView.requestFocus();
-					}
-/*					else if (!mainView.isActive()) //TODO: występują problemy na windowsie
-					{
-						mainView.setVisible(false);
-						mainView.setVisible(true);
-						mainView.toFront();
-						mainView.requestFocus();
-					}
-*/					else
-						mainView.setVisible(false);
-				}
+				else if
+					(
+					//okno jest widoczne
+					mainView.isVisible() &&
+
+					//nie jest zminimalizowane
+					mainView.getState() == Frame.NORMAL &&
+
+					//oraz jest, lub było przed chwilą aktywne
+					(mainView.isActive() || wasActive + 100 > (new Date()).getTime())
+					)
+					mainView.setVisible(false);
 				else
-				{
-					mainView.setVisible(true);
-					mainView.toFront();
-					mainView.requestFocus();
-				}
+					GUIUtilities.bringWindowToFront(mainView);
 			}
 		}
 	}
@@ -189,6 +197,8 @@ public class MainView extends JFrame
 
 		@Override public void run()
 		{
+			//TODO: jakoś trzeba zareagować - jest to podstawowa funkcja tego
+			//widoku
 			if (!SystemTray.isSupported())
 				return;
 

@@ -2,6 +2,8 @@ package tools;
 
 import java.applet.Applet;
 import java.awt.*;
+import java.awt.event.*;
+import java.lang.reflect.*;
 import javax.swing.*;
 
 /**
@@ -59,7 +61,7 @@ public abstract class GUIUtilities
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		try
 		{
-			java.lang.reflect.Field awtAppClassNameField =
+			Field awtAppClassNameField =
 				toolkit.getClass().getDeclaredField("awtAppClassName");
 			awtAppClassNameField.setAccessible(true);
 			awtAppClassNameField.set(toolkit, applicationName);
@@ -77,33 +79,48 @@ public abstract class GUIUtilities
 	}
 
 	/**
-	 * Wyśrodkowuje okno na ekranie.
+	 * Przywołuje okno na wierzch systemowego managera okien. Jest to obejście
+	 * wadliwej implementacji metody {@link Frame#toFront()}. Oryginalna
+	 * implementacja nie zawsze przywołuje okno na wierzch - np. pod linuksem,
+	 * jeżeli okno jest zminimalizowane, a po zminimalizowaniu inne (natywne)
+	 * okno uzyska focus.
 	 *
-	 * @param window okno
+	 * @param window okno do przywołania
+	 * @see Frame#toFront()
 	 */
-	public static void centerWindow(Window window)
+	public static void bringWindowToFront(final Frame window)
 	{
-		if (window == null)
-			throw new NullPointerException();
-		Rectangle ownerPos;
-		if (window.getOwner() == null)
-		{
-			ownerPos = new Rectangle();
-			ownerPos.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-			ownerPos.setLocation(window.getLocation());
-		}
+		boolean fromIconified = (window.getState() == Frame.ICONIFIED);
+
+		if (fromIconified)
+			window.setState(Frame.NORMAL);
 		else
-			ownerPos = window.getOwner().getBounds();
-		window.setLocation(
-			(int) ((ownerPos.getWidth() - window.getWidth()) / 2 + ownerPos.getX()),
-			(int) ((ownerPos.getHeight() - window.getHeight()) / 2 + ownerPos.getY())
-			);
+			window.setVisible(false);
+		window.setVisible(true);
+		window.toFront();
+		window.requestFocus();
+		if (fromIconified)
+		{
+			Timer timer = new Timer(50, new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					window.setVisible(false);
+					window.setVisible(true);
+					window.toFront();
+					window.requestFocus();
+				}
+			});
+			timer.setRepeats(false);
+			timer.start();
+		}
 	}
 
 	/**
-	 * Opakowanie SwingUtilities.invokeAndWait. Funkcję można wywoływać
-	 * z EventDispatcherThread. Przechwycone są też wyjątki InterruptedException
-	 * oraz InvocationTargetException - po ich wystąpieniu, metoda zwraca fałsz.
+	 * Opakowanie {@link SwingUtilities#invokeAndWait}. Funkcję można wywoływać
+	 * z {@link EventDispatchThread}. Przechwycone są też wyjątki
+	 * {@link InterruptedException} oraz {@link InvocationTargetException} -
+	 * po ich wystąpieniu, metoda zwraca <code>false</code>.
 	 *
 	 * @param runnable kod do wykonania w wątku AWT
 	 * @return <code>true</code>, jeżeli zakończony powodzeniem
@@ -122,7 +139,7 @@ public abstract class GUIUtilities
 			e.printStackTrace();
 			return false;
 		}
-		catch (java.lang.reflect.InvocationTargetException e)
+		catch (InvocationTargetException e)
 		{
 			e.printStackTrace();
 			return false;
@@ -131,8 +148,8 @@ public abstract class GUIUtilities
 	}
 
 	/**
-	 * Podmienia RepaintManager na pilnujący dostępu do tych zasobów Swing, do
-	 * których dostęp powinien być tylko z EventDispatchThread.
+	 * Podmienia {@link RepaintManager} na pilnujący dostępu do tych zasobów
+	 * Swing, do których dostęp powinien być tylko z {@link EventDispatchThread}.
 	 *
 	 * @param crashOnErrors czy w przypadku niedozwolonego dostępu rzucać
 	 * wyjątek (czy tylko wyświetlić ostrzeżenie na stderr)
@@ -144,7 +161,7 @@ public abstract class GUIUtilities
 }
 
 /**
- * RepaintManager sprawdzający, czy wątek mający dostęp do obiektów swing, jest
+ * RepaintManager sprawdzający, czy wątek mający dostęp do obiektów Swing, jest
  * do tego uprawniony.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
