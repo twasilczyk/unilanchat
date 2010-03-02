@@ -1,0 +1,56 @@
+Plany rozwoju programu UniLANChat. Niniejszy dokument jest luźnym planem, podane
+tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmienić.
+
+
+0.1.0 (pierwsze publiczne wydanie rozwojowe)
+ - okno "o programie"
+ - serializacja i deserializacja konfiguracji, zapis do katalogu w folderze
+   użytkownika, możliwość wskazania folderu użytkownika w parametrze wywołania
+ - moduł automatycznych aktualizacji (z wieloma URLami źródłowymi)
+ - przygotować jakąś oryginalną ikonkę
+ - obsługa bibliotek JNI pod linuxem 64bit
+ - uzupełnić komentarze w pakiecie views.swing
+
+0.2.0
+ - tylko jedna instancja programu
+ - ipmsg: transfer plików
+ - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
+   liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
+ - ipmsg: szyfrowanie (wymaga znajomych na liście kontaktów), dodawanie kluczy
+   publicznych do znajomych kontaktów
+ - automatyczne uruchamianie wraz ze startem systemu
+ - logowanie przebiegu rozmów, podgląd logów
+ - lepszy UI dla zakładek rozmów i dla przycisku wybierania statusu (podobny do
+   tego w komunikatorze Pidgin)
+ - ipmsg: wykrywanie, lub ustawianie dla konkretnych kontaktów innych znaków
+   cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
+   UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania
+   cytatów
+
+1.0.0 (pierwsza wersja finalna)
+ - wiele języków (przynajmniej Polski i Angielski)
+ - obsługa przynajmniej jednego dodatkowego protokołu (np. LanChat, winpopup),
+   panel zarządzania kontami
+ - metakontakty
+ - dodatkowy protokół, oparty o XML, pozwalający na przesyłanie dodatkowych
+   informacji, np. o metakontaktach
+ - bug: JEditorPane nie zawija zbyt szerokich wiadomości
+ - bug: przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt -
+   zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają
+
+1.1.0
+ - blokowanie kontaktów
+ - wskazywanie dodatkowych adresów IP, rozszerzających broadcast
+
+dalsze wydania
+ - interfejs tekstowy dla konsoli (ncurses, Charva)
+ - prosty interfejs tekstowy (zapytania - odpowiedzi, obsługa tylko przez
+   standardowe strumienie)
+ - automatyczny routing: sieć sama powinna dbać o to, aby klienci, którzy nie
+   widzą się nawzajem, mogli się ze sobą komunikować (poprzez wspólnych
+   sąsiadów)
+ - sieć wymiany plików, częściowo oparta o przesyłanie plików w implementowanych
+   protokołach, aby oryginalni klienci mieli częściową możliwość korzystania
+   z nich (np. poprzez polecenia tekstowe)
+ - komunikacja głosowa
+ - tablica ogłoszeń

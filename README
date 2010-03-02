@@ -75,3 +75,9 @@ Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
    Section "Extensions"
      Option       "Composite" "off"
    EndSection
+
+ * Jeżeli występują problemy z połączeniem, nie widać wszystkich osób
+   korzystających z danej sieci, należy sprawdzić, czy firewall przepuszcza
+   ruch na portach:
+   
+   - 2425 (tcp i udp), również pakiety broadcast - protokół ipmsg
