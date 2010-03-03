@@ -36,6 +36,8 @@ public class StatusPanel extends JPanel implements Observer
 		this.add(mainStatusCombo, BorderLayout.NORTH);
 
 		mainController.addObserver(this);
+
+		setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 	}
 
 	public void update(Observable o, Object arg)

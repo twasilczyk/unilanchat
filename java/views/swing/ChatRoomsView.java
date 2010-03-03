@@ -74,15 +74,9 @@ public class ChatRoomsView extends JFrame
 
 	protected boolean isAnyUnread = false;
 
-	public void setUnread(ChatRoomPanel panel, boolean unread)
+	public void setUnread(final ChatRoom room, boolean unread)
 	{
-		GUIUtilities.swingInvokeAndWait(new Runnable()
-		{
-			public void run()
-			{
-				chatTabs.repaint();
-			}
-		});
+		chatTabs.updateRoomTitle(room);
 
 		if (this.isAnyUnread == unread)
 			return;

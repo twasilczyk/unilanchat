@@ -14,7 +14,6 @@ import tools.*;
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-
 public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<ChatRoom>, ChangeListener
 {
 	protected final ChatRoomsView chatRoomsView;
@@ -27,8 +26,6 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	public ChatTabs(ChatRoomsView chatRoomsView)
 	{
 		this.chatRoomsView = chatRoomsView;
-
-		this.setUI(new ChatTabsUI(this));
 
 		this.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
 
@@ -189,82 +186,45 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	}
 
 	/**
-	 * Aktualizuje tytuł i ikonkę okna. Może być wywoływany TYLKO w wątku AWT.
+	 * Aktualizuje tytuł i ikonkę okna.
 	 *
 	 * @param room pokój do aktualizacji
 	 */
-	protected void updateRoomTitle(ChatRoom room)
+	protected void updateRoomTitle(final ChatRoom room)
 	{
-		int tabno = getRoomIndex(room);
-		if (tabno >= 0)
+		final int tabno = getRoomIndex(room);
+		if (tabno < 0)
+			return;
+		GUIUtilities.swingInvokeAndWait(new Runnable()
 		{
-			String title = room.getTitle();
-			if (title.isEmpty())
-				title = "rozmowa";
-			setTitleAt(tabno, title);
-			updateWindowTitle();
-			if (room instanceof PrivateChatRoom)
+			public void run()
 			{
-				PrivateChatRoom privRoom = (PrivateChatRoom)room;
-				switch (privRoom.getContact().getStatus())
+				String title = room.getTitle();
+				if (title.isEmpty())
+					title = "rozmowa";
+
+				if (getRoomPanel(room).isUnread())
+					setTitleAt(tabno, "<html><b>" + title + "</b></html>");
+				else
+					setTitleAt(tabno, title);
+				updateWindowTitle();
+				if (room instanceof PrivateChatRoom)
 				{
-					case ONLINE:
-						setIconAt(tabno, statusOnline);
-						break;
-					case BUSY:
-						setIconAt(tabno, statusBusy);
-						break;
-					case OFFLINE:
-						setIconAt(tabno, statusOffline);
-						break;
+					PrivateChatRoom privRoom = (PrivateChatRoom)room;
+					switch (privRoom.getContact().getStatus())
+					{
+						case ONLINE:
+							setIconAt(tabno, statusOnline);
+							break;
+						case BUSY:
+							setIconAt(tabno, statusBusy);
+							break;
+						case OFFLINE:
+							setIconAt(tabno, statusOffline);
+							break;
+					}
 				}
 			}
-		}
-	}
-}
-
-class ChatTabsUI extends javax.swing.plaf.basic.BasicTabbedPaneUI
-{
-	protected final ChatTabs chatTabs;
-	protected final Font boldFont;
-	protected FontMetrics boldFontMetrics;
-
-	public ChatTabsUI(ChatTabs chatTabs)
-	{
-		this.chatTabs = chatTabs;
-		boldFont = new Font(chatTabs.getFont().getFontName(), Font.BOLD,
-				chatTabs.getFont().getSize());
-	}
-
-	@Override public void installUI(JComponent c)
-	{
-		super.installUI(c);
-		boldFontMetrics = c.getFontMetrics(this.boldFont);
-	}
-
-	protected boolean isUnread(int tabIndex)
-	{
-		Component c = chatTabs.getComponentAt(tabIndex);
-		if (!(c instanceof ChatRoomPanel))
-			return false;
-		return ((ChatRoomPanel)c).isUnread();
-	}
-
-	@Override protected void paintText(Graphics g, int tabPlacement, Font font,
-			FontMetrics metrics, int tabIndex, String title, Rectangle textRect,
-			boolean isSelected)
-	{
-		if (isUnread(tabIndex))
-			super.paintText(g, tabPlacement, boldFont, boldFontMetrics, tabIndex, title, textRect, isSelected);
-		else
-			super.paintText(g, tabPlacement, font, metrics, tabIndex, title, textRect, isSelected);
-	}
-
-	@Override protected int calculateTabWidth(int tabPlacement, int tabIndex, FontMetrics metrics)
-	{
-		if (isUnread(tabIndex))
-			return super.calculateTabWidth(tabPlacement, tabIndex, boldFontMetrics) + 5;
-		else
-			return super.calculateTabWidth(tabPlacement, tabIndex, metrics);
+		});
 	}
 }

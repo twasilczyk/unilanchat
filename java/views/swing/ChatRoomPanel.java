@@ -171,7 +171,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		if (this.unread == unread)
 			return;
 		this.unread = unread;
-		chatRoomsView.setUnread(this, unread);
+		chatRoomsView.setUnread(this.chatRoom, unread);
 	}
 
 	public boolean isUnread()

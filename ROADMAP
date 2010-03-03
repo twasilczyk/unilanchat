@@ -20,8 +20,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    publicznych do znajomych kontaktów
  - automatyczne uruchamianie wraz ze startem systemu
  - logowanie przebiegu rozmów, podgląd logów
- - lepszy UI dla zakładek rozmów i dla przycisku wybierania statusu (podobny do
-   tego w komunikatorze Pidgin)
+ - lepszy UI dla przycisku wybierania statusu (podobny do tego w komunikatorze
+   Pidgin)
  - ipmsg: wykrywanie, lub ustawianie dla konkretnych kontaktów innych znaków
    cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
    UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania

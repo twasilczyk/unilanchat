@@ -48,19 +48,15 @@ public class MainView extends JFrame
 		chatRoomsView.addObserver(new ChatRoomsViewObserver());
 
 		setMinimumSize(new Dimension(100, 200));
-		setPreferredSize(new Dimension(200, 450));
-		setLayout(new BorderLayout(0, 3));
+		setPreferredSize(new Dimension(250, 450));
+		setLayout(new BorderLayout());
 		setIconImage(ResourceManager.getIcon("icon.png").getImage());
 
 		addWindowListener(mainViewListener);
 
 		setJMenuBar(new MainMenu(this));
 
-		JButton mainRoomButton = new JButton("Pokój główny");
-		mainRoomButton.setActionCommand("openMainRoom");
-		mainRoomButton.addActionListener(mainViewListener);
-
-		add(mainRoomButton, BorderLayout.NORTH);
+		add(new MainRoomButtonPanel(), BorderLayout.NORTH);
 		add(new ContactListPanel(this), BorderLayout.CENTER);
 		add(new StatusPanel(mainController), BorderLayout.SOUTH);
 
@@ -68,6 +64,20 @@ public class MainView extends JFrame
 		setLocationRelativeTo(null); //wyśrodkowanie okna
 
 		new TrayInitThread();
+	}
+
+	class MainRoomButtonPanel extends JPanel
+	{
+		public MainRoomButtonPanel()
+		{
+			setLayout(new BorderLayout());
+			setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+
+			JButton mainRoomButton = new JButton("Pokój główny");
+			mainRoomButton.setActionCommand("openMainRoom");
+			mainRoomButton.addActionListener(mainViewListener);
+			add(mainRoomButton, BorderLayout.CENTER);
+		}
 	}
 
 	class MainViewListener implements ActionListener, WindowListener
