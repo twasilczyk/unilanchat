@@ -10,6 +10,10 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - przygotować jakąś oryginalną ikonkę
  - obsługa bibliotek JNI pod linuxem 64bit
  - uzupełnić komentarze w pakiecie views.swing
+ - bug: przy uruchomieniu wraz ze startem systemu nie wypełnia się lista
+   kontaktów (nawet po przełączeniu statusu na niedostępny i z powrotem)
+ - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
+   ogólnie przejrzeć te klasy
 
 0.2.0
  - tylko jedna instancja programu
@@ -26,6 +30,10 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
    UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania
    cytatów
+ - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
+ - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu
+ - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych
+ - bug: użycie IpmsgAccount.sendPacket(), gdy nie ma połączenia
 
 1.0.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)
@@ -41,6 +49,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 1.1.0
  - blokowanie kontaktów
  - wskazywanie dodatkowych adresów IP, rozszerzających broadcast
+ - przeciąganie zakładek z rozmowami (w celu zmiany ich kolejności)
 
 dalsze wydania
  - interfejs tekstowy dla konsoli (ncurses, Charva)
@@ -53,4 +62,7 @@ dalsze wydania
    protokołach, aby oryginalni klienci mieli częściową możliwość korzystania
    z nich (np. poprzez polecenia tekstowe)
  - komunikacja głosowa
- - tablica ogłoszeń
+ - tablica ogłoszeń, na której może publikować każdy użytkownik, a wyświetla
+   się (i aktualizuje?) na początku pokoju publicznego
+ - bug: TrayIcon nie wspiera przezroczystości na KDE, nie używa swingowego menu,
+   długo się uruchamia

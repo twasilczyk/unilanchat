@@ -163,7 +163,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 	{
 		if (!this.chatRoomsView.isFocused())
 			return false;
-		return (this == this.chatRoomsView.getSelectedRoom());
+		return (this == ((ChatTabs)this.getParent()).getSelectedRoom());
 	}
 
 	public synchronized void setUnread(boolean unread)

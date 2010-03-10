@@ -62,14 +62,6 @@ public class ChatRoomsView extends JFrame
 		chatTabs.goToRoom(room);
 	}
 
-	public ChatRoomPanel getSelectedRoom()
-	{
-		Component sel = chatTabs.getSelectedComponent();
-		if (sel == null || !(sel instanceof ChatRoomPanel))
-			return null;
-		return (ChatRoomPanel)sel;
-	}
-
 	// <editor-fold defaultstate="collapsed" desc="Oznaczanie jako przeczytane / nie przeczytane">
 
 	protected boolean isAnyUnread = false;
@@ -89,7 +81,7 @@ public class ChatRoomsView extends JFrame
 		}
 		else
 		{ // zobaczmy, czy zostały jeszcze jakieś nie przeczytane
-			if (getAnyUnreadIndex() >= 0)
+			if (getAnyUnread() != null)
 				return;
 
 			// już nie mrugamy ikonką w trayu
@@ -97,7 +89,7 @@ public class ChatRoomsView extends JFrame
 		}
 	}
 
-	protected int getAnyUnreadIndex()
+	protected ChatRoomPanel getAnyUnread()
 	{
 		synchronized (chatTabs)
 		{
@@ -108,11 +100,11 @@ public class ChatRoomsView extends JFrame
 				if (chatRoomPanel.isUnread())
 				{
 					this.isAnyUnread = true;
-					return i;
+					return chatRoomPanel;
 				}
 			}
 			this.isAnyUnread = false;
-			return -1;
+			return null;
 		}
 	}
 
@@ -132,9 +124,9 @@ public class ChatRoomsView extends JFrame
 
 		synchronized (chatTabs)
 		{
-			int unreadIndex = getAnyUnreadIndex();
-			if (unreadIndex >= 0)
-				chatTabs.goToRoom(unreadIndex);
+			ChatRoomPanel unread = getAnyUnread();
+			if (unread != null)
+				chatTabs.goToRoom(unread.getChatRoom());
 		}
 	}
 
@@ -142,7 +134,7 @@ public class ChatRoomsView extends JFrame
 	{
 		public void windowGainedFocus(WindowEvent e)
 		{
-			ChatRoomPanel sel = getSelectedRoom();
+			ChatRoomPanel sel = chatTabs.getSelectedRoom();
 			if (sel != null)
 			{
 				sel.setUnread(false);

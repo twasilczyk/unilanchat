@@ -34,6 +34,27 @@ public class HTMLUtilities
 	}
 
 	/**
+	 * Zabezpieczenie przed atakiem html injection tekstu, który ma być osadzony
+	 * w komponencie Swing.
+	 *
+	 * Jeżeli tekst zaczyna się od frazy &lt;html&gt; (wielkość liter nie ma
+	 * znaczenia, ale między nawiasami a "html" nie może być odstępu) - wywołuje
+	 * na nim metodę {@link #escape(String)} oraz osadza w tagu &lt;html&gt.
+	 * W przeciwnym przypadku przepuszcza tekst bez zmian
+	 *
+	 * @param text tekst do sprawdzenia
+	 * @return tekst bezpieczny, do umieszczenia na komponencie Swing
+	 */
+	public static String escapeForSwing(String text)
+	{
+		if (text.length() >= 6 &&
+			text.substring(0, 6).equalsIgnoreCase("<html>"))
+			return "<html>" + escape(text) + "</html>";
+		else
+			return text;
+	}
+
+	/**
 	 * Zamienia wszystkie znaki końca linii na przełamanie wiersza w HTML.
 	 *
 	 * @param text tekst do przetworzenia

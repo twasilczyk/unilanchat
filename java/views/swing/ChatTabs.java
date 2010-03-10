@@ -8,6 +8,7 @@ import javax.swing.event.*;
 import protocols.*;
 import resources.ResourceManager;
 import tools.*;
+import tools.html.HTMLUtilities;
 
 /**
  * Zakładki z otwartymi pokojami rozmów.
@@ -16,6 +17,8 @@ import tools.*;
  */
 public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<ChatRoom>, ChangeListener
 {
+	protected final ChatTabs thisChatTabs = this;
+
 	protected final ChatRoomsView chatRoomsView;
 	protected final ChatRoomList chatRoomList;
 
@@ -36,18 +39,11 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 		addChangeListener(this);
 	}
 
-	public synchronized boolean goToRoom(ChatRoom room)
+	public synchronized void goToRoom(ChatRoom room)
 	{
-		int panelIndex = getRoomIndex(room);
-		if (panelIndex < 0)
-			return false;
-		goToRoom(panelIndex);
-		return true;
-	}
-
-	public void goToRoom(int index)
-	{
-		setSelectedIndex(index);
+		ChatRoomPanel panel = getRoomPanel(room);
+		assert (panel != null);
+		setSelectedComponent(panel);
 		updateWindowTitle();
 	}
 
@@ -77,29 +73,45 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	{
 		for (int i = 0; i < this.getTabCount(); i++)
 		{
-			if (!(getComponentAt(i) instanceof ChatRoomPanel))
+			ChatRoomPanel panel = getRoomPanelAt(i);
+			if (panel == null)
 				continue;
-			ChatRoomPanel panel = (ChatRoomPanel)getComponentAt(i);
 			if (panel.getChatRoom() == item)
 				return panel;
 		}
 		return null;
 	}
 
-	protected synchronized int getRoomIndex(ChatRoom item)
+	//TODO: do wyrzucenia po poprawieniu metod getRoomPanel
+	public ChatRoomPanel getRoomPanelAt(int index)
 	{
-		for (int i = 0; i < this.getTabCount(); i++)
-		{
-			if (!(getComponentAt(i) instanceof ChatRoomPanel))
-				continue;
-			ChatRoomPanel panel = (ChatRoomPanel)getComponentAt(i);
-			if (panel.getChatRoom() == item)
-				return i;
-		}
-		return -1;
+		Object tab = getComponentAt(index);
+
+		if (!(tab instanceof ChatRoomPanel))
+			return null;
+
+		return (ChatRoomPanel)tab;
 	}
 
-	public void mousePressed(MouseEvent e) { } //może przenoszenie tabów?
+	public ChatRoomPanel getSelectedRoom()
+	{
+		Component sel = getSelectedComponent();
+		if (sel == null || !(sel instanceof ChatRoomPanel))
+			return null;
+		return (ChatRoomPanel)sel;
+	}
+
+	protected synchronized void setTitleAt(ChatRoomPanel panel, String title)
+	{
+		super.setTitleAt(indexOfComponent(panel), title);
+	}
+
+	protected synchronized void setIconAt(ChatRoomPanel panel, Icon icon)
+	{
+		super.setIconAt(indexOfComponent(panel), icon);
+	}
+
+	public void mousePressed(MouseEvent e) { }
 	public void mouseReleased(MouseEvent e) { }
 	public void mouseEntered(MouseEvent e) { }
 	public void mouseExited(MouseEvent e) { }
@@ -110,9 +122,12 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 		{
 			public void run()
 			{
-				addTab("rozmowa",
-					null,
-					new ChatRoomPanel(item, chatRoomsView));
+				synchronized (thisChatTabs)
+				{
+					addTab("rozmowa",
+						null,
+						new ChatRoomPanel(item, chatRoomsView));
+				}
 				updateRoomTitle(item);
 			}
 		});
@@ -125,9 +140,9 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 			public void run()
 			{
 				ChatRoomPanel panel = getRoomPanel(item);
-				remove(panel);
-				synchronized (this)
+				synchronized (thisChatTabs)
 				{
+					remove(panel);
 					if (getTabCount() == 0)
 						chatRoomsView.setVisible(false);
 				}
@@ -177,7 +192,10 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	{
 		try
 		{
-			chatRoomsView.setTitle(getTitleAt(getSelectedIndex()));
+			ChatRoomPanel roomPanel = getSelectedRoom();
+			if (roomPanel == null)
+				return;
+			chatRoomsView.setTitle(roomPanel.getChatRoom().getTitle());
 		}
 		catch (IndexOutOfBoundsException ex)
 		{
@@ -192,35 +210,34 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	 */
 	protected void updateRoomTitle(final ChatRoom room)
 	{
-		final int tabno = getRoomIndex(room);
-		if (tabno < 0)
-			return;
 		GUIUtilities.swingInvokeAndWait(new Runnable()
 		{
 			public void run()
 			{
+				ChatRoomPanel panel = getRoomPanel(room);
+
 				String title = room.getTitle();
 				if (title.isEmpty())
 					title = "rozmowa";
-
 				if (getRoomPanel(room).isUnread())
-					setTitleAt(tabno, "<html><b>" + title + "</b></html>");
+					setTitleAt(panel, "<html><b>" + HTMLUtilities.escape(title) + "</b></html>");
 				else
-					setTitleAt(tabno, title);
+					setTitleAt(panel, HTMLUtilities.escapeForSwing(title));
 				updateWindowTitle();
+				
 				if (room instanceof PrivateChatRoom)
 				{
 					PrivateChatRoom privRoom = (PrivateChatRoom)room;
 					switch (privRoom.getContact().getStatus())
 					{
 						case ONLINE:
-							setIconAt(tabno, statusOnline);
+							setIconAt(panel, statusOnline);
 							break;
 						case BUSY:
-							setIconAt(tabno, statusBusy);
+							setIconAt(panel, statusBusy);
 							break;
 						case OFFLINE:
-							setIconAt(tabno, statusOffline);
+							setIconAt(panel, statusOffline);
 							break;
 					}
 				}

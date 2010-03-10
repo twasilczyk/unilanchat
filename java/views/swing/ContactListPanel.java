@@ -8,6 +8,7 @@ import components.swing.JImagePanel;
 import controllers.MainController;
 import protocols.*;
 import resources.ResourceManager;
+import tools.html.HTMLUtilities;
 import views.ContactListModel;
 
 /**
@@ -191,7 +192,7 @@ class ContactListPanelRenderer implements ListCellRenderer
 			userTextStatus.setForeground(Color.GRAY);
 		}
 
-		userName.setText(contact.getName());
+		userName.setText(HTMLUtilities.escapeForSwing(contact.getName()));
 
 		String textStatus = contact.getTextStatus();
 		if (textStatus == null)
@@ -199,7 +200,7 @@ class ContactListPanelRenderer implements ListCellRenderer
 		else
 		{
 			userTextStatus.setVisible(true);
-			userTextStatus.setText(textStatus);
+			userTextStatus.setText(HTMLUtilities.escapeForSwing(textStatus));
 		}
 
 		switch (contact.getStatus())
