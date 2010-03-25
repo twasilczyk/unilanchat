@@ -14,6 +14,10 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    kontaktów (nawet po przełączeniu statusu na niedostępny i z powrotem)
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
+ - bug: zawieszanie się niektórych wątków, jeżeli nie można pobrać nazwy
+   lokalnego hosta - metoda IP4Utilities.getLocalHostName(). Wprowadzić
+   pobieranie tej nazwy w osobnym wątku, co minutę. Funkcja przy pierwszym
+   uruchomieniu czeka (wait()) najwyżej sekundę, aż nazwa zostanie pobrana
 
 0.2.0
  - tylko jedna instancja programu

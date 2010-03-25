@@ -173,13 +173,13 @@ public class IP4Utilities
 	 */
 	public static String getLocalHostName()
 	{
-		try
-		{
-			return InetAddress.getLocalHost().getHostName();
-		}
-		catch (UnknownHostException e)
-		{
+		//try
+		//{
+		//	return InetAddress.getLocalHost().getHostName();
+		//}
+		//catch (UnknownHostException e)
+		//{
 			return "localhost";
-		}
+		//}
 	}
 }
