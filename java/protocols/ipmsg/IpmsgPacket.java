@@ -2,7 +2,7 @@ package protocols.ipmsg;
 
 import java.nio.charset.Charset;
 
-import tools.IP4Utilities;
+import net.NameService;
 
 /**
  * Pakiet przesyłany w protokole IPMsg. Jest to wersja częściowo
@@ -277,7 +277,7 @@ public class IpmsgPacket
 			throw new NullPointerException();
 		
 		this.packetNo = ++selfPacketNo;
-		this.hostName = IP4Utilities.getLocalHostName();
+		this.hostName = NameService.getLocalHostName();
 		this.userName = userName;
 	}
 

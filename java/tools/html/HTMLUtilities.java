@@ -109,7 +109,7 @@ public class HTMLUtilities
 			throw new NullPointerException();
 
 		StringBuffer result = new StringBuffer(text.length());
-		Matcher matcher = tagURLsPattern.matcher(" " + text.replaceAll(" ", "  ") + " ");
+		Matcher matcher = tagURLsPattern.matcher(" " + text.replaceAll("(\\s)", " $1") + " ");
 		
 		while (matcher.find())
 		{
@@ -130,7 +130,7 @@ public class HTMLUtilities
 					preLink + "<a href=\"" + url + "\">" + link + "</a>" + postLink);
 		}
 		matcher.appendTail(result);
-		return result.toString().trim().replaceAll("  ", " ");
+		return result.toString().trim().replaceAll(" (\\s)", "$1");
 	}
 
 	static final String[] browsers = {

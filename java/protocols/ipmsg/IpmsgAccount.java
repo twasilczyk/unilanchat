@@ -5,7 +5,7 @@ import java.util.*;
 
 import main.Configuration;
 import protocols.*;
-import tools.IP4Utilities;
+import net.IP4Utilities;
 
 /**
  * Implementacja protokołu IPMsg.
@@ -335,15 +335,12 @@ public class IpmsgAccount extends Account
 				statusNotify(IpmsgPacket.COMM_EXIT);
 				setConnected(false);
 
-				Vector<Contact> removeContacts = new Vector<Contact>();
 				synchronized (contactList)
 				{
 					for (Contact contact : contactList)
 						if (contact instanceof IpmsgContact)
-							removeContacts.add(contact);
+							((IpmsgContact)contact).setStatus(IpmsgContact.UserStatus.OFFLINE);
 				}
-				for (Contact contact : removeContacts)
-					contactList.remove(contact);
 			}
 
 			notifyObservers();

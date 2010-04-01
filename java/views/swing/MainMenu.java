@@ -12,6 +12,7 @@ public class MainMenu extends JMenuBar
 {
 	final MainView mainView;
 	final MainMenuListener mainMenuListener = new MainMenuListener();
+	final AboutView aboutView = new AboutView();
 
 	class MainMenuListener implements ActionListener
 	{
@@ -20,6 +21,8 @@ public class MainMenu extends JMenuBar
 			String cmd = event.getActionCommand();
 			if (cmd.equals("application.close"))
 				mainView.getMainController().applicationClose();
+			else if (cmd.equals("help.about"))
+				aboutView.showAbout();
 			else
 				assert(false);
 		}
@@ -37,5 +40,14 @@ public class MainMenu extends JMenuBar
 		itemZamknij.setActionCommand("application.close");
 		itemZamknij.addActionListener(mainMenuListener);
 		menuProgram.add(itemZamknij);
+
+		JMenu menuHelp = new JMenu("Pomoc");
+		menuHelp.addActionListener(mainMenuListener);
+		this.add(menuHelp);
+
+		JMenuItem itemAbout = new JMenuItem("O programie");
+		itemAbout.setActionCommand("help.about");
+		itemAbout.addActionListener(mainMenuListener);
+		menuHelp.add(itemAbout);
 	}
 }

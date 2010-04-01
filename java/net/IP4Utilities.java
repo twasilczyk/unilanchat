@@ -1,4 +1,4 @@
-package tools;
+package net;
 
 import java.net.*;
 import java.util.*;
@@ -164,22 +164,5 @@ public class IP4Utilities
 		}
 
 		return Inet4Address.getByAddress(oByte);
-	}
-
-	/**
-	 * Zwraca nazwę hosta komputera, na którym jest uruchomiona aplikacja.
-	 *
-	 * @return nazwa hosta
-	 */
-	public static String getLocalHostName()
-	{
-		//try
-		//{
-		//	return InetAddress.getLocalHost().getHostName();
-		//}
-		//catch (UnknownHostException e)
-		//{
-			return "localhost";
-		//}
 	}
 }

@@ -21,6 +21,13 @@ public class JImagePanel extends JPanel
 		this.setBackground(Color.WHITE);
 	}
 
+	public JImagePanel(Image image)
+	{
+		this.setOpaque(false);
+		this.setBackground(Color.WHITE);
+		this.image = image;
+	}
+
 	@Override public void paintComponent(Graphics g)
 	{
 		if (isOpaque())

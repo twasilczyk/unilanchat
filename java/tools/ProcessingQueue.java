@@ -35,6 +35,8 @@ public class ProcessingQueue
 		}
 	}
 
+	private static int applicationProcessingThreadCount = 0;
+
 	/**
 	 * Wątek wykonujący zakolejkowane zadania.
 	 */
@@ -42,8 +44,8 @@ public class ProcessingQueue
 	{
 		public ApplicationProcessingThread()
 		{
+			super("ProcessingQueue-" + (applicationProcessingThreadCount++));
 			setDaemon(true);
-			setName("ProcessingQueue");
 			start();
 		}
 
