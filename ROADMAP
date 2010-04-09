@@ -9,8 +9,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - przygotować jakąś oryginalną ikonkę
  - obsługa bibliotek JNI pod linuxem 64bit
  - uzupełnić komentarze w pakiecie views.swing
- - bug: przy uruchomieniu wraz ze startem systemu nie wypełnia się lista
-   kontaktów (nawet po przełączeniu statusu na niedostępny i z powrotem)
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
 
