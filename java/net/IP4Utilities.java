@@ -2,6 +2,7 @@ package net;
 
 import java.net.*;
 import java.util.*;
+import tools.CachedDataProvider;
 
 /**
  * Klasa pomocnicza dla protokołu IPv4.
@@ -12,86 +13,40 @@ public class IP4Utilities
 {
 	private IP4Utilities() { }
 
+	private final static IPAddressesProvider localHostNameProvider =
+		new IPAddressesProvider();
+
 	/**
 	 * Lista adresów interfejsów w komputerze (cache).
 	 */
-	protected static final List<Inet4Address> ifaceAdresses =
+	protected static List<Inet4Address> ifaceAdresses =
 			new Vector<Inet4Address>();
 
 	/**
 	 * Lista adresów broadcast interfejsów w komputerze (cache).
 	 */
-	protected static final List<Inet4Address> broadcastAdresses =
+	protected static List<Inet4Address> broadcastAdresses =
 			new Vector<Inet4Address>();
 
-	/**
-	 * Czy adresy zostały wczytane.
-	 *
-	 * @todo może zrobić jakieś odświeżanie?
-	 * @see #ifaceAdresses
-	 * @see #broadcastAdresses
-	 */
-	protected static boolean adressesLoaded = false;
-
-	/**
-	 * Sprawdza, czy podany adres IP jest przypisany do jednego z interfejsów.
-	 *
-	 * @param ip adres IP w postaci <code>xxx.xxx.xxx.xxx</code>
-	 * @return <code>true</code>, jeżeli podany adres jest lokalny
-	 */
-	public static boolean isLocalAdress(String ip)
+	static class IPAddressesProvider extends CachedDataProvider
 	{
-		if (ip == null)
-			throw new NullPointerException();
-		for (Inet4Address addr : getLocalAdresses())
-			if (addr.getHostAddress().equals(ip))
-				return true;
-		return false;
-	}
+		/**
+		 * Ilość sekund od uruchomienia wątku. Po osiągnięciu (około) minuty
+		 * przestaje zliczać czas.
+		 */
+		private int runTime = 0;
 
-	/**
-	 * Pobiera listę adresów lokalnych interfejsów.
-	 *
-	 * @return lista adresów IPv4
-	 */
-	public static List<Inet4Address> getLocalAdresses()
-	{
-		loadAdresses();
-		return ifaceAdresses;
-	}
-
-	/**
-	 * Pobiera listę adresów broadcast lokalnych interfejsów.
-	 *
-	 * @return lista adresów IPv4
-	 */
-	public static List<Inet4Address> getBroadcastAdresses()
-	{
-		loadAdresses();
-		return broadcastAdresses;
-	}
-
-	/**
-	 * Inicjuje (o ile jest taka potrzeba) tablice z adresami.
-	 *
-	 * @see #adressesLoaded
-	 * @see #ifaceAdresses
-	 * @see #broadcastAdresses
-	 */
-	protected static void loadAdresses()
-	{
-		if (adressesLoaded)
-			return;
-
-		synchronized (ifaceAdresses)
+		public IPAddressesProvider()
 		{
-			if (adressesLoaded)
-				return;
+			super("IPAddressesProvider");
+			refreshRate = 1000;
+		}
 
+		@Override protected void loadData()
+		{
 			Enumeration<NetworkInterface> interfaces;
-
-			ifaceAdresses.clear();
-			broadcastAdresses.clear();
+			List<Inet4Address> newIfaceAdresses = new Vector<Inet4Address>();
+			List<Inet4Address> newBroadcastAdresses = new Vector<Inet4Address>();
 
 			try
 			{
@@ -99,7 +54,6 @@ public class IP4Utilities
 			}
 			catch (SocketException e)
 			{
-				adressesLoaded = true;
 				return;
 			}
 
@@ -124,15 +78,64 @@ public class IP4Utilities
 					InetAddress adres = ifAdress.getAddress();
 					InetAddress bcast = ifAdress.getBroadcast();
 					if (bcast != null && (bcast instanceof Inet4Address))
-						broadcastAdresses.add((Inet4Address)bcast);
+						newBroadcastAdresses.add((Inet4Address)bcast);
 					if (adres instanceof Inet4Address)
-						ifaceAdresses.add((Inet4Address)adres);
-
+						newIfaceAdresses.add((Inet4Address)adres);
 				}
 			}
-			
-			adressesLoaded = true;
+
+			ifaceAdresses = newIfaceAdresses;
+			broadcastAdresses = newBroadcastAdresses;
+
+			if (runTime < 60) // pierwsza minuta
+			{
+				if (ifaceAdresses.isEmpty() || broadcastAdresses.isEmpty())
+					refreshRate = 1000;
+				else
+					refreshRate = 5000;
+				runTime += refreshRate / 1000;
+			}
+			else
+				refreshRate = 60000;
 		}
+	}
+
+	/**
+	 * Sprawdza, czy podany adres IP jest przypisany do jednego z interfejsów.
+	 *
+	 * @param ip adres IP w postaci <code>xxx.xxx.xxx.xxx</code>
+	 * @return <code>true</code>, jeżeli podany adres jest lokalny
+	 */
+	public static boolean isLocalAdress(String ip)
+	{
+		if (ip == null)
+			throw new NullPointerException();
+		for (Inet4Address addr : getLocalAdresses())
+			if (addr.getHostAddress().equals(ip))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Pobiera listę adresów lokalnych interfejsów.
+	 *
+	 * @return lista adresów IPv4
+	 */
+	public static List<Inet4Address> getLocalAdresses()
+	{
+		localHostNameProvider.waitForData();
+		return ifaceAdresses;
+	}
+
+	/**
+	 * Pobiera listę adresów broadcast lokalnych interfejsów.
+	 *
+	 * @return lista adresów IPv4
+	 */
+	public static List<Inet4Address> getBroadcastAdresses()
+	{
+		localHostNameProvider.waitForData();
+		return broadcastAdresses;
 	}
 
 	/**

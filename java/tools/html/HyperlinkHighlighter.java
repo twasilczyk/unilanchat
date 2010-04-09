@@ -1,7 +1,6 @@
 package tools.html;
 
 import java.awt.event.*;
-import java.util.Vector;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 

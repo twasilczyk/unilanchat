@@ -2,6 +2,7 @@ package protocols.ipmsg;
 
 import java.io.IOException;
 import java.net.*;
+import protocols.ConnectionLostException;
 
 /**
  * Wątek połączenia IPMsg. Dokładniej mówiąc, nie jest to połączenie, tylko
@@ -146,11 +147,11 @@ class IpmsgConnectionThread extends Thread
 		if (packet == null)
 			throw new NullPointerException();
 		if (!isConnected)
-			return;
+			throw new ConnectionLostException();
 		synchronized(sockSendLocker)
 		{
 			if (!isConnected)
-				return;
+				throw new ConnectionLostException();
 			try
 			{
 				sock.send(packet);
@@ -161,6 +162,7 @@ class IpmsgConnectionThread extends Thread
 			catch (IOException e)
 			{
 				disconnect();
+				throw new ConnectionLostException();
 			}
 		}
 	}

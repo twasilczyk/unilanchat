@@ -82,7 +82,6 @@ public class IpmsgAccount extends Account
 			}
 			if (connectionThread.isConnected)
 			{
-				postMessageThread = new IpmsgPostMessageThread(this);
 				garbageContactsCollector = new IpmsgGarbageContactsCollector(this);
 				return true;
 			}
@@ -91,7 +90,6 @@ public class IpmsgAccount extends Account
 		else
 		{
 			connectionThread.disconnect();
-			postMessageThread.interrupt();
 			garbageContactsCollector.interrupt();
 			return true;
 		}
@@ -111,7 +109,7 @@ public class IpmsgAccount extends Account
 		if (packet == null)
 			throw new NullPointerException();
 		if (!isConnected())
-			throw new RuntimeException("Próba wysłania pakietu bez połączenia");
+			throw new ConnectionLostException();
 
 		byte[] rawPacketData = packet.getRAWData();
 
@@ -542,7 +540,8 @@ public class IpmsgAccount extends Account
 
 		// <editor-fold defaultstate="collapsed" desc="Wysyłanie wiadomości">
 
-	private IpmsgPostMessageThread postMessageThread;
+	private IpmsgPostMessageThread postMessageThread =
+		new IpmsgPostMessageThread(this);
 
 	/**
 	 * Kolejkuje wiadomość do wysłania.

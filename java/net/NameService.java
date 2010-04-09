@@ -2,8 +2,10 @@ package net;
 
 import java.net.*;
 
+import tools.CachedDataProvider;
+
 /**
- * Klasa dostarczająca nazw hostów.
+ * Klasa dostarczająca nazwy hostów.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
@@ -12,49 +14,26 @@ public class NameService
 	private final static LocalHostNameProvider localHostNameProvider =
 		new LocalHostNameProvider();
 
-	static class LocalHostNameProvider extends Thread
-	{
-		protected final static int refreshRate = 60000;
-		public final static String defaultHostName = "localhost";
-		
-		public boolean isLocalHostNameReady = false;
-		public String localHostName = defaultHostName;
+	protected final static String defaultHostName = "localhost";
 
+	protected static String localHostName = defaultHostName;
+
+	static class LocalHostNameProvider extends CachedDataProvider
+	{
 		public LocalHostNameProvider()
 		{
 			super("LocalHostNameProvider");
-			setDaemon(true);
-			start();
 		}
 
-		@Override public void run()
+		@Override protected void loadData()
 		{
-			while (true)
+			try
 			{
-				try
-				{
-					localHostName = InetAddress.getLocalHost().getHostName();
-				}
-				catch (UnknownHostException ex)
-				{
-					localHostName = defaultHostName;
-				}
-
-				if (!isLocalHostNameReady)
-					synchronized (localHostNameProvider)
-					{
-						isLocalHostNameReady = true;
-						notifyAll();
-					}
-				
-				try
-				{
-					sleep(refreshRate);
-				}
-				catch (InterruptedException ex)
-				{
-					return;
-				}
+				localHostName = InetAddress.getLocalHost().getHostName();
+			}
+			catch (UnknownHostException ex)
+			{
+				localHostName = defaultHostName;
 			}
 		}
 	}
@@ -66,25 +45,8 @@ public class NameService
 	 */
 	public static String getLocalHostName()
 	{
-		if (!localHostNameProvider.isLocalHostNameReady)
-			synchronized (localHostNameProvider)
-			{
-				if (!localHostNameProvider.isLocalHostNameReady)
-					try
-					{
-						localHostNameProvider.wait(100);
-					}
-					catch (InterruptedException ex)
-					{
-						return LocalHostNameProvider.defaultHostName;
-					}
-				if (!localHostNameProvider.isLocalHostNameReady)
-				{
-					localHostNameProvider.isLocalHostNameReady = true;
-					localHostNameProvider.notifyAll();
-				}
-			}
+		localHostNameProvider.waitForData();
 
-		return localHostNameProvider.localHostName;
+		return localHostName;
 	}
 }

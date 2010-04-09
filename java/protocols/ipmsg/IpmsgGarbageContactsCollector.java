@@ -2,7 +2,8 @@ package protocols.ipmsg;
 
 import java.util.*;
 
-import protocols.Contact;
+import net.IP4Utilities;
+import protocols.*;
 
 /**
  * Wątek sprawdzania dostępności jest inicjowany i kończony w ramach
@@ -38,7 +39,7 @@ class IpmsgGarbageContactsCollector extends Thread
 	 * Ile razy kontakt jest odpytywany (bez powodzenia) przed skreśleniem
 	 * z listy.
 	 */
-	protected final static int confirmMaxCount = 5;
+	protected final static int confirmMaxCount = 3;
 
 	/**
 	 * Lista nie potwierdzonych (w danej akcji czyszczenia) kontaktów.
@@ -79,9 +80,17 @@ class IpmsgGarbageContactsCollector extends Thread
 		{
 			wait(collectorFirstInterval);
 
+			// czekamy maksimum minutę na zainicjowanie interfejsów
+			for (int i = 0; i < 60; i++)
+			{
+				if (!IP4Utilities.getBroadcastAdresses().isEmpty())
+					break;
+				wait(1000);
+			}
+
 			while (true)
 			{
-				if (ipmsgAccount.isConnected()) //nie koniecznie musi trwać przez całą pętlę
+				if (ipmsgAccount.isConnected())
 				{
 					// przygotowanie listy kontaktów do sprawdzenia
 					synchronized (unconfirmedContacts)
@@ -122,6 +131,10 @@ class IpmsgGarbageContactsCollector extends Thread
 
 				wait(collectorInterval);
 			}
+		}
+		catch (ConnectionLostException e)
+		{
+			return;
 		}
 		catch (InterruptedException e)
 		{

@@ -1,6 +1,7 @@
 package protocols.ipmsg;
 
 import java.util.*;
+import protocols.ConnectionLostException;
 
 import protocols.Contact;
 
@@ -65,10 +66,14 @@ class IpmsgPostMessageThread extends Thread
 					{
 						messagePacket.packet.ip = receiver.getIP();
 
-						// TODO: obsłużyć błędy, jeżeli nie połączony
-						// (isConnected() nie koniecznie musi trwać przez
-						// całą pętlę)
-						ipmsgAccount.sendPacket(messagePacket.packet);
+						try
+						{
+							ipmsgAccount.sendPacket(messagePacket.packet);
+						}
+						catch (ConnectionLostException e)
+						{
+							break;
+						}
 					}
 			}
 
