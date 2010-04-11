@@ -1,3 +1,5 @@
+DEBUGMODE=0
+
 packages=$(shell ls -C java | sed 's/\s\+/:/g' | sed -e :a -e '$!N; s/\n/:/; ta')
 dirs=$(shell cd java ; find . -type d -iregex '..+' \! -iregex '.*\.svn.*')
 srcs=$(shell cd java ; find . -iname '*.java' \! -iregex '.*\.svn.*')
@@ -8,11 +10,20 @@ JNI_CPP_INC = jni/jni_helper.cpp
 JNI_CPP_INCDIR = -I/usr/java/default/include -I/usr/java/default/include/linux
 JAVA_BIN_DIR = /usr/java/default/bin/
 
+ifeq ($(DEBUGMODE), 1)
+	JAVA_BUILD_FLAGS = -Xlint:all,-serial -g
+else
+	JAVA_BUILD_FLAGS = -Xlint:all,-serial
+endif
+
 dist: java-build jni-build launcher-build
 	mkdir dist
 	cd java-build ; jar cfme ../dist/UniLANChat.jar ../manifest.mf main.Main  *
 	cp launcher-build/UniLANChat.exe dist
 	cp launcher-build/UniLANChat dist
+
+debug: clean
+	make dist DEBUGMODE=1
 
 all: dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
 
@@ -28,7 +39,7 @@ java-build:
 		mkdir $$dir ; \
 	done
 	cd java ; \
-	javac -Xlint:all,-serial -d ../java-build $(srcs)
+	javac $(JAVA_BUILD_FLAGS) -d ../java-build $(srcs)
 	for resi in $(res) ; do \
 		cp java/$$resi java-build/$$resi ; \
 	done
@@ -45,7 +56,11 @@ launcher-build:
 	cd launcher-build ; tar xzf ../launcher/windows/launch4j-3.0.1-linux.tgz
 	cd launcher-build/launch4j ; ./launch4j ../../launcher/windows/launcher.xml
 	chmod -x launcher-build/UniLANChat.exe
-	cp launcher/unix/UniLANChat launcher-build
+ifeq ($(DEBUGMODE), 1)
+	cp launcher/unix/UniLANChat-debug launcher-build/UniLANChat
+else
+	cp launcher/unix/UniLANChat launcher-build/UniLANChat
+endif
 	chmod +x launcher-build/UniLANChat
 
 java-doc:

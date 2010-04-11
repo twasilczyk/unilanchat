@@ -35,7 +35,6 @@ public class MessagesPanel extends JStickyScrollPane
 	protected final HTMLDocument messagesDoc;
 	protected final Element messagesElement;
 
-	//TODO: statusUnknownIcon
 	protected static final URL statusUnknown = ResourceManager.get("msgStatus-unknown.png");
 	protected static final URL statusPending = ResourceManager.get("msgStatus-pending.png");
 	protected static final URL statusFailed = ResourceManager.get("msgStatus-failed.png");

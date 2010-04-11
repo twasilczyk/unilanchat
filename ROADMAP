@@ -2,7 +2,7 @@ Plany rozwoju programu UniLANChat. Niniejszy dokument jest luźnym planem, podan
 tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmienić.
 
 
-0.1.0 (pierwsze publiczne wydanie rozwojowe)
+0.1 (pierwsze publiczne wydanie rozwojowe)
  - serializacja i deserializacja konfiguracji, zapis do katalogu w folderze
    użytkownika, możliwość wskazania folderu użytkownika w parametrze wywołania
  - moduł automatycznych aktualizacji (z wieloma URLami źródłowymi)
@@ -14,11 +14,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu któregoś
    z interfejsów (powinny być śledzone w IP4Utilities)
 
-0.2.0
+0.2
  - tylko jedna instancja programu
  - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
- - wersja debug: przełącznik -g przy kompilacji oraz przy uruchomieniu:
-   "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
  - ipmsg: transfer plików
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
@@ -38,7 +36,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
 
-1.0.0 (pierwsza wersja finalna)
+1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)
  - obsługa przynajmniej jednego dodatkowego protokołu (np. LanChat, winpopup),
    panel zarządzania kontami
@@ -49,7 +47,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt -
    zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają
 
-1.1.0
+1.1
  - blokowanie kontaktów
  - wskazywanie dodatkowych adresów IP, rozszerzających broadcast
  - przeciąganie zakładek z rozmowami (w celu zmiany ich kolejności)
@@ -69,3 +67,5 @@ dalsze wydania
    się (i aktualizuje?) na początku pokoju publicznego
  - bug: TrayIcon nie wspiera przezroczystości na KDE, nie używa swingowego menu,
    długo się uruchamia
+ - protokół korzystający z samej warstwy łącza danych (MAC), pozwalający na
+   komunikację bez skonfigurowanej warstwy sieciowej (IP)

@@ -80,19 +80,16 @@ class IpmsgConnectionThread extends Thread
 
 		while (true)
 		{
-			try
-			{
-				Thread.sleep(1);
-			}
-			catch (InterruptedException e)
-			{
+			if (isInterrupted())
 				break;
-			}
 
 			DatagramPacket packet = new DatagramPacket(readBuff, readBuff.length);
 			try
 			{
 				sock.receive(packet);
+
+				if (isInterrupted())
+					break;
 
 				IpmsgPacket ipmsgPacket;
 
@@ -125,7 +122,6 @@ class IpmsgConnectionThread extends Thread
 
 		sock.close();
 		isConnected = false;
-//			System.err.println("disconnected");
 	}
 
 	/**

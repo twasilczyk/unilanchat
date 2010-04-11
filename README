@@ -49,6 +49,13 @@ Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
    w katalogu głównym tworzy pliki tar.gz i zip, do publikacji jako gotowe
    wydania programu
 
+ * make debug
+   odpowiednik dist, ale przygotowujący wersję gotową do debugowania poprzez
+   jdb dla systemu linux. Aby rozpocząć debugowanie na działającej aplikacji
+   z poziomu NetBeans, znajdź PID programu ("ps -ef | grep UniLANChat.jar"),
+   wybierz pozycję "Attach Debugger..." z menu "Debug", wybierz Connector
+   "ProcessAttach", wpisz odczytany wcześniej PID i kliknij OK
+
  * make netbeans
    przygotowanie katalogu z kodem źródłowym javy do kompilacji z użyciem innego
    pliku Makefile (np. poprzez środowisko NetBeans). Polega m.in. na
