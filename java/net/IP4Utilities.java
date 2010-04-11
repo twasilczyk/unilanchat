@@ -9,7 +9,7 @@ import tools.CachedDataProvider;
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class IP4Utilities
+public abstract class IP4Utilities
 {
 	private IP4Utilities() { }
 
@@ -92,11 +92,11 @@ public class IP4Utilities
 				if (ifaceAdresses.isEmpty() || broadcastAdresses.isEmpty())
 					refreshRate = 1000;
 				else
-					refreshRate = 5000;
+					refreshRate = 3000;
 				runTime += refreshRate / 1000;
 			}
 			else
-				refreshRate = 60000;
+				refreshRate = 10000;
 		}
 	}
 

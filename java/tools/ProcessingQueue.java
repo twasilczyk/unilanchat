@@ -58,7 +58,7 @@ public class ProcessingQueue
 					{
 						synchronized (taskQueue)
 						{
-							taskQueue.wait(); // a może lepiej wait(1000)?
+							taskQueue.wait();
 						}
 					}
 					catch (InterruptedException ex)

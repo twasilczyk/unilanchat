@@ -37,7 +37,7 @@ class IpmsgConnectionThread extends Thread
 	/**
 	 * Bufor dla odbieranych pakietów.
 	 */
-	protected final byte[] readBuff = new byte[1024];
+	protected final byte[] readBuff = new byte[102400];
 
 	/**
 	 * Port, na którym jest nasłuchiwanie, oraz na który są wysyłane pakiety
@@ -142,7 +142,7 @@ class IpmsgConnectionThread extends Thread
 	 *
 	 * @param packet pakiet do wysłania
 	 */
-	public void send(DatagramPacket packet)
+	public void send(DatagramPacket packet) throws ConnectionLostException
 	{
 		if (packet == null)
 			throw new NullPointerException();

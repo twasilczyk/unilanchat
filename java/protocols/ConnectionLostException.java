@@ -6,7 +6,7 @@ package protocols;
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class ConnectionLostException extends RuntimeException
+public class ConnectionLostException extends Exception
 {
 	public ConnectionLostException()
 	{

@@ -11,9 +11,14 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
+ - wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu któregoś
+   z interfejsów (powinny być śledzone w IP4Utilities)
 
 0.2.0
  - tylko jedna instancja programu
+ - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
+ - wersja debug: przełącznik -g przy kompilacji oraz przy uruchomieniu:
+   "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
  - ipmsg: transfer plików
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
@@ -30,7 +35,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych
- - bug: użycie IpmsgAccount.sendPacket(), gdy nie ma połączenia
+ - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
+   w tym przypadku zazwyczaj zawiesza
 
 1.0.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

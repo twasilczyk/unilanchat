@@ -82,7 +82,7 @@ public class IpmsgAccount extends Account
 			}
 			if (connectionThread.isConnected)
 			{
-				garbageContactsCollector = new IpmsgGarbageContactsCollector(this);
+				contactsThread.speedupRefresh();
 				return true;
 			}
 			return false;
@@ -90,7 +90,6 @@ public class IpmsgAccount extends Account
 		else
 		{
 			connectionThread.disconnect();
-			garbageContactsCollector.interrupt();
 			return true;
 		}
 	}
@@ -104,7 +103,7 @@ public class IpmsgAccount extends Account
 	 *
 	 * @param packet pakiet do wysłania
 	 */
-	protected void sendPacket(IpmsgPacket packet)
+	protected void sendPacket(IpmsgPacket packet) throws ConnectionLostException
 	{
 		if (packet == null)
 			throw new NullPointerException();
@@ -122,7 +121,7 @@ public class IpmsgAccount extends Account
 			for (Inet4Address bcaddr : IP4Utilities.getBroadcastAdresses())
 			{
 				udpPacket.setAddress(bcaddr);
-				connectionThread.send(udpPacket); // TODO: czy na pewno dalej mamy połączenie?
+				connectionThread.send(udpPacket);
 			}
 		}
 		else
@@ -207,7 +206,7 @@ public class IpmsgAccount extends Account
 		switch (packet.getCommand())
 		{
 			case IpmsgPacket.COMM_ANSENTRY:
-				garbageContactsCollector.confirmContact(contact);
+				contactsThread.confirmContact(contact);
 				break;
 			case IpmsgPacket.COMM_ABSENCE:
 				break;
@@ -241,7 +240,7 @@ public class IpmsgAccount extends Account
 
 		// <editor-fold defaultstate="collapsed" desc="Lista kontaktów">
 
-	private IpmsgGarbageContactsCollector garbageContactsCollector;
+	private IpmsgContactsThread contactsThread = new IpmsgContactsThread(this);
 
 	/**
 	 * Pobiera kontakt powiązany z podanym adresem IP. Jeżeli nie istnieje -
@@ -432,7 +431,13 @@ public class IpmsgAccount extends Account
 			packet.data = userName + '\0' + groupName;
 		else
 			packet.data = userName + '[' + textStatus + ']' + '\0' + groupName;
-		sendPacket(packet);
+		try
+		{
+			sendPacket(packet);
+		}
+		catch (ConnectionLostException e)
+		{
+		}
 	}
 
 		// </editor-fold>
@@ -477,7 +482,13 @@ public class IpmsgAccount extends Account
 			confirmPacket.ip = packet.ip;
 			confirmPacket.setCommand(IpmsgPacket.COMM_RECVMSG);
 			confirmPacket.data = Long.toString(packet.packetNo);
-			sendPacket(confirmPacket);
+			try
+			{
+				sendPacket(confirmPacket);
+			}
+			catch (ConnectionLostException e)
+			{
+			}
 
 			synchronized (confirmedMessages)
 			{
