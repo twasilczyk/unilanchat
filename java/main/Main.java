@@ -2,6 +2,7 @@ package main;
 
 import controllers.MainController;
 import tools.*;
+import tools.systemintegration.SystemDirectories;
 
 /**
  * Główna klasa aplikacji, odpowiedzialna za jej uruchomienie.
@@ -42,7 +43,22 @@ public abstract class Main
 	 * @see #isNightly
 	 */
 	public static final String applicationFullName =
-		applicationName + " " + version + (isNightly?" (nightly)":"");
+		applicationName + " " + version + (isNightly ? " (nightly)" : "");
+
+	private static String appDir;
+
+	/**
+	 * Zwraca katalog aplikacji. Może on zostać podany w parametrach wywołania
+	 * programu, w innym wypadku katalog jest zależny od systemu operacyjnego.
+	 *
+	 * @return katalog aplikacji
+	 */
+	public static String getAppDir()
+	{
+		if (appDir == null)
+			throw new NullPointerException("Jeszcze nie ustawiono");
+		return appDir;
+	}
 
 	/**
 	 * Uruchomienie aplikacji z konsoli.
@@ -65,13 +81,31 @@ public abstract class Main
 		GUIUtilities.installCarefulRepaintManager(false);
 		GUIUtilities.setBestLookAndFeel();
 
+		// <editor-fold defaultstate="collapsed" desc="Wczytywanie parametrów">
+
+		String paramNick = null, paramUserDir = null;
+
 		for (int i = 0; i < args.length; i++)
 		{
 			if (args[i].equals("--nick") && i + 1 < args.length)
-				Configuration.getInstance().setNick(args[++i]);
-
-			Configuration.getInstance().notifyObservers();
+				paramNick = args[++i];
+			else if (args[i].equals("--user-dir") && i + 1 < args.length)
+				paramUserDir = args[++i];
 		}
+
+		if(paramUserDir != null)
+			appDir = paramUserDir;
+		else
+			appDir = SystemDirectories.getAppStoreDir(applicationName, true);
+
+		Configuration.loadInstance(appDir + "config.xml");
+
+		if (paramNick != null)
+			Configuration.getInstance().setNick(paramNick);
+
+		Configuration.getInstance().notifyObservers();
+
+		// </editor-fold>
 
 		final MainController mainController = new MainController();
 

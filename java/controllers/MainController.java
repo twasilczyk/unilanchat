@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.*;
 
+import main.Configuration;
 import protocols.*;
 import protocols.ipmsg.IpmsgAccount;
 import tools.*;
@@ -164,6 +165,7 @@ public class MainController extends SimpleObservable implements Observer
 	public void applicationClose()
 	{
 		setStatus(Contact.UserStatus.OFFLINE);
+		Configuration.saveInstance(Main.getAppDir() + "config.xml");
 		System.exit(0);
 	}
 
