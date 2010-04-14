@@ -1,20 +1,15 @@
 package views.swing;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.event.*;
 
 import components.swing.JImagePanel;
-import java.awt.event.ActionListener;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLDocument;
 import resources.ResourceManager;
-import tools.html.HTMLUtilities;
 import tools.html.HyperlinkHighlighter;
+import tools.systemintegration.SystemProcesses;
 
 /**
  * Widok okna informacji o programie.
@@ -65,7 +60,7 @@ public class AboutView extends JFrame
 		public void hyperlinkUpdate(HyperlinkEvent e)
 		{
 			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
-				HTMLUtilities.openURL(e.getDescription());
+				SystemProcesses.openURL(e.getDescription());
 		}
 
 		public void actionPerformed(ActionEvent e)

@@ -2,11 +2,11 @@ package controllers;
 
 import java.util.*;
 
-import main.Configuration;
+import main.*;
 import protocols.*;
 import protocols.ipmsg.IpmsgAccount;
 import tools.*;
-import main.Main;
+import tools.systemintegration.X11StartupNotification;
 
 /**
  * Główny kontroler aplikacji.

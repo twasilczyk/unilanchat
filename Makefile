@@ -46,8 +46,8 @@ java-build:
 
 jni-build: java-build
 	mkdir jni-build
-	$(JAVA_BIN_DIR)javah -d jni -classpath java-build tools.X11StartupNotification
-	g++ $(JNI_CPP_FLAGS) -lX11 jni/tools_X11StartupNotification.cpp $(JNI_CPP_INC) -o jni-build/libtools_X11StartupNotification.so $(JNI_CPP_INCDIR)
+	$(JAVA_BIN_DIR)javah -d jni -classpath java-build tools.systemintegration.X11StartupNotification
+	g++ $(JNI_CPP_FLAGS) -lX11 jni/tools_systemintegration_X11StartupNotification.cpp $(JNI_CPP_INC) -o jni-build/libtools_systemintegration_X11StartupNotification.so $(JNI_CPP_INCDIR)
 	cp -f jni-build/*.so java-build/jni
 	cp -f jni-build/*.so java/jni
 
@@ -93,6 +93,6 @@ clean:
 	@rm -f UniLANChat-bin.zip
 	@rm -f UniLANChat-bin.tar.gz
 	@rm -f UniLANChat-doc.tar.gz
-	@rm -f jni/tools_X11StartupNotification.h
+	@rm -f jni/tools_systemintegration_X11StartupNotification.h
 	@rm -f java/jni/*.so
 	@rm -f java/jni/*.dll

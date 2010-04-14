@@ -7,6 +7,9 @@ package tools.systemintegration;
  */
 public class WindowsRegistry
 {
+	public final static boolean isSupported =
+		System.getProperty("os.name").contains("Windows");
+
 	/**
 	 * Zwraca dane zapisane pod daną ścieżką i kluczem w rejestrze Windows.
 	 * 
@@ -16,6 +19,9 @@ public class WindowsRegistry
 	 */
 	public static Object readValue(String keyPath, String keyName)
 	{
+		if (!isSupported)
+			throw new UnsupportedOperationException(
+				"Obsługa rejestru jest możliwa tylko pod systemem Windows");
 
 		String response = SystemProcesses.systemExec("REG QUERY \"" + keyPath.trim() + "\" " + "/v " + keyName);
 

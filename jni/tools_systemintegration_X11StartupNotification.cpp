@@ -1,4 +1,4 @@
-#include "tools_X11StartupNotification.h"
+#include "tools_systemintegration_X11StartupNotification.h"
 #include "jni_helper.h"
 
 //#include <iostream>
@@ -11,7 +11,7 @@ using namespace std;
 static void broadcast_xmessage(const string& message);
 static string escape_for_xmessage(const string& s);
 
-JNIEXPORT void JNICALL Java_tools_X11StartupNotification_notifyStartupCompleteNative
+JNIEXPORT void JNICALL Java_tools_systemintegration_X11StartupNotification_notifyStartupCompleteNative
 	(JNIEnv *env, jclass, jstring jStartupID)
 {
 	string startupID = JNI_jstring2string(env, jStartupID);

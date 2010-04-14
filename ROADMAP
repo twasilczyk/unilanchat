@@ -3,8 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.1 (pierwsze publiczne wydanie rozwojowe)
- - serializacja i deserializacja konfiguracji, zapis do katalogu w folderze
-   użytkownika, możliwość wskazania folderu użytkownika w parametrze wywołania
  - moduł automatycznych aktualizacji (z wieloma URLami źródłowymi)
  - przygotować jakąś oryginalną ikonkę
  - obsługa bibliotek JNI pod linuxem 64bit

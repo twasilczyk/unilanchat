@@ -14,6 +14,7 @@ import components.swing.JStickyScrollPane;
 import protocols.*;
 import resources.ResourceManager;
 import tools.html.*;
+import tools.systemintegration.SystemProcesses;
 
 /**
  * Panel z listą wiadomości.
@@ -244,7 +245,7 @@ public class MessagesPanel extends JStickyScrollPane
 				if (url.startsWith("action:"))
 					actionPerformed(url.substring(7));
 				else
-					HTMLUtilities.openURL(url);
+					SystemProcesses.openURL(url);
 			}
 		}
 

@@ -1,4 +1,4 @@
-package tools;
+package tools.systemintegration;
 
 import jni.JNIManager;
 
@@ -14,7 +14,7 @@ public abstract class X11StartupNotification
 	 * została załadowana.
 	 */
 	public static final boolean isSupported =
-		JNIManager.tryLoadLibrary("tools_X11StartupNotification");
+		JNIManager.tryLoadLibrary("tools_systemintegration_X11StartupNotification");
 
 	/**
 	 * Nazwa zmiennej systemowej, przechowującej ID uruchomionej aplikacji.
