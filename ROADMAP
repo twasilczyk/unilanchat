@@ -5,7 +5,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 0.1 (pierwsze publiczne wydanie rozwojowe)
  - moduł automatycznych aktualizacji (z wieloma URLami źródłowymi)
  - przygotować jakąś oryginalną ikonkę
- - obsługa bibliotek JNI pod linuxem 64bit
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
@@ -33,6 +32,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
+ - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

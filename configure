@@ -1,0 +1,34 @@
+#!/bin/sh
+rm -f Makefile
+
+echo "# plik Makefile wygenerowany automatycznie za pomocą skryptu ./configure" >> Makefile
+echo >> Makefile
+
+if [ "$1" = "debug" ]
+then
+	echo "Tryb debug włączony."
+	DEBUGMODE=1
+else
+	echo "Tryb debug wyłączony."
+	DEBUGMODE=0
+fi
+
+echo "DEBUGMODE=$DEBUGMODE" >> Makefile
+
+JAVA_ROOT=$JDK_HOME
+if [ -d "$JAVA_ROOT" ] ; then
+	echo -n
+elif [ -d "/usr/lib/jvm/java-6-sun" ] ; then # Ubuntu
+	JAVA_ROOT="/usr/lib/jvm/java-6-sun"
+elif [ -d "/usr/lib/jvm/java" ] ; then # OpenSUSE
+	JAVA_ROOT="/usr/lib/jvm/java"
+else
+	echo "Nie znaleziono JDK, zmienna systemowa JDK_HOME nie wskazuje poprawnego katalogu."
+	exit
+fi
+echo "JAVA_ROOT=$JAVA_ROOT" >> Makefile
+
+echo >> Makefile
+cat Makefile.in >> Makefile
+
+echo "Plik Makefile gotowy, możesz użyć make, lub make all."

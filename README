@@ -22,25 +22,34 @@ http://www.java.com/getjava/
 
 
 Zaleca się kompilację pod systemem Linux - właśnie dla tego systemu jest
-przygotowany plik Makefile. Do kompilacji potrzebne są następujące biblioteki:
+przygotowany plik Makefile. Wspierane dystrybucje:
+
+ * OpenSUSE 11.2
+ * Ubuntu 10.04 - eksperymentalnie, 9.10 - częściowo
+
+Do kompilacji potrzebne są następujące biblioteki:
 
  * JavaSE JDK - najlepiej instalować bezpośrednio ze strony Oracle, inne
    dystrybucje (np. ta instalowana z repozytoriów OpenSUSE 11.2) mogą posiadać
    inny układ katalogów, lub nie zawierać wszystkich potrzebnych plików.
-   JDK6 można pobrać z adresu:
+   JDK6 (wersję RPM) można pobrać z adresu:
 
    http://java.sun.com/javase/downloads/widget/jdk6.jsp
 
- * gcc, gcc-c++ - potrzebna do kompilacji bibliotek JNI
+   W Ubuntu można zainstalować pakiet sun-java6-jdk
+
+Opcjonalnie:
+
+ * gcc, gcc-c++ - potrzebna do kompilacji bibliotek JNI; dla Ubuntu: cpp
 
  * xorg-x11-libX11, xorg-x11-libX11-devel - potrzebna dla klasy
-   X11StartupNotification
+   X11StartupNotification; dla Ubuntu: libx11-6, libx11-dev
 
 ################################################################################
 ## KOMPILACJA
 ################################################################################
 
-Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
+Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefile:
 
  * make dist (domyślny)
    wersja programu gotowa do uruchomienia
@@ -56,18 +65,24 @@ Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
    wybierz pozycję "Attach Debugger..." z menu "Debug", wybierz Connector
    "ProcessAttach", wpisz odczytany wcześniej PID i kliknij OK
 
- * make netbeans
-   przygotowanie katalogu z kodem źródłowym javy do kompilacji z użyciem innego
-   pliku Makefile (np. poprzez środowisko NetBeans). Polega m.in. na
-   umieszczeniu skompilowanych bibliotek JNI w odpowiednich katalogach. Poza
-   wywołaniem tej opcji należy zastąpić wygenerowany przez NetBeans plik
-   manifest.mf, tym dostarczonym razem z aplikacją
-
  * make java-doc
    dokumentacja kodu źródłowego
 
  * make clean
+   usunięcie wszystkich produktów kompilacji
+
+ * make clean-all
    przygotowanie do synchronizacji z svn, lub zrobienia paczki z kodem źródłowym
+
+ * make clean-jni
+   make jni-bin-linux32
+   make jni-bin-linux64
+   polecenia wykonywane w przypadku potrzeby przekompilowania bibliotek JNI.
+   Wersje binarne są przechowywane razem ze źródłami oraz nie kasowane przez
+   make clean, aby zmniejszyć ilość zależności, potrzebnych do kompilacji
+   projektu. Wykonanie kompilacji bibliotek 64-bit wymaga na systemie 32-bit
+   cross-kompilatora, więc można wykonać tą kompilację na innej maszynie,
+   a następnie przenieść wynik do katalogu java/jni
 
 ################################################################################
 ## ZNANE PROBLEMY
@@ -88,3 +103,9 @@ Do kompilacji nie jest potrzebny skrypt configure. Dostępne opcje Makefile:
    ruch na portach:
    
    - 2425 (tcp i udp), również pakiety broadcast - protokół ipmsg
+
+ * Po kompilacji za pomocą środowiska NetBeans próba uruchomienia programu
+   może kończyć się komunikatem "Failed to load Main-Class manifest attribute
+   from UniLANChat.jar". W takim przypadku należy zwrócić uwagę, czy plik
+   manifest.mf (wygenerowany przez środowisko) został zastąpiony tym
+   dostarczonym razem z aplikacją.

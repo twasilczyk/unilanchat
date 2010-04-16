@@ -11,6 +11,16 @@ import java.net.URL;
 public abstract class JNIManager
 {
 	/**
+	 * Cache właściwości os.arch, przechowującej bieżącą architekturę JVM.
+	 */
+	protected final static String arch = System.getProperty("os.arch");
+
+	/**
+	 * Czy architektura maszyny wirtualnej jest 64-bitowa.
+	 */
+	protected final static boolean arch64 = (arch != null && arch.contains("64"));
+
+	/**
 	 * Wczytanie biblioteki natywnej z pliku jar. Nazwa pliku binarnego
 	 * biblioteki jest automatycznie generowana z nazwy biblioteki.
 	 *
@@ -22,7 +32,11 @@ public abstract class JNIManager
 		if (libname == null)
 			throw new NullPointerException();
 
-		String libFileName = System.mapLibraryName(libname);
+		String libFileName;
+		if (arch64)
+			libFileName = System.mapLibraryName(libname + "-64");
+		else
+			libFileName = System.mapLibraryName(libname);
 
 		URL liburl = JNIManager.class.getResource(libFileName);
 		if (liburl == null)
@@ -85,7 +99,7 @@ public abstract class JNIManager
 		{
 			return false;
 		}
-		
+
 		return true;
 	}
 }

@@ -1,14 +1,12 @@
-DEBUGMODE=0
-
 packages=$(shell ls -C java | sed 's/\s\+/:/g' | sed -e :a -e '$!N; s/\n/:/; ta')
 dirs=$(shell cd java ; find . -type d -iregex '..+' \! -iregex '.*\.svn.*')
 srcs=$(shell cd java ; find . -iname '*.java' \! -iregex '.*\.svn.*')
 res=$(shell cd java ; find . -type f \! -iname '*.java' \! -iregex '.*\.svn.*')
 
-JNI_CPP_FLAGS = -shared -static -Wall -Wextra -O2
+JNI_CPP_FLAGS = -shared -Wall -Wextra -O2
 JNI_CPP_INC = jni/jni_helper.cpp
-JNI_CPP_INCDIR = -I/usr/java/default/include -I/usr/java/default/include/linux
-JAVA_BIN_DIR = /usr/java/default/bin/
+JNI_CPP_INCDIR = -I$(JAVA_ROOT)/include -I$(JAVA_ROOT)/include/linux
+JAVA_BIN_DIR = $(JAVA_ROOT)/bin/
 
 ifeq ($(DEBUGMODE), 1)
 	JAVA_BUILD_FLAGS = -Xlint:all,-serial -g
@@ -16,21 +14,13 @@ else
 	JAVA_BUILD_FLAGS = -Xlint:all,-serial
 endif
 
-dist: java-build jni-build launcher-build
+dist: jni-bin java-build launcher-build
 	mkdir dist
 	cd java-build ; jar cfme ../dist/UniLANChat.jar ../manifest.mf main.Main  *
 	cp launcher-build/UniLANChat.exe dist
 	cp launcher-build/UniLANChat dist
 
-debug: clean
-	make dist DEBUGMODE=1
-
 all: dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
-
-netbeans: clean jni-build
-	@rm -f -r java-build
-	@rm -f -r jni-build
-	@rm -f jni/tools_X11StartupNotification.h
 
 java-build:
 	mkdir java-build
@@ -44,12 +34,22 @@ java-build:
 		cp java/$$resi java-build/$$resi ; \
 	done
 
-jni-build: java-build
-	mkdir jni-build
+jni-headers: java-build
 	$(JAVA_BIN_DIR)javah -d jni -classpath java-build tools.systemintegration.X11StartupNotification
-	g++ $(JNI_CPP_FLAGS) -lX11 jni/tools_systemintegration_X11StartupNotification.cpp $(JNI_CPP_INC) -o jni-build/libtools_systemintegration_X11StartupNotification.so $(JNI_CPP_INCDIR)
-	cp -f jni-build/*.so java-build/jni
-	cp -f jni-build/*.so java/jni
+
+jni-bin-linux32: jni-headers
+	g++ -m32 $(JNI_CPP_FLAGS) -lX11 jni/tools_systemintegration_X11StartupNotification.cpp $(JNI_CPP_INC) \
+		-o java/jni/libtools_systemintegration_X11StartupNotification.so $(JNI_CPP_INCDIR)
+	chmod -x java/jni/libtools_systemintegration_X11StartupNotification.so
+
+jni-bin-linux64: jni-headers
+	g++ -m64 -fPIC $(JNI_CPP_FLAGS) -lX11 jni/tools_systemintegration_X11StartupNotification.cpp $(JNI_CPP_INC) \
+		-o java/jni/libtools_systemintegration_X11StartupNotification-64.so $(JNI_CPP_INCDIR)
+	chmod -x java/jni/libtools_systemintegration_X11StartupNotification-64.so
+
+jni-bin: \
+	java/jni/libtools_systemintegration_X11StartupNotification.so \
+	java/jni/libtools_systemintegration_X11StartupNotification-64.so
 
 launcher-build:
 	mkdir launcher-build
@@ -65,7 +65,9 @@ endif
 
 java-doc:
 	mkdir java-doc
-	javadoc -d java-doc -encoding utf8 -docencoding utf8 -charset utf8 -protected -nodeprecated -nohelp -noindex -author -windowtitle UniChat -tag todo:a:"TODO:" -sourcepath java -subpackages ${packages}
+	javadoc -d java-doc -encoding utf8 -docencoding utf8 -charset utf8 \
+		-protected -nodeprecated -nohelp -noindex -author -windowtitle UniChat \
+		-tag todo:a:"TODO:" -sourcepath java -subpackages ${packages}
 
 dist-zip: dist java-doc
 	mkdir dist-zip
@@ -87,12 +89,16 @@ clean:
 	@rm -f -r dist
 	@rm -f -r java-doc
 	@rm -f -r java-build
-	@rm -f -r jni-build
 	@rm -f -r launcher-build
 	@rm -f -r dist-zip
 	@rm -f UniLANChat-bin.zip
 	@rm -f UniLANChat-bin.tar.gz
 	@rm -f UniLANChat-doc.tar.gz
 	@rm -f jni/tools_systemintegration_X11StartupNotification.h
+
+clean-all: clean
+	@rm -f Makefile
+
+clean-jni:
 	@rm -f java/jni/*.so
 	@rm -f java/jni/*.dll
