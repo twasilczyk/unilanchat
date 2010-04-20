@@ -19,7 +19,7 @@ public class MainView extends JFrame
 	protected final MainController mainController;
 	protected final MainView mainView = this;
 
-	protected final ChatRoomsView chatRoomsView;
+	private ChatRoomsView chatRoomsView;
 
 	protected TrayIcon trayIcon = null;
 	protected boolean trayModeShowUnread = false;
@@ -39,13 +39,21 @@ public class MainView extends JFrame
 	 * @see #init(MainController)
 	 * @param mainController główny kontroler, z którym powiązany jest widok
 	 */
-	protected MainView(MainController mainController)
+	protected MainView(MainController mainControllerObj)
 	{
 		super("Lista kontaktów");
-
-		this.mainController = mainController;
-		chatRoomsView = new ChatRoomsView(mainController.getChatController());
-		chatRoomsView.addObserver(new ChatRoomsViewObserver());
+		
+		this.mainController = mainControllerObj;
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// utworzenie tego okna zajmuje dużo czasu, a nie potrzebujemy
+				// go od razu po starcie aplikacji
+				chatRoomsView = new ChatRoomsView(mainController.getChatController());
+				chatRoomsView.addObserver(new ChatRoomsViewObserver());
+			}
+		});
 
 		setMinimumSize(new Dimension(100, 200));
 		setPreferredSize(new Dimension(250, 450));
@@ -62,8 +70,6 @@ public class MainView extends JFrame
 
 		pack();
 		setLocationRelativeTo(null); //wyśrodkowanie okna
-
-		new TrayInitThread();
 	}
 
 	class MainRoomButtonPanel extends JPanel
@@ -115,14 +121,36 @@ public class MainView extends JFrame
 	 */
 	public static boolean init(MainController mainController)
 	{
+		TrayInitThread trayInitThread = new TrayInitThread();
+
 		MainViewInitializator init = new MainViewInitializator(mainController);
-		if (!GUIUtilities.swingInvokeAndWait(init))
+		if (!GUIUtilities.swingInvokeAndWait(init) || !init.wasSuccessful())
 			return false;
-		return init.wasSuccessful();
+
+		try
+		{
+			trayInitThread.join();
+		}
+		catch (InterruptedException ex) { }
+		if (trayInitThread.trayIcon == null)
+			return false;
+		init.getMainView().trayIcon = trayInitThread.trayIcon;
+		init.getMainView().finishTrayInitialization();
+
+		return true;
 	}
 
 	public ChatRoomsView getChatRoomsView()
 	{
+		if (chatRoomsView == null)
+		{
+			long waitstart = System.currentTimeMillis();
+			while (chatRoomsView == null &&
+				System.currentTimeMillis() - waitstart < 10000) // czekamy max 10s
+				Thread.yield();
+			if (chatRoomsView == null)
+				throw new NullPointerException("Nie zainicjowano chatRoomsView");
+		}
 		return chatRoomsView;
 	}
 
@@ -142,7 +170,7 @@ public class MainView extends JFrame
 			if (trayIcon == null)
 				return;
 
-			trayModeShowUnread = chatRoomsView.isAnyUnread();
+			trayModeShowUnread = getChatRoomsView().isAnyUnread();
 
 			if (trayModeShowUnread)
 				trayIcon.setImage(ResourceManager.getImage("iconUnread.png"));
@@ -177,7 +205,7 @@ public class MainView extends JFrame
 			if (e.getButton() == MouseEvent.BUTTON1)
 			{
 				if (trayModeShowUnread)
-					chatRoomsView.showAnyUnread();
+					getChatRoomsView().showAnyUnread();
 				else if
 					(
 					//okno jest widoczne
@@ -196,8 +224,10 @@ public class MainView extends JFrame
 		}
 	}
 
-	class TrayInitThread extends Thread
+	static class TrayInitThread extends Thread
 	{
+		private TrayIcon trayIcon;
+
 		public TrayInitThread()
 		{
 			super("ULC-TrayInitThread");
@@ -212,24 +242,13 @@ public class MainView extends JFrame
 			if (!SystemTray.isSupported())
 				return;
 
-			TrayMenuListener trayMenuListener = new TrayMenuListener();
-
-			SystemTray tray = SystemTray.getSystemTray();
-			PopupMenu trayMenu = new PopupMenu();
-			
 			trayIcon = new TrayIcon(ResourceManager.getImage("icon.png"),
-					"UniLANChat", trayMenu);
+					"UniLANChat");
 			trayIcon.setImageAutoSize(true);
-			trayIcon.addMouseListener(new TrayMouseListener());
-
-			MenuItem itemZamknij = new MenuItem("Zamknij");
-			itemZamknij.addActionListener(trayMenuListener);
-			itemZamknij.setActionCommand("application.close");
-			trayMenu.add(itemZamknij);
 
 			try
 			{
-				tray.add(trayIcon);
+				SystemTray.getSystemTray().add(trayIcon); // ~650 - 700ms
 			}
 			catch (AWTException e)
 			{
@@ -237,6 +256,30 @@ public class MainView extends JFrame
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Związanie ikony w trayu z widokiem (po zainicjowaniu widoku).
+	 *
+	 * Ten kod został wydzielony z TrayInitThread, aby można było rozpocząć
+	 * inicjalizację tej ikony jeszcze przed rozpoczęciem tworzenia widoku.
+	 */
+	private void finishTrayInitialization()
+	{
+		if (trayIcon == null)
+			throw new NullPointerException();
+
+		PopupMenu trayMenu = new PopupMenu();
+
+		TrayMenuListener trayMenuListener = new TrayMenuListener();
+		trayIcon.addMouseListener(new TrayMouseListener());
+
+		MenuItem itemZamknij = new MenuItem("Zamknij");
+		itemZamknij.addActionListener(trayMenuListener);
+		itemZamknij.setActionCommand("application.close");
+		trayMenu.add(itemZamknij);
+
+		trayIcon.setPopupMenu(trayMenu);
 	}
 
 	// </editor-fold>
@@ -251,6 +294,7 @@ public class MainView extends JFrame
 class MainViewInitializator implements Runnable
 {
 	protected boolean success = false;
+	protected MainView mainView;
 	protected final MainController mainController;
 
 	public MainViewInitializator(MainController mainController)
@@ -263,11 +307,16 @@ class MainViewInitializator implements Runnable
 		return success;
 	}
 
+	public MainView getMainView()
+	{
+		return mainView;
+	}
+
 	public void run()
 	{
 		try
 		{
-			new MainView(mainController);
+			mainView = new MainView(mainController);
 			success = true;
 		}
 		catch (HeadlessException e)

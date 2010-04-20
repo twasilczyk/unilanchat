@@ -79,8 +79,8 @@ public abstract class Main
 
 		GUIUtilities.setApplicationName(applicationFullName);
 		GUIUtilities.installCarefulRepaintManager(false);
-		GUIUtilities.setBestLookAndFeel();
-
+		GUIUtilities.setBestLookAndFeel(true);
+		
 		// <editor-fold defaultstate="collapsed" desc="Wczytywanie parametrów">
 
 		String paramNick = null, paramUserDir = null;
@@ -98,7 +98,7 @@ public abstract class Main
 		else
 			appDir = SystemDirectories.getAppStoreDir(applicationName, true);
 
-		Configuration.loadInstance(appDir + "config.xml");
+		Configuration.loadInstance(appDir + "config.xml"); // ~50ms
 
 		if (paramNick != null)
 			Configuration.getInstance().setNick(paramNick);

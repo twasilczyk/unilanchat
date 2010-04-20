@@ -2,7 +2,6 @@ package tools;
 
 import java.applet.Applet;
 import java.awt.*;
-import java.awt.event.*;
 import java.lang.reflect.*;
 import javax.swing.*;
 
@@ -30,23 +29,36 @@ public abstract class GUIUtilities
 	/**
 	 * Ustawia najlepszy wygląd (Look and Feel) według ustalonych priorytetów.
 	 *
+	 * @param multiThread czy wykonać w wątku Swing - metoda może się wykonywać
+	 * kilkaset milisekund. Zwalnia bieżący wątek, ale opóźnia zadania Swing
 	 * @see #lookAndFeelPriority
-	 * @return nazwa ustawionego Look and Feel
 	 */
-	public static String setBestLookAndFeel()
+	public static void setBestLookAndFeel(boolean multiThread)
 	{
-		for (int i = 0; i < lookAndFeelPriority.length; i++)
-			try
+		Runnable r = new Runnable()
+		{
+			public void run()
 			{
-				UIManager.setLookAndFeel(lookAndFeelPriority[i]);
-				return lookAndFeelPriority[i];
-			}
-			catch (Exception e)
-			{
-				continue;
-			}
+				for (int i = 0; i < lookAndFeelPriority.length; i++)
+					try
+					{
+						UIManager.setLookAndFeel(lookAndFeelPriority[i]);
+						break;
+					}
+					catch (Exception e)
+					{
+						continue;
+					}
 
-		return UIManager.getLookAndFeel().getName();
+				for (Frame f : Frame.getFrames())
+					SwingUtilities.updateComponentTreeUI(f);
+			}
+		};
+
+		if (multiThread)
+			SwingUtilities.invokeLater(r);
+		else
+			r.run();
 	}
 
 	/**
@@ -85,35 +97,32 @@ public abstract class GUIUtilities
 	 * jeżeli okno jest zminimalizowane, a po zminimalizowaniu inne (natywne)
 	 * okno uzyska focus.
 	 *
+	 * Wywołanie metody może wstrzymać bieżący wątek na 250ms (zazwyczaj
+	 * kilkanaście) - w przypadku aktywacji zminimalizowanego okna, oczekuje na
+	 * jego pojawienie się.
+	 *
 	 * @param window okno do przywołania
 	 * @see Frame#toFront()
 	 */
 	public static void bringWindowToFront(final Frame window)
 	{
-		boolean fromIconified = (window.getState() == Frame.ICONIFIED);
-
-		if (fromIconified)
+		if (window.getState() == Frame.ICONIFIED)
+		{
 			window.setState(Frame.NORMAL);
-		else
-			window.setVisible(false);
+
+			//czekamy na pojawienie się okna - max 250ms
+			long waitStart = System.currentTimeMillis();
+			while (window.getState() != Frame.NORMAL &&
+				System.currentTimeMillis() - waitStart < 250)
+				Thread.yield();
+		}
+
+		//ukrycie i pokazanie okna to obejście, gdy nie da się uzyskać focusa
+		window.setVisible(false);
 		window.setVisible(true);
+		
 		window.toFront();
 		window.requestFocus();
-		if (fromIconified)
-		{
-			Timer timer = new Timer(50, new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					window.setVisible(false);
-					window.setVisible(true);
-					window.toFront();
-					window.requestFocus();
-				}
-			});
-			timer.setRepeats(false);
-			timer.start();
-		}
 	}
 
 	/**

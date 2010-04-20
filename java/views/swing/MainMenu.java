@@ -3,6 +3,8 @@ package views.swing;
 import java.awt.event.*;
 import javax.swing.*;
 
+import main.Main;
+
 /**
  * Komponent wyświetlający główne menu programu.
  *
@@ -12,7 +14,7 @@ public class MainMenu extends JMenuBar
 {
 	final MainView mainView;
 	final MainMenuListener mainMenuListener = new MainMenuListener();
-	final AboutView aboutView = new AboutView();
+	AboutView aboutView;
 
 	class MainMenuListener implements ActionListener
 	{
@@ -22,7 +24,19 @@ public class MainMenu extends JMenuBar
 			if (cmd.equals("application.close"))
 				mainView.getMainController().applicationClose();
 			else if (cmd.equals("help.about"))
-				aboutView.showAbout();
+			{
+				if (aboutView == null) // widok nie musi być od razu gotowy
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							if (aboutView != null)
+								aboutView.showAbout();
+						}
+					});
+				else
+					aboutView.showAbout();
+			}
 			else
 				assert(false);
 		}
@@ -31,6 +45,16 @@ public class MainMenu extends JMenuBar
 	public MainMenu(MainView mainView)
 	{
 		this.mainView = mainView;
+
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				// utworzenie tego okna zajmuje dużo czasu, a nie potrzebujemy
+				// go od razu po starcie aplikacji
+				aboutView = new AboutView();
+			}
+		});
 
 		JMenu menuProgram = new JMenu("Program");
 		menuProgram.addActionListener(mainMenuListener);

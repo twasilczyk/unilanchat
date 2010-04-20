@@ -8,8 +8,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
- - wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu któregoś
-   z interfejsów (powinny być śledzone w IP4Utilities)
+ - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
+   czyli wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu
+   któregoś z interfejsów (powinny być śledzone w IP4Utilities)
 
 0.2
  - tylko jedna instancja programu
@@ -29,7 +30,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    cytatów
  - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu
- - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
