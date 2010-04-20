@@ -3,6 +3,10 @@ package tools;
 import java.applet.Applet;
 import java.awt.*;
 import java.lang.reflect.*;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.midi.SysexMessage;
 import javax.swing.*;
 
 /**
@@ -13,6 +17,9 @@ import javax.swing.*;
 public abstract class GUIUtilities
 {
 	private GUIUtilities() { }
+
+	private final static boolean isLinux =
+		System.getProperty("os.name").contains("Linux");
 
 	/**
 	 * Priorytet paczek Look and Feel (im niższy indeks, tym wyższy priorytet).
@@ -102,6 +109,8 @@ public abstract class GUIUtilities
 	 * jego pojawienie się.
 	 *
 	 * @param window okno do przywołania
+	 * @todo pod systemem Linux metoda przywołuje wszystkie okna aplikacji na
+	 * wierzch - dobrze by było znaleźć na to jakieś obejście
 	 * @see Frame#toFront()
 	 */
 	public static void bringWindowToFront(final Frame window)
@@ -117,8 +126,24 @@ public abstract class GUIUtilities
 				Thread.yield();
 		}
 
-		//ukrycie i pokazanie okna to obejście, gdy nie da się uzyskać focusa
+		// ukrycie i pokazanie (pod X11 - wszystkich) okien to obejście, gdy nie
+		// da się uzyskać focusa
 		window.setVisible(false);
+		if (isLinux)
+		{
+			Vector<Frame> visibleFrames = new Vector<Frame>();
+			for (Frame f : Frame.getFrames())
+				if (f.isVisible())
+				{
+					if (f.getClass().getCanonicalName().equals(
+						"sun.awt.X11.XTrayIconPeer.XTrayIconEmbeddedFrame"))
+						continue;
+					f.setVisible(false);
+					visibleFrames.add(f);
+				}
+			for (Frame f : visibleFrames)
+				f.setVisible(true);
+		}
 		window.setVisible(true);
 		
 		window.toFront();

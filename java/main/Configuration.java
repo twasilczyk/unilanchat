@@ -51,11 +51,8 @@ public class Configuration extends Observable
 	/**
 	 * Egzemplarz klasy przechowującej konfigurację. Powinien być jeden na całą
 	 * aplikację.
-	 *
-	 * @todo zamiast "new Configuration()", zrobić deserializację
-	 * (i serializację).
 	 */
-	protected static Configuration instance = new Configuration();
+	protected static Configuration instance;
 
 	/**
 	 * Serializuje obiekt konfiguracji do obiektu drzewa XML.
@@ -120,6 +117,8 @@ public class Configuration extends Observable
 	 */
 	public static void loadInstance(String path)
 	{
+		if (instance != null)
+			throw new RuntimeException("Konfiguracja została już wczytana");
 		try
 		{
 			File file = new File(path);
