@@ -33,6 +33,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
+ - obsłużyć wersję protokołu iptux ("1_iptux_0")
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)
@@ -44,11 +45,18 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: JEditorPane nie zawija zbyt szerokich wiadomości
  - bug: przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt -
    zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają
+ - wykrywanie (i oznaczanie) kontaktów, których firewall nie wpuszcza pakietów
+ - powiadamianie o błędach tak, jak w pidginie (panel z komunikatem pod listą
+   kontaktów)
+ - wykrywanie lub zgadywanie, że ustawienia firewall lub NAT nie pozwalają na
+   komunikację, informowanie o tym użytkownika
 
 1.1
  - blokowanie kontaktów
  - wskazywanie dodatkowych adresów IP, rozszerzających broadcast
  - przeciąganie zakładek z rozmowami (w celu zmiany ich kolejności)
+ - implementacja wbudowanego klienta i serwera wymiany listy kontaktów ipmsg,
+   wykorzystującego pakiety COMM_ANSLIST
 
 dalsze wydania
  - interfejs tekstowy dla konsoli (ncurses, Charva)
@@ -59,7 +67,8 @@ dalsze wydania
    sąsiadów)
  - sieć wymiany plików, częściowo oparta o przesyłanie plików w implementowanych
    protokołach, aby oryginalni klienci mieli częściową możliwość korzystania
-   z nich (np. poprzez polecenia tekstowe)
+   z nich (np. poprzez polecenia tekstowe). W protokole iptux obsłużyć polecenie
+   pobrania listy udostępnianych plików (id polecenia to 0xFF)
  - komunikacja głosowa
  - tablica ogłoszeń, na której może publikować każdy użytkownik, a wyświetla
    się (i aktualizuje?) na początku pokoju publicznego

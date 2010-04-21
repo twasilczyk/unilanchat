@@ -100,11 +100,21 @@ public class IpmsgPacket
 
 		// </editor-fold>
 
+		// <editor-fold defaultstate="collapsed" desc="Komunikacja z serwerem wymiany listy kontaktów">
+
 	public final static int COMM_BR_ISGETLIST = 0x00000010;
 	public final static int COMM_OKGETLIST = 0x00000011;
 	public final static int COMM_GETLIST = 0x00000012;
+
+	/**
+	 * Przesłanie listy kontaktów z serwera wymiany. Jest przesyłany zaraz po
+	 * potwierdzeniu COMM_ANSENTRY pakietu COMM_ENTRY.
+	 */
 	public final static int COMM_ANSLIST = 0x00000013;
+
 	public final static int COMM_BR_ISGETLIST2 = 0x00000018;
+
+		// </editor-fold>
 
 		// <editor-fold defaultstate="collapsed" desc="Przesyłanie wiadomości">
 
