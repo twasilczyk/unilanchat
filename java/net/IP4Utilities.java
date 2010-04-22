@@ -36,6 +36,12 @@ public abstract class IP4Utilities
 		 */
 		private int runTime = 0;
 
+		/**
+		 * Czy wyświetlać na stderr szczegółowe informacje dotyczące odkrywanych
+		 * interfejsów i ich adresów.
+		 */
+		private final boolean verbose = false;
+
 		public IPAddressesProvider()
 		{
 			super("IPAddressesProvider");
@@ -48,6 +54,9 @@ public abstract class IP4Utilities
 			List<Inet4Address> newIfaceAdresses = new Vector<Inet4Address>();
 			List<Inet4Address> newBroadcastAdresses = new Vector<Inet4Address>();
 
+			if (verbose)
+				System.err.println("IPAddressesProvider: Skanowanie interfejsów sieciowych...");
+			
 			try
 			{
 				interfaces = NetworkInterface.getNetworkInterfaces();
@@ -60,6 +69,9 @@ public abstract class IP4Utilities
 			while(interfaces.hasMoreElements())
 			{
 				NetworkInterface ni = interfaces.nextElement();
+
+				if (verbose)
+					System.err.println("IPAddressesProvider: " + ni.getDisplayName());
 
 				try
 				{
@@ -75,12 +87,31 @@ public abstract class IP4Utilities
 
 				for (InterfaceAddress ifAdress : adresyInterfejsu)
 				{
+					if (verbose)
+						System.err.print("IPAddressesProvider:  ");
+
 					InetAddress adres = ifAdress.getAddress();
 					InetAddress bcast = ifAdress.getBroadcast();
-					if (bcast != null && (bcast instanceof Inet4Address))
-						newBroadcastAdresses.add((Inet4Address)bcast);
+
 					if (adres instanceof Inet4Address)
+					{
 						newIfaceAdresses.add((Inet4Address)adres);
+						if (verbose)
+							System.err.print("ipv4: " +
+								((Inet4Address)adres).getHostAddress() + "/" +
+								ifAdress.getNetworkPrefixLength() + " ");
+					}
+					
+					if (bcast != null && (bcast instanceof Inet4Address))
+					{
+						newBroadcastAdresses.add((Inet4Address)bcast);
+						if (verbose)
+							System.err.print("bcast: " +
+								((Inet4Address)bcast).getHostAddress() + " ");
+					}
+
+					if (verbose)
+						System.err.println();
 				}
 			}
 

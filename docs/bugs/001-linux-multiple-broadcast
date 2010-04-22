@@ -1,0 +1,124 @@
+################################################################################
+# Opis błędu
+################################################################################
+
+Pod systemem linux, w przypadku kart posiadających przypisane więcej niż jeden
+adres IP, adres broadcast jest pobierany tylko dla jednego z nich i przypisywany
+do reszty. Podobnie jest z maską podsieci / długością prefiksu podsieci.
+
+W opisanej poniżej konfiguracji dla przypadku 1, nie jest możliwe przesyłanie
+pakietów broadcast z komputera z linuxem do komputerów z windowsem, chyba, że
+w kliencie ipmsg (w tej chwili tylko oryginalna implementacja na to pozwala)
+zostaną podane ręcznie.
+
+W konfiguracji dla przypadku 2, komunikacja przebiega bez problemu (pod
+warunkiem, że na komputerze nr 1 (z Windowsem) korzystamy z naszej implementacji
+klienta ipmsg.
+
+Problem prawdopodobnie rozwiązuje przykładowy program napisany w C. Wydaje mi
+się, że przy pewnej konfiguracji zwracał podobne wyniki, jak wersja w javie, ale
+nie udało mi się tego odtworzyć.
+
+
+################################################################################
+# Przypadek 1 - linux posiada dwa adresy IP, problem występuje
+################################################################################
+
+PC1 (windows):
+netsh interface ip set address name="VB-BR" static addr=192.168.150.2 mask=255.255.255.0
+
+PC2 (windows):
+netsh interface ip set address name="VB-BR" static addr=10.10.10.2 mask=255.240.0.0
+
+PC3 (linux):
+ip route del default
+ip addr flush eth1
+ip addr add 192.168.150.1/24 brd 192.168.150.255 dev eth1
+ip addr add 10.10.20.2/12 brd 10.15.255.255 dev eth1
+
+
+################################################################################
+# Przypadek 2 - windows posiada dwa adresy IP, problem nie występuje
+################################################################################
+
+PC1 (windows):
+netsh interface ip set address name="VB-BR" static addr=192.168.150.5 mask=255.255.255.0
+netsh interface ip add address "VB-BR" addr=10.10.20.2 mask=255.240.0.0
+
+PC2 (windows):
+netsh interface ip set address name="VB-BR" static addr=10.10.10.5 mask=255.240.0.0
+
+PC3 (linux):
+ip route del default
+ip addr flush eth1
+ip addr add 192.168.150.2/24 brd 192.168.150.255 dev eth1
+
+
+################################################################################
+# Możliwe rozwiązania
+################################################################################
+
+Pod linuxem, poprawne adresy broadcast przechowywane są w:
+$ cat /proc/net/route (sama maska)
+$ ip addr show | grep -e "^\\W*inet "
+
+Można też skorzystać z przykładowego kodu w C, dodając go jako bibliotekę JNI.
+
+
+################################################################################
+# Przykładowy kod w C, realizujący podobne zadanie
+################################################################################
+
+/* source: http://www.doctort.org/adam/ by Adam Pierce <adam@doctort.org> */
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <arpa/inet.h>
+
+int main(void)
+{
+	char buf[1024];
+	struct ifconf ifc;
+	struct ifreq *ifr;
+	int sck, nInterfaces, i;
+
+	/* Get a socket handle. */
+	sck = socket(AF_INET, SOCK_DGRAM, 0);
+	if(sck < 0)
+	{
+		perror("socket");
+		return 1;
+	}
+
+	/* Query available interfaces. */
+	ifc.ifc_len = sizeof(buf);
+	ifc.ifc_buf = buf;
+	if(ioctl(sck, SIOCGIFCONF, &ifc) < 0)
+	{
+		perror("ioctl(SIOCGIFCONF)");
+		return 1;
+	}
+
+	/* Iterate through the list of interfaces. */
+	ifr = ifc.ifc_req;
+	nInterfaces = ifc.ifc_len / sizeof(struct ifreq);
+	for(i = 0; i < nInterfaces; i++)
+	{
+		struct ifreq *item = &ifr[i];
+
+		/* Show the device name and IP address */
+		printf("%s: IP %s",
+			item->ifr_name,
+			inet_ntoa(((struct sockaddr_in *)
+				&item->ifr_addr)->sin_addr));
+
+		/* Get the broadcast address (added by Eric) */
+		if(ioctl(sck, SIOCGIFBRDADDR, item) >= 0)
+			printf(", BCAST %s", inet_ntoa(((struct sockaddr_in *)
+				&item->ifr_broadaddr)->sin_addr));
+		printf("\n");
+	}
+
+	return 0;
+}

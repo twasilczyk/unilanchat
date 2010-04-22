@@ -50,6 +50,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    kontaktów)
  - wykrywanie lub zgadywanie, że ustawienia firewall lub NAT nie pozwalają na
    komunikację, informowanie o tym użytkownika
+ - bug 001-linux-multiple-broadcast: problem z wykrywaniem adresów broadcast
+   dla interfejsów posiadających wiele przypisanych adresów ip
 
 1.1
  - blokowanie kontaktów
