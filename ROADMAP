@@ -5,9 +5,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 0.1 (pierwsze publiczne wydanie rozwojowe)
  - moduł automatycznych aktualizacji (z wieloma URLami źródłowymi)
  - przygotować jakąś oryginalną ikonkę
- - uzupełnić komentarze w pakiecie views.swing
- - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
-   ogólnie przejrzeć te klasy
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
    czyli wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu
    któregoś z interfejsów (powinny być śledzone w IP4Utilities)
@@ -15,6 +12,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 0.2
  - tylko jedna instancja programu
  - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
+ - uzupełnić komentarze w pakiecie views.swing
+ - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
+   ogólnie przejrzeć te klasy
  - ipmsg: transfer plików
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
@@ -33,7 +33,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
- - obsłużyć wersję protokołu iptux ("1_iptux_0")
+ - obsłużyć wersję protokołu iptux ("1_iptux_0"), ten klient może wysyłać
+   pakiety COMM_BR_ISGETLIST2
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

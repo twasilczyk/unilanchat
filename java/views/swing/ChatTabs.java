@@ -210,7 +210,7 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 	 */
 	protected void updateRoomTitle(final ChatRoom room)
 	{
-		GUIUtilities.swingInvokeAndWait(new Runnable()
+		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
