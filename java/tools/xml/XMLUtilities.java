@@ -76,7 +76,7 @@ public class XMLUtilities
 			});
 			Document doc = builder.parse(new InputSource(new StringReader(data)));
 
-			return doc.getFirstChild();
+			return doc.getDocumentElement();
 		}
 		catch(ParserConfigurationException ex)
 		{
