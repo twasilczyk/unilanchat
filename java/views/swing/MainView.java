@@ -6,15 +6,17 @@ import java.util.*;
 import javax.swing.*;
 
 import controllers.MainController;
+import main.Main;
 import resources.ResourceManager;
-import tools.GUIUtilities;
+import tools.*;
+import tools.systemintegration.SystemProcesses;
 
 /**
  * Widok odpowiadający za główne okno programu.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class MainView extends JFrame
+public class MainView extends JFrame implements Observer
 {
 	protected final MainController mainController;
 	protected final MainView mainView = this;
@@ -42,8 +44,9 @@ public class MainView extends JFrame
 	protected MainView(MainController mainControllerObj)
 	{
 		super("Lista kontaktów");
-		
+
 		this.mainController = mainControllerObj;
+		this.mainController.addObserver(this);
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
@@ -70,6 +73,46 @@ public class MainView extends JFrame
 
 		pack();
 		setLocationRelativeTo(null); //wyśrodkowanie okna
+	}
+
+	public void update(Observable o, Object gArg)
+	{
+		if (o == mainController && gArg instanceof Pair)
+		{
+			Pair arg = (Pair)gArg;
+			if (arg.left.equals("newVersionAvailable"))
+			{
+				assert(arg.right instanceof Updater);
+				final Updater updater = (Updater)arg.right;
+
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						String newestVersion =
+							(Main.isNightly ?
+								updater.getNightlyVersion() + " (nightly)" :
+								updater.getCurrentVersion());
+
+						String[] options = new String[]
+						{
+							"aktualizuj",
+							"później"
+						};
+
+						int selection = JOptionPane.showOptionDialog(mainView,
+							"Nowa wersja programu jest już dostępna: " + newestVersion,
+							"Nowa wersja programu",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.INFORMATION_MESSAGE, null,
+							options, options[0]);
+						
+						if (selection == 0)
+							SystemProcesses.openURL(updater.getHomepage());
+					}
+				});
+			}
+		}
 	}
 
 	class MainRoomButtonPanel extends JPanel

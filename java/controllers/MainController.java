@@ -1,5 +1,6 @@
 package controllers;
 
+import java.net.*;
 import java.util.*;
 
 import main.*;
@@ -31,11 +32,25 @@ public class MainController extends SimpleObservable implements Observer
 	 */
 	protected final ContactList contactList = new ContactList();
 
+	protected final Updater updater = new Updater();
+
 	public MainController()
 	{
 		Account ipmacc = new IpmsgAccount(contactList, getChatController().getChatRoomList());
 		accounts.add(ipmacc);
 		ipmacc.addObserver(this);
+		
+		try
+		{
+			updater.addUpdateServer(new URL("http://wasilczyk.pl/ulc-version.xml"));
+			updater.addUpdateServer(new URL("http://unilanchat.googlecode.com/svn/version.xml"));
+		}
+		catch (MalformedURLException ex)
+		{
+			assert(false); // te URLe są wpisane na sztywno
+		}
+
+		updater.addObserver(this);
 	}
 
 	/**
@@ -177,11 +192,23 @@ public class MainController extends SimpleObservable implements Observer
 		if (X11StartupNotification.isSupported)
 			X11StartupNotification.notifyStartupComplete();
 		setStatus(Contact.UserStatus.ONLINE);
+
+		updater.checkForUpdates();
 	}
 
 	public void update(Observable o, Object arg)
 	{
 		if (o instanceof Account)
 			accountStatusProbablyChanged((Account)o);
+		if (o == updater)
+		{
+			String newestVersion =
+				(Main.isNightly ?
+					updater.getNightlyVersion() :
+					updater.getCurrentVersion());
+			if (!newestVersion.equals(Main.version))
+				notifyObservers(new Pair<String, Object>("newVersionAvailable",
+					updater));
+		}
 	}
 }

@@ -26,6 +26,16 @@ public class Updater extends Observable
 	protected String currentVersion;
 
 	/**
+	 * Numer ostatnio wykrytej wersji nightly.
+	 */
+	protected String nightlyVersion;
+
+	/**
+	 * Adres strony, na której można znaleźć najnowszą wersję programu.
+	 */
+	protected String homepage;
+
+	/**
 	 * Limit czasu oczekiwania na połączenie z serwerem.
 	 */
 	protected final int connectTimeout = 10000;
@@ -39,11 +49,6 @@ public class Updater extends Observable
 	 * Wątek pobierający informacje o nowej wersji.
 	 */
 	protected UpdaterThread thread;
-
-	public Updater(String currentVersion)
-	{
-		this.currentVersion = currentVersion;
-	}
 
 	/**
 	 * Dodaje URL do listy adresów, z ktorych będzie pobierana informacja
@@ -69,6 +74,26 @@ public class Updater extends Observable
 	public String getCurrentVersion()
 	{
 		return currentVersion;
+	}
+
+	/**
+	 * Zwraca numer ostatnio wykrytej wersji nightly.
+	 *
+	 * @return numer ostatnio wykrytej wersji nightly
+	 */
+	public String getNightlyVersion()
+	{
+		return nightlyVersion;
+	}
+
+	/**
+	 * Zwraca adres strony, na której można znaleźć najnowszą wersję programu.
+	 *
+	 * @return adres strony, na której można znaleźć najnowszą wersję programu
+	 */
+	public String getHomepage()
+	{
+		return homepage;
 	}
 
 	/**
@@ -106,9 +131,8 @@ public class Updater extends Observable
 
 						BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 
-						boolean wasSuccessful = false;
-
-						if (!urlConnection.getContentType().equals("text/xml"))
+						if (!urlConnection.getContentType().contains("xml") &&
+							!urlConnection.getContentType().equals("text/plain"))
 							continue;
 							
 						StringBuffer stringBuffer = new StringBuffer();
@@ -146,19 +170,32 @@ public class Updater extends Observable
 										continue;
 
 									if (node2.getNodeName().trim().equals("currentVersion") &&
-											!currentVersion.equals(node2.getTextContent().trim()))
+											!node2.getTextContent().trim().equals(currentVersion))
 									{
 										currentVersion = node2.getTextContent().trim();
-										
-										notifyObservers();
+
+										setChanged();
 									}
-									wasSuccessful = true;
+									else if (node2.getNodeName().trim().equals("nightlyVersion") &&
+											!node2.getTextContent().trim().equals(nightlyVersion))
+									{
+										nightlyVersion = node2.getTextContent().trim();
+
+										setChanged();
+									}
 								}
 							}
+							else if (node.getNodeName().trim().equals("homepage"))
+								homepage = node.getTextContent().trim();
 						}
 
-						if (wasSuccessful)
+						if (currentVersion != null && homepage != null)
+						{
+							if (nightlyVersion == null)
+								nightlyVersion = currentVersion;
+							notifyObservers();
 							break;
+						}
 
 					}
 					catch (SocketTimeoutException ex)
