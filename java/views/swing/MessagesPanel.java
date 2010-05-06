@@ -92,10 +92,10 @@ public class MessagesPanel extends JStickyScrollPane
 		"<p><a href=\"action:messageReceiversSwitch/%d\">" +
 		"<img src=\"%s\" border=\"0\" width=\"10\" height=\"10\" "+
 		"alt=\"Dostarczono: %d, wysyłanie: %d, nie dostarczono: %d\" /></a></p>";
-	protected final static String messageSwitchRawCell = //id
+	protected final static String messageSwitchRawCell = //id, ikona (switchRawMessage)
 		"<td><p><a href=\"action:switchRawContents/%d\">" +
-		"<img width=\"10\" height=\"10\" src=\"" + switchRawMessage + 
-		"\" alt=\"Pokaż/ukryj oryginalną wiadomość\" border=\"0\" /></a></p></td>";
+		"<img width=\"10\" height=\"10\" src=\"%s\" " +
+		"alt=\"Pokaż/ukryj oryginalną wiadomość\" border=\"0\" /></a></p></td>";
 	protected final static String messageServiceCell = //id
 		"<div class=\"message-serviceCell\" id=\"message-serviceCell-%d\"><p></p></div>";
 
@@ -124,7 +124,9 @@ public class MessagesPanel extends JStickyScrollPane
 			if (((IncomingMessage)message).isRawContentsDifferent())
 			{
 				messageIcons.append(
-					String.format(messageSwitchRawCell, message.id)
+					String.format(messageSwitchRawCell,
+						message.id,
+						switchRawMessage)
 					);
 			}
 		}

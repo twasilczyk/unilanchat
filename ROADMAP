@@ -34,6 +34,10 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
  - obsłużyć wersję protokołu iptux ("1_iptux_0"), ten klient może wysyłać
    pakiety COMM_BR_ISGETLIST2
+ - przenieść kompilator launchera poza folder trunk (np. do tools), w źródłach
+   trzymać tylko binarkę, a kompilować (wraz z pobieraniem kompilatora z svn)
+   jedynie na wyraźne życzenie (dodatkowa sekcja w Makefile)
+ - do Makefile dodać sekcję UniLANChat-src.tar.gz
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

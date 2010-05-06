@@ -39,7 +39,7 @@ public class MainView extends JFrame implements Observer
 	 * z metody {@link #init(MainController)}.
 	 *
 	 * @see #init(MainController)
-	 * @param mainController główny kontroler, z którym powiązany jest widok
+	 * @param mainControllerObj główny kontroler, z którym powiązany jest widok
 	 */
 	protected MainView(MainController mainControllerObj)
 	{
