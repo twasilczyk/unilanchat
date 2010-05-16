@@ -36,7 +36,7 @@ public class ChatRoomsView extends JFrame
 		this.setMinimumSize(new Dimension(200, 200));
 		this.setPreferredSize(new Dimension(500, 450));
 		this.setLayout(new BorderLayout());
-		this.setIconImage(ResourceManager.getIcon("icon.png").getImage());
+		this.setIconImage(ResourceManager.getIcon("icons/32.png").getImage());
 
 		this.addWindowFocusListener(new ChatRoomsViewFocusListener());
 

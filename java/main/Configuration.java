@@ -74,6 +74,12 @@ public class Configuration extends Observable
 		Text ignoreAutoResponsesVal = serializationDoc.createTextNode(ignoreAutoResponses ? "true" : "false");
 		ignoreAutoResponsesEl.appendChild(ignoreAutoResponsesVal);
 
+		Element autoUpdateEl = serializationDoc.createElement("autoUpdate");
+		configurationEl.appendChild(autoUpdateEl);
+
+		Text autoUpdateVal = serializationDoc.createTextNode(autoUpdate ? "true" : "false");
+		autoUpdateEl.appendChild(autoUpdateVal);
+
 		return configurationEl;
 	}
 
@@ -103,6 +109,13 @@ public class Configuration extends Observable
 					conf.ignoreAutoResponses = true;
 				else if (tempNode.getTextContent().equals("false"))
 					conf.ignoreAutoResponses = false;
+			}
+			else if (tempNode.getNodeName().trim().equals("autoUpdate"))
+			{
+				if (tempNode.getTextContent().equals("true"))
+					conf.autoUpdate = true;
+				else if (tempNode.getTextContent().equals("false"))
+					conf.autoUpdate = false;
 			}
 		}
 
@@ -171,17 +184,17 @@ public class Configuration extends Observable
 			{
 				throw new RuntimeException("Błąd podczas tworzenia pliku konfiguracji.", ex);
 			}
+		}
 
-			try
-			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(file));
-				out.write(data);
-				out.close();
-			}
-			catch(IOException ex)
-			{
-				throw new RuntimeException("Błąd podczas zapisywania pliku konfiguracji.", ex);
-			}
+		try
+		{
+			BufferedWriter out = new BufferedWriter(new FileWriter(file));
+			out.write(data);
+			out.close();
+		}
+		catch(IOException ex)
+		{
+			throw new RuntimeException("Błąd podczas zapisywania pliku konfiguracji.", ex);
 		}
 	}
 
@@ -246,6 +259,32 @@ public class Configuration extends Observable
 		if (set != ignoreAutoResponses)
 			setChanged();
 		ignoreAutoResponses = set;
+	}
+
+	private boolean autoUpdate = true;
+
+	/**
+	 * Czy moduł automatycznych aktualizacji ma być włączony.
+	 *
+	 * @return <code>true</code>, jeżeli moduł automatycznych aktualizacji jest
+	 * włączony
+	 */
+	public boolean getAutoUpdate()
+	{
+		return autoUpdate;
+	}
+
+	/**
+	 * Włącza, lub wyłącza moduł automatycznych aktualizacji.
+	 *
+	 * @param enabled czy włączyć moduł automatycznych aktualizacji
+	 * @see #getAutoUpdate()
+	 */
+	public void setAutoUpdate(boolean enabled)
+	{
+		if (enabled != autoUpdate)
+			setChanged();
+		autoUpdate = enabled;
 	}
 
 	// </editor-fold>

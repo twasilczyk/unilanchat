@@ -25,6 +25,8 @@ public class MainView extends JFrame implements Observer
 
 	protected TrayIcon trayIcon = null;
 	protected boolean trayModeShowUnread = false;
+	protected static Image trayIconImageReady = null;
+	protected static Image trayIconImageUnread = null;
 
 	private final MainViewListener mainViewListener =
 		new MainViewListener();
@@ -61,7 +63,7 @@ public class MainView extends JFrame implements Observer
 		setMinimumSize(new Dimension(100, 200));
 		setPreferredSize(new Dimension(250, 450));
 		setLayout(new BorderLayout());
-		setIconImage(ResourceManager.getIcon("icon.png").getImage());
+		setIconImage(ResourceManager.getIcon("icons/32.png").getImage());
 
 		addWindowListener(mainViewListener);
 
@@ -216,9 +218,9 @@ public class MainView extends JFrame implements Observer
 			trayModeShowUnread = getChatRoomsView().isAnyUnread();
 
 			if (trayModeShowUnread)
-				trayIcon.setImage(ResourceManager.getImage("iconUnread.png"));
+				trayIcon.setImage(trayIconImageUnread);
 			else
-				trayIcon.setImage(ResourceManager.getImage("icon.png"));
+				trayIcon.setImage(trayIconImageReady);
 		}
 	}
 
@@ -280,14 +282,44 @@ public class MainView extends JFrame implements Observer
 
 		@Override public void run()
 		{
+			SystemTray tray;
+
 			//TODO: jakoś trzeba zareagować - jest to podstawowa funkcja tego
 			//widoku
 			if (!SystemTray.isSupported())
 				return;
+			try
+			{
+				tray = SystemTray.getSystemTray();
+			}
+			catch (Throwable e)
+			{
+				return;
+			}
 
-			trayIcon = new TrayIcon(ResourceManager.getImage("icon.png"),
-					"UniLANChat");
-			trayIcon.setImageAutoSize(true);
+			if (trayIconImageReady == null)
+			{
+				int traySize = Math.min(tray.getTrayIconSize().width,
+					tray.getTrayIconSize().height);
+				if (traySize < 22)
+				{
+					trayIconImageReady = ResourceManager.getImage("icons/16.png");
+					trayIconImageUnread = ResourceManager.getImage("icons/message-16.png");
+				}
+				else if (traySize < 32)
+				{
+					trayIconImageReady = ResourceManager.getImage("icons/22.png");
+					trayIconImageUnread = ResourceManager.getImage("icons/message-22.png");
+				}
+				else
+				{
+					trayIconImageReady = ResourceManager.getImage("icons/32.png");
+					trayIconImageUnread = ResourceManager.getImage("icons/message-32.png");
+				}
+			}
+
+			trayIcon = new TrayIcon(trayIconImageReady, Main.applicationName);
+			trayIcon.setImageAutoSize(false);
 
 			try
 			{

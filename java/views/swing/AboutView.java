@@ -32,7 +32,7 @@ public class AboutView extends JFrame
 		setMinimumSize(new Dimension(350, 200));
 		setPreferredSize(new Dimension(350, 300));
 		setLayout(new BorderLayout());
-		setIconImage(ResourceManager.getIcon("icon.png").getImage());
+		setIconImage(ResourceManager.getIcon("icons/32.png").getImage());
 
 		wholePanel.add(new TitleBar(), BorderLayout.NORTH);
 
@@ -78,7 +78,7 @@ public class AboutView extends JFrame
 		{
 			setLayout(new BorderLayout(10, 0));
 
-			JImagePanel logo = new JImagePanel(ResourceManager.getImage("icon.png"));
+			JImagePanel logo = new JImagePanel(ResourceManager.getImage("icons/32.png"));
 			logo.setPreferredSize(new Dimension(32, 32));
 			add(logo, BorderLayout.WEST);
 

@@ -3,7 +3,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.1 (pierwsze publiczne wydanie rozwojowe)
- - przygotować jakąś oryginalną ikonkę
+ - wydać wersję 0.1
 
 0.2
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
@@ -38,6 +38,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    trzymać tylko binarkę, a kompilować (wraz z pobieraniem kompilatora z svn)
    jedynie na wyraźne życzenie (dodatkowa sekcja w Makefile)
  - do Makefile dodać sekcję UniLANChat-src.tar.gz
+ - do configure dodać więcej możliwych ścieżek do JDK, sprawdzanie ma obejmować
+   także występowanie javac
+ - wykonać prosty skrypt zastępujący configure + Makefile dla Windows
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

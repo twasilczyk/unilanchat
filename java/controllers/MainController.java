@@ -193,7 +193,8 @@ public class MainController extends SimpleObservable implements Observer
 			X11StartupNotification.notifyStartupComplete();
 		setStatus(Contact.UserStatus.ONLINE);
 
-		updater.checkForUpdates();
+		if (Configuration.getInstance().getAutoUpdate())
+			updater.checkForUpdates();
 	}
 
 	public void update(Observable o, Object arg)
