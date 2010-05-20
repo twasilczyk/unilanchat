@@ -109,3 +109,11 @@ Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefi
    from UniLANChat.jar". W takim przypadku należy zwrócić uwagę, czy plik
    manifest.mf (wygenerowany przez środowisko) został zastąpiony tym
    dostarczonym razem z aplikacją.
+
+################################################################################
+## WYDANE WERSJE
+################################################################################
+
+ * 0.1 (2010-05-20)
+   Pierwsze publiczne wydanie rozwojowe. Program obsługuje częściowo protokół
+   ipmsg, m.in. bez możliwości szyfrowania i przesyłania plików.

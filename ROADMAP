@@ -2,9 +2,6 @@ Plany rozwoju programu UniLANChat. Niniejszy dokument jest luźnym planem, podan
 tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmienić.
 
 
-0.1 (pierwsze publiczne wydanie rozwojowe)
- - wydać wersję 0.1
-
 0.2
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
    czyli wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu
