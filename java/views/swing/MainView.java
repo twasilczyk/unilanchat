@@ -316,6 +316,12 @@ public class MainView extends JFrame implements Observer
 					trayIconImageReady = ResourceManager.getImage("icons/32.png");
 					trayIconImageUnread = ResourceManager.getImage("icons/message-32.png");
 				}
+
+
+				trayIconImageReady = RemoveAlphaImageFilter.removeAlphaChannel(
+					trayIconImageReady, 0xFFDDDDDD);
+				trayIconImageUnread = RemoveAlphaImageFilter.removeAlphaChannel(
+					trayIconImageUnread, 0xFFDDDDDD);
 			}
 
 			trayIcon = new TrayIcon(trayIconImageReady, Main.applicationName);
