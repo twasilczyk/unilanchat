@@ -6,31 +6,15 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
    czyli wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu
    któregoś z interfejsów (powinny być śledzone w IP4Utilities)
- - tylko jedna instancja programu
  - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
  - ipmsg: transfer plików
- - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
-   liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
- - ipmsg: szyfrowanie (wymaga znajomych na liście kontaktów), dodawanie kluczy
-   publicznych do znajomych kontaktów
- - automatyczne uruchamianie wraz ze startem systemu
  - logowanie przebiegu rozmów, podgląd logów
- - lepszy UI dla przycisku wybierania statusu (podobny do tego w komunikatorze
-   Pidgin)
- - ipmsg: wykrywanie, lub ustawianie dla konkretnych kontaktów innych znaków
-   cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
-   UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania
-   cytatów
- - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
- - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
- - obsłużyć wersję protokołu iptux ("1_iptux_0"), ten klient może wysyłać
-   pakiety COMM_BR_ISGETLIST2
  - przenieść kompilator launchera poza folder trunk (np. do tools), w źródłach
    trzymać tylko binarkę, a kompilować (wraz z pobieraniem kompilatora z svn)
    jedynie na wyraźne życzenie (dodatkowa sekcja w Makefile)
@@ -38,6 +22,27 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - do configure dodać więcej możliwych ścieżek do JDK, sprawdzanie ma obejmować
    także występowanie javac
  - wykonać prosty skrypt zastępujący configure + Makefile dla Windows
+ - wyświetlanie bieżącego nicka w widocznym miejscu
+
+0.3
+ - tylko jedna instancja programu
+ - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
+   liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
+ - ipmsg: szyfrowanie (wymaga znajomych na liście kontaktów), dodawanie kluczy
+   publicznych do znajomych kontaktów
+ - automatyczne uruchamianie wraz ze startem systemu
+ - lepszy UI dla przycisku wybierania statusu (podobny do tego w komunikatorze
+   Pidgin)
+ - ipmsg: wykrywanie, lub ustawianie dla konkretnych kontaktów innych znaków
+   cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
+   UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania
+   cytatów
+ - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
+ - obsłużyć wersję protokołu iptux ("1_iptux_0"), ten klient może wysyłać
+   pakiety COMM_BR_ISGETLIST2
+ - przycisk zamykania zakładek rozmów
+ - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
+   inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)
@@ -78,7 +83,6 @@ dalsze wydania
  - komunikacja głosowa
  - tablica ogłoszeń, na której może publikować każdy użytkownik, a wyświetla
    się (i aktualizuje?) na początku pokoju publicznego
- - bug: TrayIcon nie wspiera przezroczystości na KDE, nie używa swingowego menu,
-   długo się uruchamia
+ - bug: TrayIcon nie używa swingowego menu
  - protokół korzystający z samej warstwy łącza danych (MAC), pozwalający na
    komunikację bez skonfigurowanej warstwy sieciowej (IP)
