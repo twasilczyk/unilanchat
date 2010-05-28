@@ -64,21 +64,23 @@ public class Configuration extends Observable
 
 		Element nickEl = serializationDoc.createElement("nick");
 		configurationEl.appendChild(nickEl);
-
 		Text nickVal = serializationDoc.createTextNode(getNick());
 		nickEl.appendChild(nickVal);
 
 		Element ignoreAutoResponsesEl = serializationDoc.createElement("ignoreAutoResponses");
 		configurationEl.appendChild(ignoreAutoResponsesEl);
-
 		Text ignoreAutoResponsesVal = serializationDoc.createTextNode(ignoreAutoResponses ? "true" : "false");
 		ignoreAutoResponsesEl.appendChild(ignoreAutoResponsesVal);
 
 		Element autoUpdateEl = serializationDoc.createElement("autoUpdate");
 		configurationEl.appendChild(autoUpdateEl);
-
 		Text autoUpdateVal = serializationDoc.createTextNode(autoUpdate ? "true" : "false");
 		autoUpdateEl.appendChild(autoUpdateVal);
+
+		Element debugModeEl = serializationDoc.createElement("debugMode");
+		configurationEl.appendChild(debugModeEl);
+		Text debugModeVal = serializationDoc.createTextNode(debugMode ? "true" : "false");
+		debugModeEl.appendChild(debugModeVal);
 
 		return configurationEl;
 	}
@@ -116,6 +118,13 @@ public class Configuration extends Observable
 					conf.autoUpdate = true;
 				else if (tempNode.getTextContent().equals("false"))
 					conf.autoUpdate = false;
+			}
+			else if (tempNode.getNodeName().trim().equals("debugMode"))
+			{
+				if (tempNode.getTextContent().equals("true"))
+					conf.debugMode = true;
+				else if (tempNode.getTextContent().equals("false"))
+					conf.debugMode = false;
 			}
 		}
 
@@ -285,6 +294,31 @@ public class Configuration extends Observable
 		if (enabled != autoUpdate)
 			setChanged();
 		autoUpdate = enabled;
+	}
+
+	private boolean debugMode = false;
+
+	/**
+	 * Czy tryb debug ma być włączony.
+	 *
+	 * @return <code>true</code>, jeżeli tryb debug jest włączony
+	 */
+	public boolean getDebugMode()
+	{
+		return debugMode;
+	}
+
+	/**
+	 * Włącza, lub wyłącza tryb debug.
+	 *
+	 * @param enabled czy włączyć tryb debug
+	 * @see #getDebugMode()
+	 */
+	public void setDebugMode(boolean enabled)
+	{
+		if (enabled != debugMode)
+			setChanged();
+		debugMode = enabled;
 	}
 
 	// </editor-fold>

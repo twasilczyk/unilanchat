@@ -3,9 +3,9 @@ package protocols.ipmsg;
 import java.net.*;
 import java.util.*;
 
-import main.Configuration;
+import main.*;
 import protocols.*;
-import net.IP4Utilities;
+import net.InterfaceInfoProvider;
 
 /**
  * Implementacja protokołu IPMsg.
@@ -118,7 +118,7 @@ public class IpmsgAccount extends Account
 
 		if (packet.ip == null) // wysyłamy na broadcast
 		{
-			for (Inet4Address bcaddr : IP4Utilities.getBroadcastAdresses())
+			for (Inet4Address bcaddr : InterfaceInfoProvider.getBroadcastAdresses())
 			{
 				udpPacket.setAddress(bcaddr);
 				connectionThread.send(udpPacket);
@@ -128,7 +128,7 @@ public class IpmsgAccount extends Account
 		{
 			try
 			{
-				udpPacket.setAddress(IP4Utilities.getIPAddress(packet.ip));
+				udpPacket.setAddress(InterfaceInfoProvider.getIPAddress(packet.ip));
 			}
 			catch (UnknownHostException e)
 			{
@@ -150,7 +150,7 @@ public class IpmsgAccount extends Account
 	{
 		if (packet == null)
 			throw new NullPointerException();
-		if (IP4Utilities.isLocalAdress(packet.ip) ||
+		if (InterfaceInfoProvider.isLocalAdress(packet.ip) ||
 			userStatus == Contact.UserStatus.OFFLINE ||
 			packet.getCommand() == IpmsgPacket.COMM_NOOP)
 			return;
@@ -292,6 +292,21 @@ public class IpmsgAccount extends Account
 			}
 		}
 		return online;
+	}
+
+	/**
+	 * Przyspieszenie odświeżenia listy kontaktów. Nie powinno się korzystać
+	 * z tej metody do innych celów, niż debugowanie.
+	 */
+	public void speedupContactsRefresh()
+	{
+		Main.backgroundProcessing.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				contactsThread.speedupRefresh();
+			}
+		});
 	}
 
 		// </editor-fold>

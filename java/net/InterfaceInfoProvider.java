@@ -2,19 +2,25 @@ package net;
 
 import java.net.*;
 import java.util.*;
-import tools.CachedDataProvider;
+
+import tools.*;
 
 /**
- * Klasa pomocnicza dla protokołu IPv4.
+ * Klasa dostarczająca informacji na temat interfejsów sieciowych.
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public abstract class IP4Utilities
+public abstract class InterfaceInfoProvider
 {
-	private IP4Utilities() { }
+	private InterfaceInfoProvider() { }
 
 	private final static IPAddressesProvider localHostNameProvider =
 		new IPAddressesProvider();
+
+	/**
+	 * Obiekt informujący obserwatorów o zmianach w interfejsach.
+	 */
+	public final static SimpleObservable interfacesObserver = new SimpleObservable();
 
 	/**
 	 * Lista adresów interfejsów w komputerze (cache).
@@ -115,8 +121,13 @@ public abstract class IP4Utilities
 				}
 			}
 
-			ifaceAdresses = newIfaceAdresses;
-			broadcastAdresses = newBroadcastAdresses;
+			if (!ifaceAdresses.equals(newIfaceAdresses) ||
+				!broadcastAdresses.equals(newBroadcastAdresses))
+			{
+				ifaceAdresses = newIfaceAdresses;
+				broadcastAdresses = newBroadcastAdresses;
+				interfacesObserver.notifyObservers();
+			}
 
 			if (runTime < 60) // pierwsza minuta
 			{

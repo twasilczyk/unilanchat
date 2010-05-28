@@ -1,9 +1,13 @@
 package views.swing;
 
 import java.awt.event.*;
+import java.util.*;
 import javax.swing.*;
 
-import main.Main;
+import main.*;
+import protocols.Account;
+import protocols.ipmsg.IpmsgAccount;
+import tools.ProcessingQueue;
 
 /**
  * Komponent wyświetlający główne menu programu.
@@ -37,8 +41,39 @@ public class MainMenu extends JMenuBar
 				else
 					aboutView.showAbout();
 			}
+			else if (cmd.equals("debug.refreshIpmsg"))
+			{
+				for (Account acc : mainView.getMainController().getAccountsVector())
+					if (acc instanceof IpmsgAccount)
+						((IpmsgAccount)acc).speedupContactsRefresh();
+			}
 			else
 				assert(false);
+		}
+	}
+
+	class ProcessQueueObserver implements Observer
+	{
+		protected final JMenuItem menuItem;
+
+		public ProcessQueueObserver(JMenuItem menuItem)
+		{
+			this.menuItem = menuItem;
+		}
+
+		public void update(final Observable o, Object arg)
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					ProcessingQueue q = (ProcessingQueue)o;
+					menuItem.setText(
+						"Monitor kolejki zadań: " +
+						q.getWaitingTasksCount() +
+						(q.isBusy()?" (zajęty)":" (wolny)"));
+				}
+			});
 		}
 	}
 
@@ -73,5 +108,22 @@ public class MainMenu extends JMenuBar
 		itemAbout.setActionCommand("help.about");
 		itemAbout.addActionListener(mainMenuListener);
 		menuHelp.add(itemAbout);
+
+		if (Configuration.getInstance().getDebugMode())
+		{
+			JMenu menuDebug = new JMenu("Debug");
+			menuDebug.addActionListener(mainMenuListener);
+			this.add(menuDebug);
+
+			JMenuItem itemRefreshIpmsg = new JMenuItem("Odśwież listę kontaktów ipmsg");
+			itemRefreshIpmsg.setActionCommand("debug.refreshIpmsg");
+			itemRefreshIpmsg.addActionListener(mainMenuListener);
+			menuDebug.add(itemRefreshIpmsg);
+
+			JMenuItem itemPQueueMonitor = new JMenuItem("Monitor kolejki zadań: nieznany");
+			menuDebug.add(itemPQueueMonitor);
+			Main.backgroundProcessing.addObserver(
+				new ProcessQueueObserver(itemPQueueMonitor));
+		}
 	}
 }

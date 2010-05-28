@@ -2,6 +2,8 @@ package protocols.ipmsg;
 
 import java.util.*;
 
+import main.Main;
+import net.InterfaceInfoProvider;
 import protocols.*;
 
 /**
@@ -74,6 +76,8 @@ class IpmsgContactsThread extends Thread
 		this.ipmsgAccount = ipmsgAccount;
 		setDaemon(true);
 		start();
+
+		InterfaceInfoProvider.interfacesObserver.addObserver(new InterfacesObserver());
 	}
 
 	@Override public synchronized void run()
@@ -143,6 +147,20 @@ class IpmsgContactsThread extends Thread
 	public synchronized void speedupRefresh()
 	{
 		notifyAll();
+	}
+
+	class InterfacesObserver implements Observer
+	{
+		public void update(Observable o, Object arg)
+		{
+			Main.backgroundProcessing.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					speedupRefresh();
+				}
+			});
+		}
 	}
 
 	/**

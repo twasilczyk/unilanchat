@@ -9,12 +9,17 @@ import java.util.Vector;
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class ProcessingQueue
+public class ProcessingQueue extends SimpleObservable
 {
 	/**
 	 * Kolejka zadań do wykonania.
 	 */
 	protected final Vector<Runnable> taskQueue = new Vector<Runnable>();
+
+	/**
+	 * Czy aktualnie jest wykonywane jakieś zadanie.
+	 */
+	protected boolean busy = false;
 	
 	private final ApplicationProcessingThread procThread =
 		new ApplicationProcessingThread();
@@ -33,6 +38,23 @@ public class ProcessingQueue
 				taskQueue.notifyAll();
 			taskQueue.add(doRun);
 		}
+		notifyObservers();
+	}
+
+	/**
+	 * @return ilość zadań w kolejce do wykonania
+	 */
+	public int getWaitingTasksCount()
+	{
+		return taskQueue.size();
+	}
+
+	/**
+	 * @return czy aktualnie jest wykonywane jakieś zadanie
+	 */
+	public boolean isBusy()
+	{
+		return busy;
 	}
 
 	private static int applicationProcessingThreadCount = 0;
@@ -69,6 +91,9 @@ public class ProcessingQueue
 				else
 				{
 					Runnable doRun = taskQueue.remove(0);
+					busy = true;
+					notifyObservers();
+					
 					try
 					{
 						doRun.run();
@@ -77,6 +102,9 @@ public class ProcessingQueue
 					{
 						ex.printStackTrace();
 					}
+					
+					busy = false;
+					notifyObservers();
 				}
 		}
 	}

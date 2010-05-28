@@ -157,7 +157,6 @@ class IpmsgConnectionThread extends Thread
 			}
 			catch (IOException e)
 			{
-				disconnect();
 				throw new ConnectionLostException();
 			}
 		}

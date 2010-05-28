@@ -3,9 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.2
- - reagowanie na zmiany adresów ip kart, nowe interfejsy, lub usuwanie starych,
-   czyli wywołanie IpmsgContactsThread.speedupRefresh() po zmianie stanu
-   któregoś z interfejsów (powinny być śledzone w IP4Utilities)
  - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
