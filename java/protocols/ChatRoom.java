@@ -6,22 +6,10 @@ import tools.*;
  * Pokój rozmowy - może być to zarówno pokój prywatny (prywatna rozmowa między
  * dwoma osobami), pokój wieloosobowy, lub pokój ogólny.
  *
- * @todo Przemyśleć trochę strukturę pokoi, przede wszystkim metodę zwracającą
- * wszystkich uczestników rozmowy. Wziąć pod uwagę wieloprotokołowość.
- *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class ChatRoom extends SimpleObservable
+public abstract class ChatRoom extends SimpleObservable
 {
-	/**
-	 * Identyfikator pokoju.
-	 *
-	 * Jest on unikalny, w postaci [identyfikator wewnętrzny]@[protokół].
-	 * Pokój główny (np. do wysyłania na broadcast) dla wszystkich protokołów
-	 * posiada pusty ID.
-	 */
-	public final String id;
-
 	/**
 	 * Tytuł pokoju. Może służyć np. do wyświetlania go w nagłówku rozmowy.
 	 */
@@ -34,24 +22,9 @@ public class ChatRoom extends SimpleObservable
 
 	/**
 	 * Główny konstruktor.
-	 *
-	 * @see #getID()
-	 * @param id identyfikator pokoju
 	 */
-	public ChatRoom(String id)
+	public ChatRoom()
 	{
-		this.id = id;
-	}
-
-	/**
-	 * Zwraca identyfikator pokoju.
-	 *
-	 * @see #id
-	 * @return identyfikator pokoju
-	 */
-	public String getID()
-	{
-		return id;
 	}
 
 	/**
@@ -62,8 +35,7 @@ public class ChatRoom extends SimpleObservable
 	 */
 	public String getTitle()
 	{
-		if (title.isEmpty() && id.isEmpty())
-			return "Pokój główny";
+		assert(!title.isEmpty());
 		return title;
 	}
 

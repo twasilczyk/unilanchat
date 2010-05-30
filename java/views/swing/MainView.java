@@ -138,7 +138,8 @@ public class MainView extends JFrame implements Observer
 			String cmd = e.getActionCommand();
 			if (cmd.equals("openMainRoom"))
 				getChatRoomsView().showRoom(
-					mainView.getMainController().getChatController().getMainChatRoom());
+					mainView.getMainController().getChatController().
+					getChatRoomList().getMain());
 			else
 				throw new RuntimeException("Nieznane polecenie: " + cmd);
 		}

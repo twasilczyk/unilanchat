@@ -3,7 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.2
- - spróbować pozbyć się identyfikatorów pokojów na rzecz listy rozmówców
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
@@ -20,6 +19,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    także występowanie javac
  - wykonać prosty skrypt zastępujący configure + Makefile dla Windows
  - wyświetlanie bieżącego nicka w widocznym miejscu
+ - w pokoju głównym, po kliknięciu na nick rozmówcy, otwiera się okno rozmowy
+   prywatnej
 
 0.3
  - tylko jedna instancja programu

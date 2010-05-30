@@ -15,7 +15,12 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	/**
 	 * Opakowywana lista pokoi.
 	 */
-	protected ListenableMap<String, ChatRoom> list = new ListenableMap<String, ChatRoom>();
+	protected ListenableVector<ChatRoom> list = new ListenableVector<ChatRoom>();
+
+	/**
+	 * Pokój główny.
+	 */
+	protected PublicChatRoom mainRoom = null;
 
 	/**
 	 * Zwraca iterator dla danej listy pokoi. Przy każdej iteracji po pokojach
@@ -25,7 +30,7 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 */
 	public Iterator<ChatRoom> iterator()
 	{
-		return list.values().iterator();
+		return list.iterator();
 	}
 
 	/**
@@ -35,7 +40,18 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 */
 	public void add(ChatRoom chatRoom)
 	{
-		list.put(chatRoom.getID(), chatRoom);
+		if (chatRoom instanceof PublicChatRoom)
+		{
+			synchronized(this)
+			{
+				if (mainRoom != null && mainRoom != chatRoom)
+					throw new IllegalArgumentException("Nie można dodać dwóch pokoi publicznych.");
+				mainRoom = (PublicChatRoom)chatRoom;
+				list.add(chatRoom);
+			}
+		}
+		else
+			list.add(chatRoom);
 	}
 
 	/**
@@ -45,56 +61,28 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 */
 	public void remove(ChatRoom chatRoom)
 	{
-		list.remove(chatRoom.getID());
+		if (chatRoom instanceof PublicChatRoom)
+		{
+			synchronized(this)
+			{
+				if (mainRoom == chatRoom)
+					mainRoom = null;
+				list.remove(chatRoom);
+			}
+		}
+		else
+			list.remove(chatRoom);
 	}
 
 	/**
 	 * Sprawdza, czy dany pokój istnieje na liście.
 	 *
-	 * @param id identyfikator sprawdzanego pokoju
-	 * @return <code>true</code>, jeżeli lista zawiera pokój o danym
-	 * identyfikatorze
+	 * @param chatRoom sprawdzany pokój
+	 * @return <code>true</code>, jeżeli pokój jest na liście
 	 */
-	public boolean exists(String id)
+	public boolean contains(ChatRoom chatRoom)
 	{
-		return list.containsKey(id);
-	}
-
-	/**
-	 * Pobiera pokój o danym identyfikatorze z listy. Jeżeli nie istnieje -
-	 * tworzy go.
-	 *
-	 * @param id identyfikator pokoju do pobrania
-	 * @return wybrany pokój rozmów
-	 */
-	public synchronized ChatRoom get(String id)
-	{
-		if (!exists(id))
-		{
-			ChatRoom newRoom = new ChatRoom(id);
-			add(newRoom);
-			return newRoom;
-		}
-		return list.get(id);
-	}
-
-	/**
-	 * Pobiera z listy pokój prywatny, do rozmowy z danym kontaktem. Jeżeli
-	 * pokój nie istnieje - tworzy go.
-	 *
-	 * @param contact kontakt, dla którego ma zostać pobrany pokój
-	 * @return pokój prywatny
-	 */
-	public synchronized PrivateChatRoom get(Contact contact)
-	{
-		String roomID = PrivateChatRoom.getRoomID(contact);
-		if (!exists(roomID))
-		{
-			PrivateChatRoom newRoom = new PrivateChatRoom(contact);
-			add(newRoom);
-			return newRoom;
-		}
-		return (PrivateChatRoom)list.get(roomID); //powinien być właśnie tego typu!
+		return list.contains(chatRoom);
 	}
 
 	/**
@@ -102,9 +90,19 @@ public class ChatRoomList implements Iterable<ChatRoom>
 	 *
 	 * @return główny pokój rozmów
 	 */
-	public ChatRoom getMain()
+	public PublicChatRoom getMain()
 	{
-		return get("");
+		if (mainRoom != null)
+			return mainRoom;
+
+		synchronized(this)
+		{
+			if (mainRoom != null)
+				return mainRoom;
+			PublicChatRoom r = new PublicChatRoom();
+			add(r);
+			return r;
+		}
 	}
 
 	/**

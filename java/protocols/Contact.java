@@ -1,6 +1,6 @@
 package protocols;
 
-import tools.SimpleObservable;
+import tools.*;
 
 /**
  * Kontakt (inny użytkownik) przechowywany na liście kontaktów.
@@ -28,6 +28,27 @@ public abstract class Contact extends SimpleObservable
 		 * Użytkownik jest niedostępny.
 		 */
 		OFFLINE
+	}
+
+	/**
+	 * Konto, z którym powiązany jest kontakt.
+	 */
+	protected final Account account;
+
+	protected final Contact thisContact = this;
+
+	/**
+	 * Pokój prywatny, do rozmów z kontaktem.
+	 */
+	protected PrivateChatRoom privateChatRoom;
+
+	public Contact(Account account)
+	{
+		if (account == null)
+			throw new NullPointerException();
+		this.account = account;
+
+		getAccount().chatRoomList.addSetListener(new ChatRoomListener());
 	}
 
 	/**
@@ -74,6 +95,50 @@ public abstract class Contact extends SimpleObservable
 	 * ustawiony
 	 */
 	public abstract String getTextStatus();
+
+	/**
+	 * Pobiera prywatny pokój do rozmów z tym kontaktem. Jeżeli chcesz
+	 * zagwarantować, że pokój nie zostanie odłączony od tego kontaktu w czasie
+	 * korzystania z niego, musisz założyć synchronizację.
+	 *
+	 * @return pokój prywatny do rozmów z kontaktem
+	 */
+	public PrivateChatRoom getPrivateChatRoom()
+	{
+		PrivateChatRoom room = privateChatRoom;
+		if (room != null)
+			return room;
+		synchronized(this)
+		{
+			privateChatRoom = new PrivateChatRoom(this);
+			getAccount().chatRoomList.add(privateChatRoom);
+			return privateChatRoom;
+		}
+	}
+
+	class ChatRoomListener implements SetListener<ChatRoom>
+	{
+		public void itemAdded(ChatRoom item) {}
+		public void itemUpdated(ChatRoom item) { }
+
+		public void itemRemoved(ChatRoom item)
+		{
+			if (!(item instanceof PrivateChatRoom))
+				return;
+			PrivateChatRoom privRoom = (PrivateChatRoom)item;
+			if (privRoom.getContact() != thisContact)
+				return;
+
+			// nasz pokój został usunięty z listy
+			synchronized(thisContact)
+			{
+				if (privateChatRoom != privRoom)
+					return;
+				assert(!getAccount().chatRoomList.contains(item));
+				privateChatRoom = null;
+			}
+		}
+	}
 
 	/**
 	 * Zamienia listę kontaktów w tekstową listę ich nazw.

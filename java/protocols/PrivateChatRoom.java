@@ -23,21 +23,10 @@ public class PrivateChatRoom extends ChatRoom
 	 */
 	public PrivateChatRoom(Contact contact)
 	{
-		super(getRoomID(contact));
+		super();
 		this.contact = contact;
 		super.setTitle(contact.getName());
 		contact.addObserver(contactObserver);
-	}
-
-	/**
-	 * Pobiera identyfikator pokoju związanego z kontaktem.
-	 *
-	 * @param contact kontakt
-	 * @return identyfikator pokoju
-	 */
-	public static String getRoomID(Contact contact)
-	{
-		return "priv:" + contact.getID();
 	}
 
 	/**

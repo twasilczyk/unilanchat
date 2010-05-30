@@ -56,15 +56,16 @@ class IpmsgMessagePacket
 		this.ipmsgAccount = ipmsgAccount;
 		ChatRoom room = message.getChatRoom();
 
-		if (room.id.isEmpty())
+		if (room instanceof PublicChatRoom)
 		{
-			receivers.addAll(ipmsgAccount.getOnlineContacts()); //TODO: contactList ma być pobierana z chatRoom jako członkowie rozmowy
+			receivers.addAll(ipmsgAccount.getOnlineContacts());
 			packet.setFlag(IpmsgPacket.FLAG_MULTICAST, true); // FLAG_BROADCAST ignoruje flagę FLAG_SENDCHECK
 		}
 		else
 		{
-			assert(room.id.endsWith("@ipmsg"));
 			if (room instanceof PrivateChatRoom)
+				// zakładamy, że dostarczono pokój do rozmowy prywatnej z innym
+				// użytkownikiem ipmsg
 				receivers.add((IpmsgContact)((PrivateChatRoom)room).getContact());
 			else
 				throw new UnsupportedOperationException("Aktualnie nie są obsługiwane pokoje multicast");

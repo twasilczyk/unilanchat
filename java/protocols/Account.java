@@ -12,6 +12,28 @@ import tools.SimpleObservable;
 public abstract class Account extends SimpleObservable
 {
 	/**
+	 * Lista kontaktów, z której ma korzystać konto.
+	 */
+	protected final ContactList contactList;
+
+	/**
+	 * Lista pokoi, z której ma korzystać konto.
+	 */
+	public final ChatRoomList chatRoomList;
+
+	/**
+	 * Główny konstruktor.
+	 *
+	 * @param contactList lista kontaktów, z której ma korzystać konto
+	 * @param chatRoomList lista pokoi, z której ma korzystać konto
+	 */
+	public Account(ContactList contactList, ChatRoomList chatRoomList)
+	{
+		this.contactList = contactList;
+		this.chatRoomList = chatRoomList;
+	}
+
+	/**
 	 * Ustawia status dostępności konta.
 	 *
 	 * @param status nowy status

@@ -51,30 +51,6 @@ public class ChatController
 	}
 
 	/**
-	 * Zwraca (ewentualnie tworzy) pokój prywatny do rozmowy z danym kontaktem.
-	 *
-	 * @param contact kontakt, dla którego chcemy uzyskać pokój
-	 * @return prywatny pokój rozmów
-	 */
-	public ChatRoom getPrivateChatRoom(Contact contact)
-	{
-		if (contact == null)
-			throw new NullPointerException();
-		return chatRoomList.get(contact);
-	}
-
-	/**
-	 * Zwraca główny pokój rozmów, do komunikacji z wszystkimi kontaktami ze
-	 * wszystkich protokołów, na kanale publicznym.
-	 *
-	 * @return publiczny pokój rozmów
-	 */
-	public ChatRoom getMainChatRoom()
-	{
-		return chatRoomList.getMain();
-	}
-
-	/**
 	 * Próbuje wysłać wiadomość po kolei za pomocą wszystkich kont.
 	 *
 	 * @param room pokój, w którym jest nadawana wiadomość

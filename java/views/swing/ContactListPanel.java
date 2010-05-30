@@ -102,9 +102,9 @@ public class ContactListPanel extends JScrollPane
 			Contact contact = contactListPanelList.locationToItem(e.getPoint());
 			if (contact == null)
 				return;
-			ChatRoom privRoom = mainController.getChatController().getPrivateChatRoom(contact);
-			if (privRoom != null)
-				mainView.getChatRoomsView().showRoom(privRoom);
+			ChatRoom privRoom = contact.getPrivateChatRoom();
+			assert(privRoom != null);
+			mainView.getChatRoomsView().showRoom(privRoom);
 		}
 
 		public void mousePressed(MouseEvent e) { }

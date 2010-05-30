@@ -10,11 +10,6 @@ import protocols.*;
 public class IpmsgContact extends Contact
 {
 	/**
-	 * Konto, z którym powiązany jest kontakt.
-	 */
-	protected final IpmsgAccount account;
-
-	/**
 	 * Adres IPv4 kontaktu.
 	 */
 	protected final String ip;
@@ -47,9 +42,9 @@ public class IpmsgContact extends Contact
 	 */
 	public IpmsgContact(IpmsgAccount account, String ip)
 	{
+		super(account);
 		if (account == null || ip == null)
 			throw new NullPointerException();
-		this.account = account;
 		this.ip = ip;
 	}
 
@@ -81,7 +76,7 @@ public class IpmsgContact extends Contact
 
 	public IpmsgAccount getAccount()
 	{
-		return account;
+		return (IpmsgAccount)account;
 	}
 
 	public String getName()

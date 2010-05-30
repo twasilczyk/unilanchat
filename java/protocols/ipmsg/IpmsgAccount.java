@@ -15,16 +15,6 @@ import net.InterfaceInfoProvider;
 public class IpmsgAccount extends Account
 {
 	/**
-	 * Lista kontaktów, z której ma korzystać konto.
-	 */
-	protected final ContactList contactList;
-
-	/**
-	 * Lista pokoi, z której ma korzystać konto.
-	 */
-	public final ChatRoomList chatRoomList;
-
-	/**
 	 * Główny konstruktor.
 	 *
 	 * @param contactList lista kontaktów, z której ma korzystać konto
@@ -32,8 +22,7 @@ public class IpmsgAccount extends Account
 	 */
 	public IpmsgAccount(ContactList contactList, ChatRoomList chatRoomList)
 	{
-		this.contactList = contactList;
-		this.chatRoomList = chatRoomList;
+		super(contactList, chatRoomList);
 	}
 
 	@Override public boolean isGroupsSupported()
@@ -537,7 +526,7 @@ public class IpmsgAccount extends Account
 		if (broadcast)
 			chatRoom = chatRoomList.getMain();
 		else
-			chatRoom = chatRoomList.get(contact);
+			chatRoom = contact.getPrivateChatRoom();
 
 		// wiadomości z załącznikami - obcinanie informacji o załączniku
 		String messageRAWContents;
@@ -581,7 +570,15 @@ public class IpmsgAccount extends Account
 	public boolean postMessage(OutgoingMessage message)
 	{
 		ChatRoom room = message.getChatRoom();
-		if (!room.id.isEmpty() && !room.id.endsWith("@ipmsg"))
+
+		// aktualnie nie obsługujemy pokoi konferencyjnych w tym protokole
+		if (!(room instanceof PublicChatRoom) &&
+			!(room instanceof PrivateChatRoom))
+			return false;
+
+		// użytkownik korzysta z innego protokołu
+		if (room instanceof PrivateChatRoom &&
+			!(((PrivateChatRoom)room).getContact() instanceof IpmsgContact))
 			return false;
 
 		postMessageThread.enqueueMessagePacket(new IpmsgMessagePacket(this, message));
