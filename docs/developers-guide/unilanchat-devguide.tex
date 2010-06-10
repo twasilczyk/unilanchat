@@ -1,0 +1,240 @@
+\documentclass[11pt,leqno]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\usepackage{amsmath,amssymb}
+\usepackage{bbm}
+\usepackage{amsthm}
+
+\setlength{\headheight}{14pt}
+
+\pagestyle{fancy}
+\lhead{UniLANChat}
+\rhead{Podręcznik programisty}
+
+\usepackage[
+pdfborder={0,0,0},
+pdftitle={UniLANChat -- podręcznik programisty},
+pdfauthor={Tomasz Wasilczyk},
+pdfdisplaydoctitle=true
+]{hyperref}
+
+\def\changemargin#1{\list{}{\rightmargin#1\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\makeatletter
+	\renewcommand\@seccntformat[1]{\csname the#1\endcsname.\quad}
+	\renewcommand\numberline[1]{#1.\hskip0.7em}
+	\newcommand\BSLASH{\char`\\}
+\makeatother
+
+\author{Tomasz Wasilczyk, Piotr Gajowiak}
+\title{UniLANChat -- podręcznik programisty}
+
+\begin{document}
+
+\pagenumbering{alph}
+\begin{titlepage}
+\begin{center}
+	\vspace*{6cm}
+	\textsc{\LARGE UniLANChat}\\[0.25cm]
+	\textsc{\Large Podręcznik programisty}\\[1cm]
+	Tomasz Wasilczyk, Piotr Gajowiak
+	\vfill
+	\today
+\end{center}
+\end{titlepage}
+\pagenumbering{arabic}
+
+\tableofcontents
+
+\section{Wstęp}
+UniLANChat to (docelowo) wieloprotokołowy, wieloplatformowy i wielojęzykowy klient czatów p2p.
+Program powstał w celu zastąpienia komunikatora IP Messenger, używanego między innymi w akademikach
+Uniwersytetu Wrocławskiego. Podstawowe założenia:
+\begin{itemize}
+	\item zgodność z protokołem IP Messenger, komunikatory powinny ze sobą współdziałać w ramach tej
+	samej sieci;
+	\item program powinien dobrze działać zarówno pod systemem Windows, jak i Linux -- napisany jest
+	więc w JavaSE;
+	\item ergonomiczny interfejs użytkownika, wzorowany jest na komunikatorze Pidgin;
+	\item udostępniony na otwartej licencji LGPL;
+	\item obsługa wielu języków (w przyszłych wersjach).
+\end{itemize}
+
+Pierwowzór odbiegał od części z powyższych założeń -- interfejs jest w nim jeszcze z czasów
+Windows 3.11, a jego działanie pod systemem Linux pozostawia wiele do życzenia.
+
+\vspace{1cm}
+W miarę możliwości czasowych, być może będą realizowane następujące cele dodatkowe:
+\begin{itemize}
+	\item zgodność z innymi protokołami, np. LanChat, winpopup;
+	\item różne interfejsy użytkownika: graficzny, tekstowy dla konsoli (czyli okienka ASCII) oraz
+	tekstowy dla terminala (np. do obsługi standardowymi strumieniami);
+	\item protokół automatycznego routingu: sieć p2p sama mogła by dbać, aby różni klienci,
+	którzy nie posiadają bezpośredniego połączenia, mogli ze sobą rozmawiać (per proxy, przez innych
+	użytkowników sieci);
+	\item komunikacja głosowa;
+	\item całkowicie zdecentralizowana sieć wymiany plików p2p.
+\end{itemize}
+
+\subsection{Autorzy}
+
+Autorzy programu:
+\begin{itemize}
+	\item Tomasz Wasilczyk (\href{http://www.wasilczyk.pl}{www.wasilczyk.pl}),
+	\item Piotr Gajowiak.
+\end{itemize}
+
+Strona projektu: \href{http://unilanchat.googlecode.com}{unilanchat.googlecode.com}
+
+Pierwsze wersje programu powstały w ramach projektu licencjackiego, prowadzonego na Instytucie
+Informatyki Uniwersytetu Wrocławskiego (\href{http://www.ii.uni.wroc.pl}{www.ii.uni.wroc.pl}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Ogólna dokumentacja programistyczna}
+
+Dokumentacja kodu źródłowego znajduje się w oddzielnym dokumencie, wygenerowanym narzędziem javadoc.
+
+\subsection{Numeracja wersji}
+
+Wersje programu są numerowane według schematu:
+\[
+<major>.<minor>[.<release>][ (nightly)]
+\]
+gdzie:
+\begin{itemize}
+	\item \textbf{major} -- główny numer wersji programu, związany z bardzo znaczącymi zmianami.
+	Zaczyna się od 0 (wersja testowa), następne są wersjami przeznaczonymi dla użytkowników
+	końcowych;
+	\item \textbf{minor} -- kolejne wydania programu, wprowadzają nowe funkcje, lub znaczne
+	poprawki błędów. Numeracja może być wielocyfrowa, zaczyna się od liczby
+	1 w przypadku gałęzi 0.x oraz od 0 w przypadku kolejnych;
+	\item \textbf{release} -- drobne poprawki, które nie zostały uwzględnione w wydaniu minor,
+	ale wymagające szybkiej naprawy, np. poprawki bezpieczeństwa, lub błędów
+	uniemożliwiających korzystanie z programu. Wersja 0 nie jest dodawana
+	do ciągu oznaczającego pełny numer wersji;
+	\item \textbf{nightly} -- kompilacja zrzutu z svn. Jest to wersja kandydująca do tej bez
+	oznaczenia nightly, zazwyczaj do wydania wersji finalnej się znacznie
+	zmienia. Nie jest przeznaczona dla użytkowników końcowych, ani betatesterów.
+\end{itemize}
+
+\subsection{Zasady formatowania}
+\begin{itemize}
+	\item wcięcia tabulacjami;
+	\item pusta linia na końcu pliku, bez białych znaków na końcach linii (również pustych);
+	\item klamry otwierające i zamykające w nowej linii, w tej samej kolumnie co blok
+	nadrzędny, blok podrzędny wcięty o jedną tabulację;
+	\item komentarze javadoc:
+	\begin{itemize}
+		\item opis metody z dużej litery, zakończony kropką;
+		\item opisy parametrów i zwracanych wartości z małej litery, bez kropki na końcu;
+		\item deklaracje zwracanych wartości boolean:
+		\texttt{@return <code>true</code>, jeżeli (...)};
+	\end{itemize}
+	\item importowane paczki w dwóch oddzielonych pustą linią sekcjach: java[x] oraz reszta.
+\end{itemize}
+
+\subsection{Struktura aplikacji}
+
+UniLANChat składa się z następujących komponentów:
+\begin{itemize}
+	\item program działający w maszynie wirtualnej Javy, którego kod źródłowy znajduje się
+	w katalogu \texttt{java};
+	\item biblioteki JNI, wykorzystywane przez powyższy program, których kod źródłowy jest
+	w katalogu \texttt{jni}. Aby uprościć proces kompilacji projektu (oraz zmniejszyć wymagane
+	zależności), te biblioteki są dostarczane w postaci binarnej (dla wszystkich obsługiwanych
+	platform) z możliwością ich rekompilacji;
+	\item natywnych programów startowych (znajdujących się w katalogu \texttt{launcher}) dla
+	systemów Windows oraz Linux. Pierwszy z nich jest generowany programem
+	launch4j (\href{http://launch4j.sourceforge.net}{launch4j.sourceforge.net}), drugi jest skryptem w bashu.
+\end{itemize}
+
+\subsection{Przepływ danych}
+
+W programie wykorzystano wzorzec MVC, w związku z czym\footnote{w Internecie krąży wiele
+sprzecznych interpretacji tego wzorca -- aby uniknąć nieporozumień, zostanie to tutaj uściślone}:
+\begin{itemize}
+	\item \textbf{model} przechowuje pełne dane na temat implementowanych rozwiązań, np. treść
+	wiadomości, jej autora, datę odebrania. Nie ma jednak możliwości bezpośredniego oddziaływania
+	na widok, ani kontroler (chyba, że tamte go obserwują);
+	\item \textbf{widok} służy do wyświetlania danych z modelu oraz wywoływania odpowiednich metod
+	kontrolera, w celu operowania na danych. Widok nie powinien modyfikować bezpośrednio modelu;
+	\item \textbf{kontroler} odpowiada za wykonywanie akcji zleconych przez widok, a także
+	przechowywanie wygenerowanych obiektów z modelu (czyli np. listy użytkowników, listy pokoi
+	rozmów). Kontroler nie może bezpośrednio modyfikować widoku, ale może na niego oddziaływać
+	przez wzorzez obserwatora.
+\end{itemize}
+
+Wzorzec obserwatora pozwala na przekazywanie informacji do obiektów, nad którymi obserwowany
+obiekt nie ma kontroli. Np. model kontaktu (osoby na liście kontaktów) sam w sobie nie może
+modyfikować widoku listy kontaktów, ale jest przez nią obserwowany\footnote{w rzeczywistości model kontaktu
+jest obserwowany przez model listy kontaktów, a ta dopiero przez widok listy kontaktów}. Wtedy
+w przypadku jego zmiany (np. zmiana statusu dostępności) wysyła o tym powiadomienie wszystkim
+obserwatorom, a więc także wspomnianemu widokowi.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Protokół: IP Messenger}
+
+Protokół jest bezpołączeniowy, opiera się o rozgłaszanie swojej obecności poprzez broadcast, za
+pomocą pakietów UDP. Wykorzystuje opcjonalne szyfrowanie, transfer plików (oparty o TCP), pozwala na
+użycie opcjonalnego serwera pośredniczącego.
+
+Strona projektu: \href{http://ipmsg.org}{ipmsg.org}.
+
+Domyślnie wykorzystywanym portem (zarówno TCP, jak i UDP) jest 2425 -- aby zachować możliwość
+pełnej komunikacji, należy mieć w firewallu otworzone je także na połączenia przychodzące.
+
+\subsection{Pakiety UDP}
+
+Pakiety UDP są przesyłane w następującym formacie (jako czysty tekst):
+\begin{verbatim}
+	<wersja protokołu>:<numer pakietu>:<login nadawcy>:<host nadawcy>:
+	<polecenie i flagi>:<dane>\0
+\end{verbatim}
+gdzie:
+\begin{itemize}
+	\item \textbf{wersja protokołu} -- ipmsg korzysta tylko z wartości \texttt{1}, a implementacja
+	iptux -- \texttt{1\_iptux\_0};
+	\item \textbf{numer pakietu} (w formacie dziesiętnym) -- unikalny (w skali każdego rozmówcy, z którym wymieniamy pakiety)
+	identyfikator pakietu, dzięki któremu można realizować m.in. kontrolę dostarczania wiadomości;
+	\item \textbf{login nadawcy} -- w oryginalnej implementacji jest to login zalogowanego
+	użytkownika w systemie nadawcy. W implementacji UniLANChat jest to po prostu jego nick (nie
+	chcemy zdradzać wspomnianej nazwy użytkownika);
+	\item \textbf{host nadawcy} -- nazwa hostu nadawcy;
+	\item \textbf{polecenie i flagi} (w formacie dziesiętnym) -- przechowuje zarówno identyfikator polecenia, jak i jego
+	flagi. Aby się do nich odwołać, należy wykonać operacje bitową AND z wartościami:
+	\begin{itemize}
+		\item \texttt{0x000000FF} -- identyfikator polecenia (opisane w klasie \texttt{IpmsgPacket},
+		w pakiecie \texttt{protocols.ipmsg});
+		\item \texttt{0xFFFFFF00} -- flagi bitowe, wykorzystywane zależnie od polecenia (opisane j/w);
+	\end{itemize}
+	\item \textbf{dane} zależne od konkretnego identyfikatora polecenia (np. treść wiadomości,
+	dane n/t klucza itp.), mogą zawierać kolejne separatory (dwukropki);
+	\item \texttt{\BSLASH0} -- znak null.
+\end{itemize}
+
+\subsubsection{\texttt{NOOP} -- pusty pakiet}
+
+Pusty pakiet, nie udało nam się odkryć jego zastosowania. Nie obsługuje żadnych flag, ani niczego
+w sekcji danych.
+
+\subsubsection{reszta pakietów}
+
+TODO
+
+\subsection{Nagłówki strumieni TCP}
+
+TODO
+
+\subsection{Scenariusze komunikacji}
+
+TODO
+
+\end{document}

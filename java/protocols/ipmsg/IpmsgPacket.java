@@ -10,7 +10,7 @@ import net.NameService;
  *
  * @author Tomasz Wasilczyk (www.wasilczyk.pl)
  */
-public class IpmsgPacket
+class IpmsgPacket
 {
 	/**
 	 * Kodowanie, w którym przesyłane są wiadomości.
