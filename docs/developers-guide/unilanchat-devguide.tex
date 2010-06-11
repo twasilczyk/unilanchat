@@ -18,7 +18,7 @@
 
 \usepackage[
 pdfborder={0,0,0},
-pdftitle={UniLANChat -- podręcznik programisty},
+pdftitle={UniLANChat - podrecznik programisty},
 pdfauthor={Tomasz Wasilczyk},
 pdfdisplaydoctitle=true
 ]{hyperref}
@@ -53,7 +53,8 @@ pdfdisplaydoctitle=true
 \tableofcontents
 
 \section{Wstęp}
-UniLANChat to (docelowo) wieloprotokołowy, wieloplatformowy i wielojęzykowy klient czatów p2p.
+UniLANChat to (docelowo) wieloprotokołowy, wieloplatformowy i wielojęzykowy klient
+czatów p2p\footnote{patrz: \nameref{sec:dictionary}}.
 Program powstał w celu zastąpienia komunikatora IP Messenger, używanego między innymi w akademikach
 Uniwersytetu Wrocławskiego. Podstawowe założenia:
 \begin{itemize}
@@ -146,16 +147,16 @@ UniLANChat składa się z następujących komponentów:
 \begin{itemize}
 	\item program działający w maszynie wirtualnej Javy, którego kod źródłowy znajduje się
 	w katalogu \texttt{java};
-	\item biblioteki JNI, wykorzystywane przez powyższy program, których kod źródłowy jest
-	w katalogu \texttt{jni}. Aby uprościć proces kompilacji projektu (oraz zmniejszyć wymagane
-	zależności), te biblioteki są dostarczane w postaci binarnej (dla wszystkich obsługiwanych
-	platform) z możliwością ich rekompilacji;
+	\item biblioteki JNI\footnote{patrz: \nameref{sec:dictionary}}, wykorzystywane przez
+	powyższy program, których kod źródłowy jest w katalogu \texttt{jni}. Aby uprościć proces
+	kompilacji projektu (oraz zmniejszyć wymagane zależności), te biblioteki są dostarczane
+	w postaci binarnej (dla wszystkich obsługiwanych platform) z możliwością ich rekompilacji;
 	\item natywnych programów startowych (znajdujących się w katalogu \texttt{launcher}) dla
 	systemów Windows oraz Linux. Pierwszy z nich jest generowany programem
 	launch4j (\href{http://launch4j.sourceforge.net}{launch4j.sourceforge.net}), drugi jest skryptem w bashu.
 \end{itemize}
 
-\subsection{Przepływ danych}
+\subsection{Zarys przepływu danych}
 
 W programie wykorzystano wzorzec MVC, w związku z czym\footnote{w Internecie krąży wiele
 sprzecznych interpretacji tego wzorca -- aby uniknąć nieporozumień, zostanie to tutaj uściślone}:
@@ -182,9 +183,10 @@ obserwatorom, a więc także wspomnianemu widokowi.
 
 \section{Protokół: IP Messenger}
 
-Protokół jest bezpołączeniowy, opiera się o rozgłaszanie swojej obecności poprzez broadcast, za
-pomocą pakietów UDP. Wykorzystuje opcjonalne szyfrowanie, transfer plików (oparty o TCP), pozwala na
-użycie opcjonalnego serwera pośredniczącego.
+Protokół jest bezpołączeniowy, opiera się o rozgłaszanie swojej obecności poprzez
+broadcast\footnote{patrz: \nameref{sec:dictionary}}, za pomocą pakietów UDP. Wykorzystuje
+opcjonalne szyfrowanie, transfer plików (oparty o TCP), pozwala na użycie opcjonalnego serwera
+pośredniczącego.
 
 Strona projektu: \href{http://ipmsg.org}{ipmsg.org}.
 
@@ -199,42 +201,144 @@ Pakiety UDP są przesyłane w następującym formacie (jako czysty tekst):
 	<polecenie i flagi>:<dane>\0
 \end{verbatim}
 gdzie:
-\begin{itemize}
-	\item \textbf{wersja protokołu} -- ipmsg korzysta tylko z wartości \texttt{1}, a implementacja
+\begin{description}
+	\item[wersja protokołu] -- ipmsg korzysta tylko z wartości \texttt{1}, a implementacja
 	iptux -- \texttt{1\_iptux\_0};
-	\item \textbf{numer pakietu} (w formacie dziesiętnym) -- unikalny (w skali każdego rozmówcy, z którym wymieniamy pakiety)
-	identyfikator pakietu, dzięki któremu można realizować m.in. kontrolę dostarczania wiadomości;
-	\item \textbf{login nadawcy} -- w oryginalnej implementacji jest to login zalogowanego
+	\item[numer pakietu] (w formacie dziesiętnym) -- unikalny (w skali każdego rozmówcy, z którym
+	wymieniamy pakiety) identyfikator pakietu, dzięki któremu można realizować m.in. kontrolę
+	dostarczania wiadomości. W oryginalnym kliencie jest inicjowany wartością
+	unix timestamp\footnote{patrz: \nameref{sec:dictionary}}, w UniLANChat losową;
+	\item[login nadawcy] -- w oryginalnej implementacji jest to login zalogowanego
 	użytkownika w systemie nadawcy. W implementacji UniLANChat jest to po prostu jego nick (nie
 	chcemy zdradzać wspomnianej nazwy użytkownika);
-	\item \textbf{host nadawcy} -- nazwa hostu nadawcy;
-	\item \textbf{polecenie i flagi} (w formacie dziesiętnym) -- przechowuje zarówno identyfikator polecenia, jak i jego
+	\item[host nadawcy] -- nazwa hostu nadawcy;
+	\item[polecenie i flagi] (w formacie dziesiętnym) -- przechowuje zarówno identyfikator polecenia, jak i jego
 	flagi. Aby się do nich odwołać, należy wykonać operacje bitową AND z wartościami:
 	\begin{itemize}
 		\item \texttt{0x000000FF} -- identyfikator polecenia (opisane w klasie \texttt{IpmsgPacket},
-		w pakiecie \texttt{protocols.ipmsg});
+		w pakiecie \texttt{protocols.ipmsg}, tam też znajdują się ich kody);
 		\item \texttt{0xFFFFFF00} -- flagi bitowe, wykorzystywane zależnie od polecenia (opisane j/w);
 	\end{itemize}
-	\item \textbf{dane} zależne od konkretnego identyfikatora polecenia (np. treść wiadomości,
+	\item[dane] zależne od konkretnego identyfikatora polecenia (np. treść wiadomości,
 	dane n/t klucza itp.), mogą zawierać kolejne separatory (dwukropki);
-	\item \texttt{\BSLASH0} -- znak null.
+	\item[\textbackslash0] -- znak null.
+\end{description}
+
+\subsubsection{\textnormal{\texttt{NOOP}} -- pusty pakiet}
+
+Pusty pakiet, nie udało nam się odkryć jego zastosowania. Nie obsługuje żadnych flag, ani sekcji
+danych.
+
+%%% Powiadamianie o obecności %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{\textnormal{\texttt{ENTRY}} -- powiadomienie o obecności}
+
+Rozpoczęcie sesji, lub odświeżenie listy. Może być wysyłany zarówno na adres broadcast (aby
+powiadomić wszystkich o swojej obecności), jak i pojedyńcze adresy (aby sprawdzić ich dostępność).
+Odebranie takiego pakietu powoduje dodanie nadawcy do listy kontaktów oraz wysłanie mu odpowiedzi
+\texttt{ANSENTRY}.
+
+Flagi:
+\begin{itemize}
+	\item \texttt{ABSENCE} -- nadawca pakietu ma ustawiony status \textit{zaraz wracam};
+	\item \texttt{SERVER} -- zarezerwowany;
+	\item \texttt{DIALUP} -- oznacza to, że nadawca nie może odbierać wiadomości broadcast.
+	Należy wysyłać do niego takie wiadomości indywidualnie (UniLANChat i tak korzysta
+	z unicastu\footnote{patrz: \nameref{sec:dictionary}}, kiedy tylko się da);
+	\item \texttt{FILEATTACH};
+	\item \texttt{ENCRYPT}.
 \end{itemize}
 
-\subsubsection{\texttt{NOOP} -- pusty pakiet}
+Sekcja danych:
+\begin{verbatim}
+	<nick>[opis]\0<grupa>
+\end{verbatim}
+gdzie:
+\begin{description}
+	\item[nick] -- konfigurowalny alias użytkownika, do wyświetlenia na liście kontaktów;
+	\item[opis] -- status opisowy użytkownika;
+	\item[grupa] -- grupa, do której należy użytkownik (także wybierana przez niego).
+\end{description}
 
-Pusty pakiet, nie udało nam się odkryć jego zastosowania. Nie obsługuje żadnych flag, ani niczego
-w sekcji danych.
+\subsubsection{\textnormal{\texttt{EXIT}} -- powiadomienie o opuszczeniu sieci}
 
-\subsubsection{reszta pakietów}
+Powiadomienie innych użytkowników sieci o jej opuszczeniu przez nadawcę. Po otrzymaniu
+takiego pakietu należy usunąć nadawcę z listy kontaktów. Flagi i sekcja danych jest
+taka sama, jak w \texttt{ENTRY}.
 
-TODO
+\subsubsection{\textnormal{\texttt{ANSENTRY}} -- potwierdzenie obecności}
+
+Potwierdzenie odebrania pakietu \texttt{ENTRY}. Nasłuchiwanie tych pakietów jest
+wykorzystywane do uzupełnienia listy obecności nowych użytkowników.
+Flagi i sekcja danych jest taka sama, jak w \texttt{ENTRY}.
+
+\subsubsection{\textnormal{\texttt{ABSENCE}} -- powiadomienie o zmianie statusu}
+
+Powiadomienie o zmianie statusu. Flagi i sekcja danych jest taka sama, jak w \texttt{ENTRY}.
+Zasadniczą różnicą między \texttt{ABSENCE} a \texttt{ENTRY} jest nie wysyłanie pakietu
+\texttt{ANSENTRY} po otrzymaniu tego pierwszego.
+
+%%% Przesyłanie wiadomości %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{\textnormal{\texttt{SENDMSG}} -- wysłanie wiadomości}
+\subsubsection{\textnormal{\texttt{RECVMSG}} -- potwierdzenie odebrania wiadomości}
+\subsubsection{\textnormal{\texttt{READMSG}} -- potwierdzenie przeczytania wiadomości}
+\subsubsection{\textnormal{\texttt{DELMSG}} -- powiadomienie o odrzuceniu wiadomości}
+\subsubsection{\textnormal{\texttt{ANSREADMSG}} -- potwierdzenie odebrania \textnormal{\texttt{READMSG}} lub \textnormal{\texttt{DELMSG}}}
+
+%%% Wymiana kluczy RSA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{\textnormal{\texttt{GETPUBKEY}} -- zapytanie o klucz publiczny RSA}
+\subsubsection{\textnormal{\texttt{ANSPUBKEY}} -- przesłanie klucza publicznego RSA}
 
 \subsection{Nagłówki strumieni TCP}
 
-TODO
-
 \subsection{Scenariusze komunikacji}
 
-TODO
+\subsubsection{Przyłączenie do sieci, odświeżenie listy kontaktów}
+
+\begin{enumerate}
+	\item Klient wysyła na adres broadcast pakiet \texttt{NOOP} (tylko w oryginalnej
+	implementacji);
+	\item klient wysyła na adres broadcast pakiet \texttt{ENTRY};
+	\item inni klienci, którzy otrzymają powyższy pakiet, odsyłają na adres nadawcy
+	pakiet \texttt{ANSENTRY}.
+\end{enumerate}
+
+UniLANChat dodatkowo, każdemu kontaktowi ze swojej listy, który nie odpowie na ten pakiet,
+wysyła pakiet \texttt{ENTRY} na adres unicast.
+
+\subsubsection{Opuszczenie sieci}
+
+Wykonywane dwukrotnie, aby zwiększyć pewność, że wszyscy otrzymają tą informację:
+\begin{enumerate}
+	\item Klient wysyła na adres broadcast pakiet \texttt{NOOP} (tylko w oryginalnej
+	implementacji);
+	\item klient wysyła na adres broadcast pakiet \texttt{EXIT}.
+\end{enumerate}
+
+\subsubsection{Ustawienie statusu}
+
+UniLANChat wykorzystuje to także do ustawienia statusu opisowego (technicznie -- zmiany nicka).
+\begin{enumerate}
+	\item Klient wysyła na adres broadcast pakiet \texttt{NOOP} (tylko w oryginalnej
+	implementacji);
+	\item klient wysyła na adres broadcast pakiet \texttt{ABSENCE}.
+\end{enumerate}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Słownik pojęć} \label{sec:dictionary}
+
+\begin{description}
+	\item[broadcast]
+	\item[czat p2p]
+	\item[JNI, Java Native Interface]
+	\item[unicast]
+	\item[unix timestamp]
+\end{description}
+
 
 \end{document}
