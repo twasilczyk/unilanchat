@@ -1,5 +1,6 @@
 package protocols;
 
+import java.io.File;
 import java.util.Vector;
 
 /**
@@ -24,6 +25,8 @@ public class OutgoingMessage extends Message
 	 */
 	protected final String selfName = "Ja";
 
+	protected final Vector<File> attachedFiles = new Vector<File>();
+
 	/**
 	 * Autor wiadomości - zawsze wartość {@link #selfName}.
 	 *
@@ -32,6 +35,20 @@ public class OutgoingMessage extends Message
 	public String getAuthor()
 	{
 		return "Ja";
+	}
+
+	public void attachFile(File file)
+	{
+		if (file == null)
+			throw new NullPointerException();
+		if (!file.exists())
+			throw new IllegalArgumentException("Dolaczany plik nie istnieje");
+		attachedFiles.add(file);
+	}
+
+	public Vector<File> getAttachedFiles()
+	{
+		return (Vector<File>)attachedFiles.clone();
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Listy odbiorców">

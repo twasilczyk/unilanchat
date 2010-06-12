@@ -197,6 +197,9 @@ class IpmsgPacket
 	 */
 	public final static long FLAG_DIALUP = 0x00010000;
 
+	/**
+	 * Powiadomienie o dołączeniu pliku do wiadomości.
+	 */
 	public final static long FLAG_FILEATTACH = 0x00200000;
 
 	public final static long FLAG_ENCRYPT = 0x00400000;

@@ -6,6 +6,7 @@ import java.util.*;
 import main.*;
 import protocols.*;
 import net.InterfaceInfoProvider;
+import tools.ListenableVector;
 
 /**
  * Implementacja protokołu IPMsg.
@@ -15,6 +16,11 @@ import net.InterfaceInfoProvider;
 public class IpmsgAccount extends Account
 {
 	/**
+	 * Wątek zajmujący się transferem plików.
+	 */
+	protected IpmsgFileTransferThread fileTransferThread;
+
+	/**
 	 * Główny konstruktor.
 	 *
 	 * @param contactList lista kontaktów, z której ma korzystać konto
@@ -23,11 +29,39 @@ public class IpmsgAccount extends Account
 	public IpmsgAccount(ContactList contactList, ChatRoomList chatRoomList)
 	{
 		super(contactList, chatRoomList);
+		fileTransferThread = new IpmsgFileTransferThread(this);
+		fileTransferThread.start();
 	}
 
 	@Override public boolean isGroupsSupported()
 	{
 		return true;
+	}
+
+	/**
+	 * Zbiór plików oczekujących na wysłanie, bądź odebranie.
+	 */
+	ListenableVector<IpmsgTransferredFile> transferredFiles = new ListenableVector<IpmsgTransferredFile>();
+
+	/**
+	 * Metoda odnajdująca obiekt pliku w zbiorze oczekujących na wysłanie.
+	 *
+	 * @param ip ip kontaktu, do którego należy wysłać plik
+	 * @param header nagłówek pliku, który należy wysłać
+	 * @return obiekt pliku, gdy ten znajduje się w zbiorze,
+	 * <code>null</code> w przeciwnym wypadku
+	 */
+	public IpmsgSentFile getSentFile(String ip, IpmsgFileReceiveRequestHeader header)
+	{
+		for(IpmsgTransferredFile file: transferredFiles)
+		{
+			if (file instanceof IpmsgSentFile &&
+					((IpmsgSentFile)file).contact.ip.equals(ip) &&
+					((IpmsgSentFile)file).packetID == header.packetID &&
+					((IpmsgSentFile)file).fileID == header.fileID)
+				return (IpmsgSentFile)file;
+		}
+		return null;
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Wątek połączenia">
@@ -515,7 +549,7 @@ public class IpmsgAccount extends Account
 			packet.getFlag(IpmsgPacket.FLAG_AUTORET))
 			return;
 
-		Contact contact = contactList.get(packet.ip + "@ipmsg");
+		IpmsgContact contact = (IpmsgContact)contactList.get(packet.ip + "@ipmsg");
 		String authorName;
 		if (contact == null)
 			authorName = "Nieznajomy (" + packet.ip + ")";
@@ -528,14 +562,29 @@ public class IpmsgAccount extends Account
 		else
 			chatRoom = contact.getPrivateChatRoom();
 
-		// wiadomości z załącznikami - obcinanie informacji o załączniku
-		String messageRAWContents;
+		String messageRAWContents, filesAdditionalSection = null;
 		if (packet.data.indexOf('\0') < 0)
 			messageRAWContents = packet.data;
 		else
-			messageRAWContents = packet.data.substring(0, packet.data.indexOf("\0"));
-		StringBuilder messageContents = new StringBuilder();
+		{
+			String[] splittedData = packet.data.split("\0");
 
+			messageRAWContents = splittedData[0];
+			if(splittedData.length > 1) // Byc moze sa kolejne sekcje
+				filesAdditionalSection = splittedData[1];
+		}
+
+		if (filesAdditionalSection != null)
+		{
+			IpmsgFileListSendRequestHeader headerList = IpmsgFileListSendRequestHeader.fromRawData(filesAdditionalSection);
+			for (IpmsgFileSendRequestHeader header: headerList.headerList)
+			{
+				IpmsgReceivedFile file = new IpmsgReceivedFile(header, contact, packet.packetNo);
+				transferredFiles.add(file);
+			}
+		}
+
+		StringBuilder messageContents = new StringBuilder();
 		//TODO: dodać możliwość wyłączenia kasowania linii cytatu (automatyczne wykrywanie, czy gadamy z ipmsg, czy UniLANChat)
 		String[] messageLines = messageRAWContents.split("\n");
 		for (int i = 0; i < messageLines.length; i++)

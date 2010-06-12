@@ -1,5 +1,6 @@
 package protocols.ipmsg;
 
+import java.io.*;
 import java.util.Vector;
 
 import main.Configuration;
@@ -76,6 +77,41 @@ class IpmsgMessagePacket
 		packet.setFlag(IpmsgPacket.FLAG_SENDCHECK, true);
 
 		packet.data = message.getContents();
+
+		Vector<File> attachedFiles = message.getAttachedFiles();
+
+		if (attachedFiles.size() != 0)
+		{
+			Vector<IpmsgSentFile> sentFiles = new Vector<IpmsgSentFile>();
+
+			for (File file: attachedFiles)
+			{
+				try
+				{
+					IpmsgSentFile sentFile = new IpmsgSentFile(file, receivers.elementAt(0), packet.packetNo);
+					sentFiles.add(sentFile);
+				}
+				catch (FileNotFoundException ex)
+				{
+					throw new RuntimeException(ex);
+				}
+			}
+
+			for (IpmsgContact contact: receivers)
+			{
+				for (IpmsgSentFile file: sentFiles)
+				{
+					IpmsgSentFile file2 = (IpmsgSentFile)file.clone();
+					file2.contact = contact;
+					ipmsgAccount.transferredFiles.add(file2);
+				}
+			}
+
+			IpmsgFileListSendRequestHeader fileListHeader = new IpmsgFileListSendRequestHeader(sentFiles);
+
+			packet.setFlag(IpmsgPacket.FLAG_FILEATTACH, true);
+			packet.data += "\0" + fileListHeader.toString(); // TODO: zrobic przez buildera
+		}
 	}
 
 	/**
