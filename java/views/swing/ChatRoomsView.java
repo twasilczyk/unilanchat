@@ -42,6 +42,8 @@ public class ChatRoomsView extends JFrame
 
 		this.add(chatTabs, BorderLayout.CENTER);
 
+		this.setJMenuBar(new ChatRoomsViewMenu());
+
 		this.pack();
 		setLocationRelativeTo(null); //wyśrodkowanie okna
 	}
@@ -168,4 +170,41 @@ public class ChatRoomsView extends JFrame
 
 	// </editor-fold>
 
+	// <editor-fold defaultstate="collapsed" desc="Menu okna rozmów">
+
+	class ChatRoomsViewMenu extends JMenuBar
+	{
+		public ChatRoomsViewMenu()
+		{
+			ChatRoomsViewListener listener = new ChatRoomsViewListener();
+
+			JMenu menuConversation = new JMenu("Rozmowa");
+			menuConversation.addActionListener(listener);
+			this.add(menuConversation);
+
+			JMenuItem itemAttachFile = new JMenuItem("Wyślij plik");
+			itemAttachFile.setActionCommand("conversation.attachFile");
+			itemAttachFile.addActionListener(listener);
+			menuConversation.add(itemAttachFile);
+
+			JMenuItem itemClose = new JMenuItem("Zamknij rozmowę");
+			itemClose.setActionCommand("conversation.close");
+			itemClose.addActionListener(listener);
+			menuConversation.add(itemClose);
+		}
+	}
+
+	class ChatRoomsViewListener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			String cmd = e.getActionCommand();
+			if (cmd.equals("conversation.close"))
+				chatTabs.chatRoomList.remove(chatTabs.getSelectedRoom().getChatRoom());
+			else if (cmd.equals("conversation.attachFile"))
+			chatTabs.getSelectedRoom().showFileAttachDialog();
+		}
+	}
+
+	// </editor-fold>
 }

@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.midi.SysexMessage;
 import javax.swing.*;
+import resources.ResourceManager;
 
 /**
  * Klasa pomocnicza dla aplikacji korzystających z GUI (Swing, ewentualnie AWT).
@@ -28,7 +29,6 @@ public abstract class GUIUtilities
 		"com.sun.java.swing.plaf.windows.WindowsLookAndFeel",
 		"com.sun.java.swing.plaf.gtk.GTKLookAndFeel",
 		"com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel",
-		//"javax.swing.plaf.synth.SynthLookAndFeel",
 		//"com.sun.java.swing.plaf.motif.MotifLookAndFeel",
 		//"javax.swing.plaf.metal.MetalLookAndFeel",
 		};
@@ -50,6 +50,8 @@ public abstract class GUIUtilities
 					try
 					{
 						UIManager.setLookAndFeel(lookAndFeelPriority[i]);
+						if (lookAndFeelPriority[i].endsWith("GTKLookAndFeel"))
+							loadGTKFileChooserUI();
 						break;
 					}
 					catch (Exception e)
@@ -66,6 +68,32 @@ public abstract class GUIUtilities
 			SwingUtilities.invokeLater(r);
 		else
 			r.run();
+	}
+
+	/**
+	 * Zastępuje przestarzałą implementację interfejsu dialogu wyboru plików /
+	 * folderów tą z Metal L&F, z pewnymi modyfikacjami.
+	 *
+	 * @see <a href="http://www.java2s.com/Tutorial/Java/0240__Swing/CustomizingaJFileChooserLookandFeel.htm">www.java2s.com - Customizing a JFileChooser Look and Feel</a>
+	 */
+	private static void loadGTKFileChooserUI()
+	{
+		UIManager.put("FileChooserUI",
+				"javax.swing.plaf.metal.MetalFileChooserUI");
+
+		UIManager.put("FileChooser.upFolderIcon",
+				ResourceManager.getIcon("FileChooser/upFolderIcon.png"));
+		UIManager.put("FileChooser.homeFolderIcon",
+				ResourceManager.getIcon("FileChooser/homeFolderIcon.png"));
+		UIManager.put("FileChooser.newFolderIcon",
+				ResourceManager.getIcon("FileChooser/newFolderIcon.png"));
+		UIManager.put("FileChooser.listViewIcon",
+				ResourceManager.getIcon("FileChooser/listViewIcon.png"));
+		UIManager.put("FileChooser.detailsViewIcon",
+				ResourceManager.getIcon("FileChooser/detailsViewIcon.png"));
+
+		UIManager.put("FileChooser.listViewBorder",
+				BorderFactory.createEmptyBorder());
 	}
 
 	/**
@@ -191,6 +219,23 @@ public abstract class GUIUtilities
 	public static void installCarefulRepaintManager(boolean crashOnErrors)
 	{
 		RepaintManager.setCurrentManager(new CarefulRepaintManager(crashOnErrors));
+	}
+
+	/**
+	 * Wywołuje metodę validate na wszystkich komponentach nadrzędnych (włącznie
+	 * z bieżącym), do samego korzenia.
+	 *
+	 * @param c bieżący komponent
+	 */
+	public static void validateRoot(Component c)
+	{
+		Component root = c;
+		while (c != null)
+		{
+			root = c;
+			c = c.getParent();
+		}
+		root.validate();
 	}
 }
 

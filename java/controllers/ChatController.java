@@ -1,5 +1,7 @@
 package controllers;
 
+import java.io.File;
+
 import main.Main;
 import protocols.*;
 
@@ -55,11 +57,16 @@ public class ChatController
 	 *
 	 * @param room pokój, w którym jest nadawana wiadomość
 	 * @param message treść wiadomości
+	 * @param attachments załączniki, do wysłania z wiadomością
 	 */
-	public void sendMessage(ChatRoom room, String message)
+	public void sendMessage(ChatRoom room, String message, File[] attachments)
 	{
 		final OutgoingMessage msg = new OutgoingMessage(room);
 		msg.setContents(message);
+
+		if (attachments != null)
+			for (File f : attachments)
+				msg.attachFile(f);
 
 		room.sentMessage(msg);
 

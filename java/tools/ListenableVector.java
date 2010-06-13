@@ -167,7 +167,7 @@ public class ListenableVector<E extends Observable> extends Vector<E>
 		if (elem == null)
 			return;
 		elem.addObserver(this);
-		for (SetListener<E> listener : setListeners)
+		for (SetListener<E> listener : setListeners) //TODO: ConcurrentModificationException
 			listener.itemAdded(elem);
 	}
 
