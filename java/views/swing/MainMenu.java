@@ -18,7 +18,9 @@ public class MainMenu extends JMenuBar
 {
 	final MainView mainView;
 	final MainMenuListener mainMenuListener = new MainMenuListener();
+
 	AboutView aboutView;
+	FileTransfersView fileTransfersView;
 
 	class MainMenuListener implements ActionListener
 	{
@@ -27,6 +29,20 @@ public class MainMenu extends JMenuBar
 			String cmd = event.getActionCommand();
 			if (cmd.equals("application.close"))
 				mainView.getMainController().applicationClose();
+			else if (cmd.equals("application.transfers"))
+			{
+				if (fileTransfersView == null) // widok nie musi być od razu gotowy
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						public void run()
+						{
+							if (fileTransfersView != null)
+								fileTransfersView.showTransfers();
+						}
+					});
+				else
+					fileTransfersView.showTransfers();
+			}
 			else if (cmd.equals("help.about"))
 			{
 				if (aboutView == null) // widok nie musi być od razu gotowy
@@ -77,23 +93,29 @@ public class MainMenu extends JMenuBar
 		}
 	}
 
-	public MainMenu(MainView mainView)
+	public MainMenu(MainView mainViewP)
 	{
-		this.mainView = mainView;
+		this.mainView = mainViewP;
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				// utworzenie tego okna zajmuje dużo czasu, a nie potrzebujemy
-				// go od razu po starcie aplikacji
+				// utworzenie tych okien zajmuje dużo czasu, a nie potrzebujemy
+				// ich od razu po starcie aplikacji
 				aboutView = new AboutView();
+				fileTransfersView = new FileTransfersView(mainView.mainController.getFileTransfersController());
 			}
 		});
 
 		JMenu menuProgram = new JMenu("Program");
 		menuProgram.addActionListener(mainMenuListener);
 		this.add(menuProgram);
+
+		JMenuItem itemTransfers = new JMenuItem("Transfery plików");
+		itemTransfers.setActionCommand("application.transfers");
+		itemTransfers.addActionListener(mainMenuListener);
+		menuProgram.add(itemTransfers);
 
 		JMenuItem itemZamknij = new JMenuItem("Zamknij");
 		itemZamknij.setActionCommand("application.close");

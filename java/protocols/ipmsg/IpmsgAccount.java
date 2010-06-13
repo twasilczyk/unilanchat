@@ -40,8 +40,10 @@ public class IpmsgAccount extends Account
 
 	/**
 	 * Zbiór plików oczekujących na wysłanie, bądź odebranie.
+	 *
+	 * @todo jak zrobimy jakiś ładny interfejs, usunąć public.
 	 */
-	ListenableVector<IpmsgTransferredFile> transferredFiles = new ListenableVector<IpmsgTransferredFile>();
+	public final ListenableVector<IpmsgTransferredFile> transferredFiles = new ListenableVector<IpmsgTransferredFile>();
 
 	/**
 	 * Metoda odnajdująca obiekt pliku w zbiorze oczekujących na wysłanie.

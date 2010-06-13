@@ -46,6 +46,7 @@ public class OutgoingMessage extends Message
 		attachedFiles.add(file);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Vector<File> getAttachedFiles()
 	{
 		return (Vector<File>)attachedFiles.clone();

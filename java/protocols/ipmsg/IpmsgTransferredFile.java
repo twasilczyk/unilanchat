@@ -25,6 +25,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 * Potrzebne do wysyłania całych katalogów.
 	 */
 	public static final long FLAG_FILE_RETPARENT =	0x00000003;
+	
 	public static final long FLAG_FILE_SYMLINK =	0x00000004;
 	public static final long FLAG_FILE_CDEV =		0x00000005;
 	public static final long FLAG_FILE_BDEV =		0x00000006;
@@ -47,7 +48,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	protected File file;
 
 	/**
-	 * <code>True</code> gdy plik jest plikiem właściwym.
+	 * <code>True</code>, gdy plik jest plikiem właściwym.
 	 */
 	protected boolean isFile;
 
@@ -123,7 +124,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 * 
 	 * @param state stan, w ktorym ma się znajdować plik
 	 */
-	public synchronized void setState(States state)
+	protected synchronized void setState(States state)
 	{
 		this.state = state;
 		notifyObservers();
@@ -149,5 +150,15 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	{
 		this.transferredDataSize = transferredDataSize;
 		notifyObservers();
+	}
+
+	@Override
+	public String toString()
+	{
+		return "IpmsgTransferredFile[\"" +
+			file.getName() + "\"" + (isFile?"(plik)":"(nie plik)") + ", " +
+			"od/do \"" + contact.name + "\", " +
+			"przesłano " + transferredDataSize + "/" + fileSize + ", " +
+			state.toString() + "]";
 	}
 }

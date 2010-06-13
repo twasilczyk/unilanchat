@@ -28,6 +28,11 @@ public class MainController extends SimpleObservable implements Observer
 	protected final ChatController chatController = new ChatController(this);
 
 	/**
+	 * Kontroler odpowiedzialny za listę przesyłanych plików.
+	 */
+	protected final FileTransfersController fileTransfersController = new FileTransfersController(this);
+
+	/**
 	 * Lista kontaktów użytkownika.
 	 */
 	protected final ContactList contactList = new ContactList();
@@ -61,6 +66,17 @@ public class MainController extends SimpleObservable implements Observer
 	public ChatController getChatController()
 	{
 		return chatController;
+	}
+
+	/**
+	 * Zwraca kontroler listy przesyłanych plików, związany z daną instancją
+	 * aplikacji.
+	 *
+	 * @return kontroler listy przesyłanych plików
+	 */
+	public FileTransfersController getFileTransfersController()
+	{
+		return fileTransfersController;
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Zarządzanie statusem">
