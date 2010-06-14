@@ -70,10 +70,12 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 			InputStream socketInputStream = null;
 			OutputStream socketOutputStream = null;
 			FileOutputStream fileOutputStream = null;
+			startNotifying();
 			try
 			{
 				socket = new Socket(contact.ip, IpmsgFileTransferThread.serverPort);
-				IpmsgFileReceiveRequestHeader header = new IpmsgFileReceiveRequestHeader(receivedFile, 0);
+				IpmsgFileReceiveRequestHeader header =
+						new IpmsgFileReceiveRequestHeader(receivedFile, isFile ? 0L : null);
 				IpmsgPacket packet = new IpmsgPacket(Configuration.getInstance().getNick());
 				packet.setCommand(isFile ? IpmsgPacket.COMM_GETFILEDATA : IpmsgPacket.COMM_GETDIRFILES);
 				packet.data = header.toString();
@@ -83,6 +85,10 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 
 				socketOutputStream.write(packet.getRAWData());
 
+				byte[] buffer = new byte[IpmsgTransferredFile.bufferSize];
+				int readChunkSize;
+				long transferredSize = 0;
+
 				setState(States.TRANSFERRING);
 				if(isFile)
 				{
@@ -90,10 +96,6 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 						throw new IOException("Nie udalo sie utworzyc");
 
 					fileOutputStream = new FileOutputStream(file);
-
-					byte[] buffer = new byte[IpmsgTransferredFile.bufferSize];
-					int readChunkSize;
-					long transferredSize = 0;
 
 					while((readChunkSize = socketInputStream.read(buffer)) != -1)
 					{
@@ -109,7 +111,104 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 				}
 				else
 				{
-					throw new UnsupportedOperationException();
+					File tempFile = null;
+					int readByte, i;
+					long headerSize;
+
+					// Dopoki jestesmy wewnatrz katalogu
+					while(tempFile == null ||
+							!(!tempFile.getCanonicalPath().equals(file.getCanonicalPath()) &&
+							file.getCanonicalPath().startsWith(tempFile.getCanonicalPath())))
+					{
+						// Czytanie naglowka
+						i = 0;
+						while((readByte = socketInputStream.read()) != -1 && readByte != ':')
+						{
+							if(i >= bufferSize)
+								throw new IOException();
+							buffer[i++] = (byte)readByte;
+						}
+
+						try
+						{
+							headerSize = Long.parseLong(new String(buffer, 0, i, IpmsgPacket.protocolCharset), 16);
+						}
+						catch(NumberFormatException ex)
+						{
+							throw new IOException();
+						}
+
+						if(readByte != ':')
+							throw new IOException();
+
+						buffer[i++] = (byte)readByte;
+
+						if(headerSize > bufferSize)
+							throw new IOException();
+
+						headerSize -= i;
+
+						while(headerSize != 0)
+						{
+							readChunkSize = socketInputStream.read(buffer, i, (int)headerSize);
+							if(readChunkSize == -1)
+								break;
+							i += readChunkSize;
+							headerSize -= readChunkSize;
+						}
+
+						IpmsgHierarchicalFileHeader hierarchicalHeader;
+						try
+						{
+							hierarchicalHeader = IpmsgHierarchicalFileHeader.fromRawData(buffer, i);
+						}
+						catch (IllegalArgumentException ex)
+						{
+							throw new IOException();
+						}
+						// Koniec czytania naglowka
+
+						File tempFile2 = new File(tempFile == null ? file.getCanonicalPath() : tempFile.getCanonicalPath()
+									+ File.separator + hierarchicalHeader.fileName);
+
+						if(hierarchicalHeader.fileAttribute == IpmsgTransferredFile.FLAG_FILE_REGULAR)
+						{
+							// Pierwsze utworzenie musi byc katalogiem
+							if(tempFile == null)
+								throw new IOException();
+							if(!tempFile2.createNewFile())
+								throw new IOException();
+							fileOutputStream = new FileOutputStream(tempFile2);
+							long dataSizeLeft = hierarchicalHeader.fileSize;
+							setFileSize(hierarchicalHeader.fileSize);
+							while(dataSizeLeft != 0)
+							{
+								readChunkSize = socketInputStream.read(buffer, 0, (int)Math.min(dataSizeLeft, (long)bufferSize));
+								if(readChunkSize == -1 && dataSizeLeft != 0)
+									throw new IOException();
+								fileOutputStream.write(buffer, 0, readChunkSize);
+								dataSizeLeft -= readChunkSize;
+								transferredSize += readChunkSize;
+								setTransferredDataSize(transferredSize);
+							}
+							fileOutputStream.close();
+						}
+						else if(hierarchicalHeader.fileAttribute == IpmsgTransferredFile.FLAG_FILE_DIR)
+						{
+							if(!tempFile2.mkdir())
+								throw new IOException();
+							tempFile = tempFile2;
+						}
+						else if(hierarchicalHeader.fileAttribute == IpmsgTransferredFile.FLAG_FILE_RETPARENT)
+						{
+							// Pierwse utworzenie musi byc katalogiem
+							if(tempFile == null)
+								throw new IOException();
+							tempFile = tempFile.getParentFile();
+						}
+						else
+							throw new IOException("Nieznana flaga przesylania folderow");
+					}
 				}
 				setState(States.COMPLETED);
 			}
@@ -122,6 +221,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 			}
 			finally
 			{
+				stopNotifying();
 				try
 				{
 					// Jesli udalo sie otworzyc strumien dla pliku to zamykamy

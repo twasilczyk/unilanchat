@@ -2,6 +2,7 @@ package protocols.ipmsg;
 
 import java.io.*;
 import java.net.*;
+import java.util.Stack;
 
 /**
  * Klasa pliku wysyłanego.
@@ -33,8 +34,6 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 		this.isFile = file.isFile();
 		if(isFile)
 			this.fileSize = file.length();
-		else
-			this.fileSize = 0;
 		this.contact = contact;
 		this.fileID = nextFileID++;
 		this.packetID = packetID;
@@ -52,19 +51,21 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 	 * @param offset ilość początkowych bajtów, która ma zostać pominięta
 	 * @throws SocketException gdy podane w parametrze gniazdo nie jest połączone
 	 */
-	public void send(Socket socket, long offset) throws SocketException
+	public void send(Socket socket, Long offset) throws SocketException
 	{
 		if (socket == null)
 				throw new NullPointerException();
 		if (!socket.isConnected())
 			throw new SocketException("Gniazdo nie jest polaczone");
+		if((offset == null) != !isFile)
+			throw new IllegalArgumentException("Zadano katalogu, a obiekt jest plikiem");
 		synchronized(this)
 		{
 			if(state == States.COMPLETED)
 				throw new RuntimeException("Plik zostal juz wyslany");
 			if(thread != null && thread.isAlive())
 				throw new RuntimeException("Plik jest wlasnie wysylany");
-			if(isFile && offset > fileSize || offset < 0)
+			if(isFile && (offset > fileSize || offset < 0))
 				throw new RuntimeException("Zly offset: " + Long.toString(offset));
 			thread = new SendingThread(socket, offset);
 			thread.setDaemon(true);
@@ -92,9 +93,9 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 	{
 		protected Socket socket;
 
-		protected long offset;
+		protected Long offset;
 
-		public SendingThread(Socket socket, long offset) throws SocketException
+		public SendingThread(Socket socket, Long offset) throws SocketException
 		{
 			if (socket == null)
 				throw new NullPointerException();
@@ -107,6 +108,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 		@Override public void run()
 		{
 			FileInputStream fileInputStream = null;
+			startNotifying();
 			try
 			{
 				OutputStream outputStream = socket.getOutputStream();
@@ -131,7 +133,42 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				}
 				else
 				{
-					throw new UnsupportedOperationException("Wysylanie folderow jescze nie dziala");
+					Stack<DirectoryNode> stack = new Stack<DirectoryNode>();
+					IpmsgHierarchicalFileHeader header = new IpmsgHierarchicalFileHeader(file);
+					
+					outputStream.write(header.toRawData());
+					stack.push(new DirectoryNode(file.listFiles()));
+					while(!stack.empty())
+					{
+						File nextFile = stack.peek().getNextFile();
+						if(nextFile == null)
+						{
+							header = IpmsgHierarchicalFileHeader.getReturnParentHeader();
+							stack.pop();
+							outputStream.write(header.toRawData());
+						}
+						else
+						{
+							header = new IpmsgHierarchicalFileHeader(nextFile);
+							if(nextFile.isFile())
+							{
+								setFileSize(nextFile.length());
+								outputStream.write(header.toRawData());
+								fileInputStream = new FileInputStream(nextFile);
+								while((readChunkSize = fileInputStream.read(buffer)) != -1)
+								{
+									outputStream.write(buffer, 0, readChunkSize);
+									transferredSize += readChunkSize;
+									setTransferredDataSize(transferredSize);
+								}
+							}
+							else
+							{
+								stack.push(new DirectoryNode(nextFile.listFiles()));
+								outputStream.write(header.toRawData());
+							}
+						}
+					}
 				}
 				setState(States.COMPLETED);
 			}
@@ -141,6 +178,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 			}
 			finally
 			{
+				stopNotifying();
 				try
 				{
 					if(fileInputStream != null)
@@ -150,6 +188,26 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				catch (IOException ex)
 				{
 				}
+			}
+		}
+
+		class DirectoryNode
+		{
+			File[] files;
+			int currentPosition = 0;
+
+			public DirectoryNode(File[] files)
+			{
+				if(files == null)
+					throw new NullPointerException();
+				this.files = files;
+			}
+
+			public File getNextFile()
+			{
+				if(currentPosition < files.length)
+					return files[currentPosition++];
+				return null;
 			}
 		}
 	}

@@ -1,6 +1,8 @@
 package protocols.ipmsg;
 
 import java.io.File;
+import java.util.*;
+
 import tools.SimpleObservable;
 
 /**
@@ -71,7 +73,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	/**
 	 * Rozmiar pliku
 	 */
-	protected long fileSize;
+	protected Long fileSize = null;
 
 	/**
 	 * Stan, w którym aktualnie znajduje się transferowany plik.
@@ -84,9 +86,19 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	protected long transferredDataSize = 0;
 
 	/**
+	 * Bieżąca szybkość transferu w bajtach na sekunde
+	 */
+	protected long transferSpeed = 0;
+
+	/**
 	 * Wątek zajmujący się przesyłem.
 	 */
 	protected Thread thread = null;
+
+	/**
+	 * Timer obliczający prędkość transferu.
+	 */
+	protected Timer notificationTimer = null;
 
 	/**
 	 * Pozwala określić czy plik jest plikiem właściwym.
@@ -99,11 +111,15 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	}
 
 	/**
-	 * Pozwala określić rozmiar pliku.
+	 * Metoda synchronizowana pozwalajaca okreslic rozmiar pliku.
 	 *
-	 * @return rozmiar pliku
+	 * @return rozmiar pliku, gdy transferowany jest plik, null
+	 * gdy transferowany jest katalog i nie był transferowany żaden plik z
+	 * katalogu, w przeciwnym wypadku zwraca sumę wszystkich rozmiarów plików
+	 * transferowanych do tej pory włączając w to transferowany w danej chwili
+	 * plik
 	 */
-	public long getFileSize()
+	public synchronized Long getFileSize()
 	{
 		return fileSize;
 	}
@@ -149,7 +165,66 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	protected synchronized void setTransferredDataSize(long transferredDataSize)
 	{
 		this.transferredDataSize = transferredDataSize;
-		notifyObservers();
+	}
+
+	/**
+	 * Metoda synchronizowana zwracająca bieżącą szybkość transferu
+	 * w bajtach na sekundę.
+	 * 
+	 * @return szybkość transferu w bajtach na sekundę
+	 */
+	protected synchronized long getTransferSpeed()
+	{
+		return transferSpeed;
+	}
+
+	/**
+	 * Metoda synchronizowana ustawiająca szybkość transferu, parametr powinien
+	 * być wyrażony w bajtach na sekundę.
+	 *
+	 * @param transferSpeed prędkość transferu w bajtach na sekundę
+	 */
+	protected synchronized void setTransferSpeed(long transferSpeed)
+	{
+		this.transferSpeed = transferSpeed;
+	}
+
+	/**
+	 * Ustawia sumę rozmiarów wszytkich plików transferowanych do tej pory.
+	 *
+	 * @param fileSize rozmiar wszystkich plików transferowanych do tej pory
+	 */
+	protected synchronized  void setFileSize(Long fileSize)
+	{
+		if(this.fileSize == null)
+			this.fileSize = 0L;
+		this.fileSize += fileSize;
+	}
+
+	/**
+	 * Kolejkuje zadanie powiadamiania o zmianie stanu obiektu do cyklicznego
+	 * wywoływania co określoną ilość czasu.
+	 */
+	protected void startNotifying()
+	{
+		if(notificationTimer == null)
+		{
+			notificationTimer = new Timer();
+			notificationTimer.schedule(new NotificationTimerTask(getTransferredDataSize()), 0,
+					NotificationTimerTask.interval);
+		}
+	}
+
+	/**
+	 * Zatrzymuje zadanie powiadamiania o zmianie stanu obiektu.
+	 */
+	protected void stopNotifying()
+	{
+		if(notificationTimer != null)
+		{
+			notificationTimer.cancel();
+			notificationTimer = null;
+		}
 	}
 
 	@Override
@@ -160,5 +235,32 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 			"od/do \"" + contact.name + "\", " +
 			"przesłano " + transferredDataSize + "/" + fileSize + ", " +
 			state.toString() + "]";
+	}
+
+	/**
+	 * Klasa zadania timera obliczająca prędkość transferu oraz powiadamiająca
+	 * obserwatorow.
+	 */
+	class NotificationTimerTask extends TimerTask
+	{
+		protected long lastTransferredDataSize;
+
+		public static final long interval = 500;
+
+		public static final long ratio = 1000 / interval;
+
+		public NotificationTimerTask(long lastTransferredDataSize)
+		{
+			this.lastTransferredDataSize = lastTransferredDataSize;
+		}
+
+		@Override public void run()
+		{
+			long currentTransferredDataSize = getTransferredDataSize();
+			setTransferSpeed(ratio *
+					(currentTransferredDataSize - lastTransferredDataSize));
+			lastTransferredDataSize = currentTransferredDataSize;
+			notifyObservers();
+		}
 	}
 }

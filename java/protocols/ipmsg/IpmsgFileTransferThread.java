@@ -161,9 +161,9 @@ public class IpmsgFileTransferThread extends Thread
 				 * to konczymy, analogicznie w symetrycznym przypadku
 				 */
 				if (!(packet.getCommand() == IpmsgPacket.COMM_GETFILEDATA &&
-					file.isFile() ||
+					file.isFile() && header.offset != null ||
 					packet.getCommand() == IpmsgPacket.COMM_GETDIRFILES &&
-					!file.isFile()))
+					!file.isFile() && header.offset == null))
 				{
 					socket.close();
 					return;

@@ -60,7 +60,8 @@ public class IpmsgAccount extends Account
 			if (file instanceof IpmsgSentFile &&
 					((IpmsgSentFile)file).contact.ip.equals(ip) &&
 					((IpmsgSentFile)file).packetID == header.packetID &&
-					((IpmsgSentFile)file).fileID == header.fileID)
+					((IpmsgSentFile)file).fileID == header.fileID &&
+					file.isFile == (header.offset != null))
 				return (IpmsgSentFile)file;
 		}
 		return null;

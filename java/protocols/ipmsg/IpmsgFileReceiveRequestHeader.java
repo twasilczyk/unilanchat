@@ -19,8 +19,9 @@ class IpmsgFileReceiveRequestHeader
 
 	/**
 	 * Ilość początkowych bajtów która ma zostać pominięta podczas wysyłania.
+	 * Null wtedy i tylko wtedy gdy transferowany plik jest katalogiem.
 	 */
-	protected long offset;
+	protected Long offset = null;
 
 	/**
 	 * Kontruktor nagłówka dla pakietów odbieranych.
@@ -32,7 +33,7 @@ class IpmsgFileReceiveRequestHeader
 	{
 		String[] data = raw.split(":");
 
-		if(data.length != 3)
+		if(data.length > 3 && data.length < 2)
 			throw new IllegalArgumentException("Niepoprawna liczba sekcji");
 
 		IpmsgFileReceiveRequestHeader header = new IpmsgFileReceiveRequestHeader();
@@ -41,7 +42,8 @@ class IpmsgFileReceiveRequestHeader
 		{
 			header.packetID = Long.parseLong(data[0], 16);
 			header.fileID = Long.parseLong(data[1], 16);
-			header.offset = Long.parseLong(data[2], 16);
+			if(data.length == 3)
+				header.offset = Long.parseLong(data[2], 16);
 		}
 		catch(NumberFormatException ex)
 		{
@@ -62,12 +64,12 @@ class IpmsgFileReceiveRequestHeader
 	 * @param offset ilość pierwszych bajtów które mają zostać pominięte
 	 * podczas transmisji
 	 */
-	protected IpmsgFileReceiveRequestHeader(IpmsgReceivedFile file, long offset)
+	protected IpmsgFileReceiveRequestHeader(IpmsgReceivedFile file, Long offset)
 	{
-		if(offset < 0)
+		if(offset != null && offset < 0)
 			throw new IllegalArgumentException("Ujemny offset");
-		if(!file.isFile)
-			throw new IllegalArgumentException("Argument jest katalogiem");
+		if(!file.isFile != (offset == null))
+			throw new IllegalArgumentException("Zadano katalogu, a obiekt jest plikiem");
 		this.packetID = file.packetID;
 		this.fileID = file.fileID;
 		this.offset = offset;
@@ -81,8 +83,11 @@ class IpmsgFileReceiveRequestHeader
 		builder.append(":");
 		builder.append(Long.toString(fileID, 16));
 		builder.append(":");
-		builder.append(Long.toString(offset, 16));
-		builder.append(":");
+		if(offset != null)
+		{
+			builder.append(Long.toString(offset, 16));
+			builder.append(":");
+		}
 
 		return builder.toString();
 	}

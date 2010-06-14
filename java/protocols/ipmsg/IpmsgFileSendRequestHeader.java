@@ -131,7 +131,7 @@ class IpmsgFileSendRequestHeader
 			throw new IllegalArgumentException();
 		this.fileID = file.fileID;
 		this.fileName = file.file.getName();
-		this.fileSize = file.fileSize;
+		this.fileSize = file.fileSize == null ? 0 : file.fileSize;
 		this.modificationTime = file.file.lastModified();
 		this.fileAttribute = file.file.isFile() ? IpmsgTransferredFile.FLAG_FILE_REGULAR :
 								IpmsgTransferredFile.FLAG_FILE_DIR;
