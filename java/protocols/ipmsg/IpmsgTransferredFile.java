@@ -3,14 +3,14 @@ package protocols.ipmsg;
 import java.io.File;
 import java.util.*;
 
-import tools.SimpleObservable;
+import protocols.TransferredFile;
 
 /**
  * Klasa abstrakcyjna reprezentująca transferowany plik.
  *
  * @author Piotr Gajowiak
  */
-public abstract class IpmsgTransferredFile extends SimpleObservable
+public abstract class IpmsgTransferredFile extends Observable implements TransferredFile
 {
 	/**
 	 * Flaga oznaczająca, że plik jest plikiem właściwym.
@@ -33,11 +33,6 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	public static final long FLAG_FILE_BDEV =		0x00000006;
 	public static final long FLAG_FILE_FIFO =		0x00000007;
 	public static final long FLAG_FILE_RESFORK =	0x00000010;
-
-	/**
-	 * Stany w jakich może znależć się transferowany plik.
-	 */
-	public enum States { WAITING_FOR_CONNECTION, TRANSFERRING, ERROR, COMPLETED };
 
 	/**
 	 * Rozmiar bufora używany podczas wysyłania, bądź pobierania.
@@ -78,7 +73,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	/**
 	 * Stan, w którym aktualnie znajduje się transferowany plik.
 	 */
-	protected States state = States.WAITING_FOR_CONNECTION;
+	protected State state = State.WAITING_FOR_CONNECTION;
 
 	/**
 	 * Rozmiar przesłanych już danych.
@@ -100,8 +95,10 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 */
 	protected Timer notificationTimer = null;
 
+	protected String fileName = null;
+
 	/**
-	 * Pozwala określić czy plik jest plikiem właściwym.
+	 * Pozwala określić czy plik jest plikiem właściwym (czy katalogiem).
 	 *
 	 * @return <code>true</code> gdy plik jest plikiem właściwym
 	 */
@@ -111,7 +108,17 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	}
 
 	/**
-	 * Metoda synchronizowana pozwalajaca okreslic rozmiar pliku.
+	 * Zwraca nazwę pliku, zaproponowaną przez nadawcę.
+	 *
+	 * @return zaproponowana nazwa pliku
+	 */
+	public String getFileName()
+	{
+		return fileName;
+	}
+
+	/**
+	 * Metoda synchronizowana pozwalająca określić rozmiar pliku.
 	 *
 	 * @return rozmiar pliku, gdy transferowany jest plik, null
 	 * gdy transferowany jest katalog i nie był transferowany żaden plik z
@@ -129,7 +136,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 *
 	 * @return stan, w którym obecnie znajduje się plik
 	 */
-	public synchronized States getState()
+	public synchronized State getState()
 	{
 		return state;
 	}
@@ -140,16 +147,16 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 * 
 	 * @param state stan, w ktorym ma się znajdować plik
 	 */
-	protected synchronized void setState(States state)
+	protected synchronized void setState(State state)
 	{
 		this.state = state;
-		notifyObservers();
+		setChanged();
 	}
 
 	/**
 	 * Metoda synchronizowana, zwracająca ilość wysłanych już danych.
 	 *
-	 * @return ilość wysłanych już danych.
+	 * @return ilość wysłanych już danych
 	 */
 	public synchronized long getTransferredDataSize()
 	{
@@ -165,6 +172,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	protected synchronized void setTransferredDataSize(long transferredDataSize)
 	{
 		this.transferredDataSize = transferredDataSize;
+		setChanged();
 	}
 
 	/**
@@ -173,7 +181,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	 * 
 	 * @return szybkość transferu w bajtach na sekundę
 	 */
-	protected synchronized long getTransferSpeed()
+	public synchronized long getTransferSpeed()
 	{
 		return transferSpeed;
 	}
@@ -187,6 +195,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	protected synchronized void setTransferSpeed(long transferSpeed)
 	{
 		this.transferSpeed = transferSpeed;
+		setChanged();
 	}
 
 	/**
@@ -199,6 +208,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 		if(this.fileSize == null)
 			this.fileSize = 0L;
 		this.fileSize += fileSize;
+		setChanged();
 	}
 
 	/**
@@ -224,6 +234,7 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 		{
 			notificationTimer.cancel();
 			notificationTimer = null;
+			notifyObservers();
 		}
 	}
 
@@ -231,9 +242,10 @@ public abstract class IpmsgTransferredFile extends SimpleObservable
 	public String toString()
 	{
 		return "IpmsgTransferredFile[\"" +
-			file.getName() + "\"" + (isFile?"(plik)":"(nie plik)") + ", " +
+			getFileName() + "\"" + (isFile?"(plik)":"(nie plik)") + ", " +
 			"od/do \"" + contact.name + "\", " +
 			"przesłano " + transferredDataSize + "/" + fileSize + ", " +
+			"transfer " + (getTransferSpeed() / 1024) + "kB/s, " +
 			state.toString() + "]";
 	}
 

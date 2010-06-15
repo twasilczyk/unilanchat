@@ -22,6 +22,7 @@ public class MainView extends JFrame implements Observer
 	protected final MainView mainView = this;
 
 	private ChatRoomsView chatRoomsView;
+	protected final MainMenu mainMenu;
 
 	protected TrayIcon trayIcon = null;
 	protected boolean trayModeShowUnread = false;
@@ -55,7 +56,7 @@ public class MainView extends JFrame implements Observer
 			{
 				// utworzenie tego okna zajmuje dużo czasu, a nie potrzebujemy
 				// go od razu po starcie aplikacji
-				chatRoomsView = new ChatRoomsView(mainController.getChatController());
+				chatRoomsView = new ChatRoomsView(mainController.getChatController(), mainView);
 				chatRoomsView.addObserver(new ChatRoomsViewObserver());
 			}
 		});
@@ -67,7 +68,8 @@ public class MainView extends JFrame implements Observer
 
 		addWindowListener(mainViewListener);
 
-		setJMenuBar(new MainMenu(this));
+		mainMenu = new MainMenu(this);
+		setJMenuBar(mainMenu);
 
 		add(new MainRoomButtonPanel(), BorderLayout.NORTH);
 		add(new ContactListPanel(this), BorderLayout.CENTER);

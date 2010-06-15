@@ -22,15 +22,18 @@ public class ChatRoomsView extends JFrame
 
 	public final ChatController chatController;
 
+	protected final MainView mainView;
+
 	private final ChatTabs chatTabs;
 
-	public ChatRoomsView(ChatController chatController)
+	public ChatRoomsView(ChatController chatController, MainView mainView)
 	{
 		super(defaultTitle);
 
 		this.setVisible(false);
 
 		this.chatController = chatController;
+		this.mainView = mainView;
 		this.chatTabs = new ChatTabs(this);
 
 		this.setMinimumSize(new Dimension(200, 200));

@@ -3,26 +3,29 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.2
- - uzupełnić komentarze w pakiecie views.swing
- - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
-   ogólnie przejrzeć te klasy
- - ipmsg: transfer plików
- - logowanie przebiegu rozmów, podgląd logów
- - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
-   w tym przypadku zazwyczaj zawiesza
- - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
  - przenieść kompilator launchera poza folder trunk (np. do tools), w źródłach
    trzymać tylko binarkę, a kompilować (wraz z pobieraniem kompilatora z svn)
    jedynie na wyraźne życzenie (dodatkowa sekcja w Makefile)
  - do Makefile dodać sekcję UniLANChat-src.tar.gz
- - do configure dodać więcej możliwych ścieżek do JDK, sprawdzanie ma obejmować
-   także występowanie javac
- - wykonać prosty skrypt zastępujący configure + Makefile dla Windows
  - wyświetlanie bieżącego nicka w widocznym miejscu
  - w pokoju głównym, po kliknięciu na nick rozmówcy, otwiera się okno rozmowy
    prywatnej
+ - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
 
 0.3
+ - uzupełnić komentarze w pakiecie views.swing
+ - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
+   ogólnie przejrzeć te klasy
+ - logowanie przebiegu rozmów, podgląd logów
+ - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
+   w tym przypadku zazwyczaj zawiesza
+ - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
+ - do configure dodać więcej możliwych ścieżek do JDK, sprawdzanie ma obejmować
+   także występowanie javac
+ - konfiguracja: możliwość nie pokazywania okna transferów po zapisaniu
+   załącznika
+
+0.4
  - tylko jedna instancja programu
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)

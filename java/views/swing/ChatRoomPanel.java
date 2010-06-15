@@ -22,7 +22,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 	protected final ChatRoom chatRoom;
 	protected final ChatRoomsView chatRoomsView;
 
-	protected final MessagesPanel messagesPanel = new MessagesPanel();
+	protected final MessagesPanel messagesPanel;
 	
 	protected final JTextPane inputPane = new JTextPane();
 
@@ -39,6 +39,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 	{
 		this.chatRoomsView = chatRoomsView;
 		this.chatRoom = chatRoom;
+		messagesPanel = new MessagesPanel(chatRoomsView);
 		chatRoom.getMessagesVector().addSetListener(this);
 
 		this.setLayout(new BorderLayout(0, 4));

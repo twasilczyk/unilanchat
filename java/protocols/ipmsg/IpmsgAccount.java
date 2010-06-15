@@ -565,6 +565,8 @@ public class IpmsgAccount extends Account
 		else
 			chatRoom = contact.getPrivateChatRoom();
 
+		IncomingMessage message = new IncomingMessage(chatRoom, authorName);
+
 		String messageRAWContents, filesAdditionalSection = null;
 		if (packet.data.indexOf('\0') < 0)
 			messageRAWContents = packet.data;
@@ -584,6 +586,7 @@ public class IpmsgAccount extends Account
 			{
 				IpmsgReceivedFile file = new IpmsgReceivedFile(header, contact, packet.packetNo);
 				transferredFiles.add(file);
+				message.addAttachment(file);
 			}
 		}
 
@@ -598,10 +601,9 @@ public class IpmsgAccount extends Account
 			if (i < messageLines.length - 1)
 				messageContents.append("\n");
 		}
-
-		IncomingMessage message = new IncomingMessage(chatRoom, authorName);
 		message.setContents(messageContents.toString().trim());
 		message.setRawContents(messageRAWContents);
+
 		chatRoom.gotMessage(message);
 	}
 

@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Stack;
 
+import protocols.TransferredFile;
+
 /**
  * Klasa pliku wysyłanego.
  *
@@ -37,6 +39,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 		this.contact = contact;
 		this.fileID = nextFileID++;
 		this.packetID = packetID;
+		this.fileName = file.getName();
 	}
 
 	protected IpmsgSentFile()
@@ -61,7 +64,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 			throw new IllegalArgumentException("Zadano katalogu, a obiekt jest plikiem");
 		synchronized(this)
 		{
-			if(state == States.COMPLETED)
+			if(state == State.COMPLETED)
 				throw new RuntimeException("Plik zostal juz wyslany");
 			if(thread != null && thread.isAlive())
 				throw new RuntimeException("Plik jest wlasnie wysylany");
@@ -83,6 +86,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 		f.packetID = packetID;
 		f.fileSize = fileSize;
 		f.isFile = isFile;
+		f.fileName = fileName;
 		return f;
 	}
 
@@ -117,7 +121,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				int readChunkSize;
 				long transferredSize = 0;
 
-				setState(States.TRANSFERRING);
+				setState(TransferredFile.State.TRANSFERRING);
 				if (isFile)
 				{
 					fileInputStream = new FileInputStream(file);
@@ -170,11 +174,11 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 						}
 					}
 				}
-				setState(States.COMPLETED);
+				setState(TransferredFile.State.COMPLETED);
 			}
 			catch (IOException ex)
 			{
-				setState(States.ERROR);
+				setState(TransferredFile.State.ERROR);
 			}
 			finally
 			{

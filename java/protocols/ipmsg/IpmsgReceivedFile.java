@@ -4,13 +4,14 @@ import java.io.*;
 import java.net.*;
 
 import main.Configuration;
+import protocols.*;
 
 /**
  * Klasa pliku odbieranego.
  *
  * @author Piotr Gajowiak
  */
-public class IpmsgReceivedFile extends IpmsgTransferredFile
+public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedFile
 {
 	/**
 	 * Konstruktor pliku odbieranego.
@@ -27,7 +28,8 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 		this.packetID = packetID;
 		this.fileID = header.fileID;
 		this.fileSize = header.fileSize;
-		this.isFile = header.fileAttribute == IpmsgTransferredFile.FLAG_FILE_REGULAR;
+		this.isFile = (header.fileAttribute == IpmsgTransferredFile.FLAG_FILE_REGULAR);
+		this.fileName = header.fileName;
 	}
 
 	/**
@@ -35,12 +37,12 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 	 *
 	 * @param path ścieżka, pod którą należy zapisać plik
 	 */
-	public synchronized void receive(String path)
+	public synchronized void receive(File target)
 	{
-		file = new File(path);
-		if(file.exists())
-			throw new IllegalArgumentException("Plik juz istnieje");
-		if(state == States.COMPLETED)
+		file = target;
+		if(file.exists() && (!file.canWrite() || file.isDirectory()))
+			throw new IllegalArgumentException("Plik juz istnieje i nie można go nadpisać");
+		if(state == State.COMPLETED)
 			throw new RuntimeException("Plik zostal juz pobrany");
 		if(thread != null && thread.isAlive())
 			throw new RuntimeException("Plik jest wlasnie pobierany");
@@ -89,9 +91,11 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 				int readChunkSize;
 				long transferredSize = 0;
 
-				setState(States.TRANSFERRING);
+				setState(TransferredFile.State.TRANSFERRING);
 				if(isFile)
 				{
+					if (file.exists())
+						file.delete();
 					if(!file.createNewFile())
 						throw new IOException("Nie udalo sie utworzyc");
 
@@ -101,9 +105,9 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 					{
 						transferredSize += readChunkSize;
 						fileOutputStream.write(buffer, 0, readChunkSize);
+						setTransferredDataSize(transferredSize);
 						if(transferredSize >= fileSize)
 							break;
-						setTransferredDataSize(transferredSize);
 					}
 
 					if(transferredSize != fileSize)
@@ -210,11 +214,11 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile
 							throw new IOException("Nieznana flaga przesylania folderow");
 					}
 				}
-				setState(States.COMPLETED);
+				setState(TransferredFile.State.COMPLETED);
 			}
 			catch (IOException ex)
 			{
-				setState(States.ERROR);
+				setState(TransferredFile.State.ERROR);
 				// Jesli plik zostal utworzony przez nas i byl blad to usuwamy
 				if(fileOutputStream != null)
 					file.delete();

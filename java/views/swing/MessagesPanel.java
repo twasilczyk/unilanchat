@@ -1,18 +1,20 @@
 package views.swing;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
+import java.util.*;
+import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.text.html.HTMLDocument;
 
-import components.swing.JStickyScrollPane;
+import components.swing.*;
 import protocols.*;
 import resources.ResourceManager;
+import tools.GUIUtilities;
 import tools.html.*;
 import tools.systemintegration.SystemProcesses;
 
@@ -24,6 +26,8 @@ import tools.systemintegration.SystemProcesses;
 public class MessagesPanel extends JStickyScrollPane
 {
 	protected final MessagesPanel messagesPanel = this;
+	protected final ChatRoomsView chatRoomsView;
+	
 	protected final JEditorPane messagesPane = new JEditorPane("text/html",
 		"<div id=\"messages\"></div>");
 
@@ -36,13 +40,14 @@ public class MessagesPanel extends JStickyScrollPane
 	protected final HTMLDocument messagesDoc;
 	protected final Element messagesElement;
 
-	protected static final URL statusUnknown = ResourceManager.get("msgStatus-unknown.png");
-	protected static final URL statusPending = ResourceManager.get("msgStatus-pending.png");
-	protected static final URL statusFailed = ResourceManager.get("msgStatus-failed.png");
-	protected static final URL statusDelivered = ResourceManager.get("msgStatus-delivered.png");
-	protected static final URL switchRawMessage = ResourceManager.get("switchRawMessage.png");
+	protected static final URL statusUnknown = ResourceManager.get("msgControls/status-unknown.png");
+	protected static final URL statusPending = ResourceManager.get("msgControls/status-pending.png");
+	protected static final URL statusFailed = ResourceManager.get("msgControls/status-failed.png");
+	protected static final URL statusDelivered = ResourceManager.get("msgControls/status-delivered.png");
+	protected static final URL switchRawMessage = ResourceManager.get("msgControls/switch-rawMessage.png");
+	protected static final URL switchAttachments = ResourceManager.get("msgControls/switch-attachments.png");
 
-	public MessagesPanel()
+	public MessagesPanel(ChatRoomsView chatRoomsView)
 	{
 		this.setViewportView(messagesPane);
 		this.setHorizontalScrollBarPolicy(
@@ -50,6 +55,7 @@ public class MessagesPanel extends JStickyScrollPane
 		this.setVerticalScrollBarPolicy(
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		this.setBorder(BorderFactory.createEmptyBorder());
+		this.chatRoomsView = chatRoomsView;
 
 		// przygotowanie odnośników DOM
 		messagesDoc = (HTMLDocument)messagesPane.getDocument();
@@ -86,18 +92,84 @@ public class MessagesPanel extends JStickyScrollPane
 		"%s</tr></table>";
 	protected final static String messageContents = //data, autor, treść
 		"<p>(%s) <strong>%s:</strong> %s</p>";
+	protected final static String messageServiceContents = //data, autor, informacja
+		"<p>(%s) <strong>%s</strong> <em>%s</em></p>";
 	protected final static String messageReceiversCell = //id, ikona (html)
 		"<td id=\"message-receivers-%d\">%s</td>";
 	protected final static String messageReceiversIcon =  //id, ikona (url), got, pending, failed
 		"<p><a href=\"action:messageReceiversSwitch/%d\">" +
 		"<img src=\"%s\" border=\"0\" width=\"10\" height=\"10\" "+
 		"alt=\"Dostarczono: %d, wysyłanie: %d, nie dostarczono: %d\" /></a></p>";
+	
 	protected final static String messageSwitchRawCell = //id, ikona (switchRawMessage)
-		"<td><p><a href=\"action:switchRawContents/%d\">" +
+		"<td class=\"message-iconCell\"><p><a href=\"action:switchRawContents/%d\">" +
 		"<img width=\"10\" height=\"10\" src=\"%s\" " +
 		"alt=\"Pokaż/ukryj oryginalną wiadomość\" border=\"0\" /></a></p></td>";
+	protected final static String messageSwitchAttachmentsCell = //id, ikona (switchAttachments)
+		"<td class=\"message-iconCell\"><p><a href=\"action:switchAttachments/%d\">" +
+		"<img width=\"10\" height=\"10\" src=\"%s\" " +
+		"alt=\"Pokaż/ukryj załączniki\" border=\"0\" /></a></p></td>";
+
 	protected final static String messageServiceCell = //id
 		"<div class=\"message-serviceCell\" id=\"message-serviceCell-%d\"><p></p></div>";
+
+	/**
+	 * Element HTML listy załączników.
+	 *
+	 * Parametry (kolejno): fileName, messageID, fileNo, dodatkowe linki.
+	 */
+	protected final static String messageAttachment =
+		"<p>%s (<a href=\"action:downloadAttachment/%d/%d\">pobierz</a>" +
+		"%s)</p>";
+
+	/**
+	 * Element HTML linku otworzenia załącznika.
+	 *
+	 * Parametry (kolejno): messageID, fileNo.
+	 */
+	protected final static String messageAttachmentOpenAction =
+		", <a href=\"action:openAttachment/%d/%d\">otwórz</a>";
+
+	protected String formatMessageContents(Message message, boolean rawContents)
+	{
+		String contents;
+
+		if (rawContents)
+		{
+			if (!(message instanceof IncomingMessage))
+				throw new RuntimeException("Wiadomości nie przychodzące nie mogą posiadać wersji RAW");
+
+			contents = escapeMessageContents(
+				((IncomingMessage)message).getRawContents(), false);
+		}
+		else
+			contents = escapeMessageContents(message.getContents(), true);
+
+		if (contents.isEmpty())
+		{
+			String komunikat;
+
+			if (((message instanceof IncomingMessage) && ((IncomingMessage)message).getAttachments() != null) ||
+				((message instanceof OutgoingMessage) && ((OutgoingMessage)message).getAttachedFiles().size() > 0))
+				komunikat = "przesyła plik";
+			else
+				komunikat = "wysłał pustą wiadomość";
+
+			return String.format(messageServiceContents,
+				messagesDateFormat.format(message.date),
+				HTMLUtilities.escape(message.getAuthor()),
+				komunikat
+				);
+		}
+		else
+		{
+			return String.format(messageContents,
+				messagesDateFormat.format(message.date),
+				HTMLUtilities.escape(message.getAuthor()),
+				contents
+				);
+		}
+	}
 
 	public void add(Message message)
 	{
@@ -107,6 +179,8 @@ public class MessagesPanel extends JStickyScrollPane
 
 		if (message instanceof OutgoingMessage)
 		{
+			OutgoingMessage out = (OutgoingMessage)message;
+
 			messageIcons.append(
 				String.format(messageReceiversCell,
 					message.id,
@@ -117,11 +191,21 @@ public class MessagesPanel extends JStickyScrollPane
 						)
 					)
 				);
+
+			if (out.getAttachedFiles().size() > 0)
+			{
+				messageIcons.append(
+					String.format(messageSwitchAttachmentsCell,
+						message.id,
+						switchAttachments)
+					);
+			}
 		}
 
 		if (message instanceof IncomingMessage)
 		{
-			if (((IncomingMessage)message).isRawContentsDifferent())
+			IncomingMessage inc = (IncomingMessage)message;
+			if (inc.isRawContentsDifferent())
 			{
 				messageIcons.append(
 					String.format(messageSwitchRawCell,
@@ -129,15 +213,20 @@ public class MessagesPanel extends JStickyScrollPane
 						switchRawMessage)
 					);
 			}
+
+			if (inc.getAttachments() != null)
+			{
+				messageIcons.append(
+					String.format(messageSwitchAttachmentsCell,
+						message.id,
+						switchAttachments)
+					);
+			}
 		}
 
 		String messageHTML = String.format(messageRow,
 			message.id, message.id,
-		String.format(messageContents,
-				messagesDateFormat.format(message.date),
-				HTMLUtilities.escape(message.getAuthor()),
-				escapeMessageContents(message.getContents(), true)
-				),
+			formatMessageContents(message, false),
 			messageIcons
 			);
 
@@ -174,6 +263,8 @@ public class MessagesPanel extends JStickyScrollPane
 		DisplayedMessage dMesg = displayedMessages.get(message.id);
 		assert(dMesg != null);
 
+		StringBuilder serviceMsg = new StringBuilder();
+
 		if (message instanceof OutgoingMessage)
 		{
 			OutgoingMessage oMessage = (OutgoingMessage)message;
@@ -202,28 +293,85 @@ public class MessagesPanel extends JStickyScrollPane
 			switch (dMesg.getServiceCellUsage())
 			{
 				case RECEIVERS:
-					String serviceMsg = "";
 					if (pending == 0 && got == 0 && failed == 0)
-						serviceMsg = "<p><b>Nieznany status wiadomości, lub brak odbiorców.</b></p>";
+						serviceMsg.append("<p><b>Nieznany status wiadomości, lub brak odbiorców.</b></p>");
 					else if (pending > 0)
-						serviceMsg = "<p><b>Wiadomość w trakcie wysyłania.</b></p>";
+						serviceMsg.append("<p><b>Wiadomość w trakcie wysyłania.</b></p>");
 					else if (failed > 0)
-						serviceMsg = "<p><b>Wiadomość nie dostarczona do wszystkich odbiorców.</b></p>";
+						serviceMsg.append("<p><b>Wiadomość nie dostarczona do wszystkich odbiorców.</b></p>");
 					else
-						serviceMsg = "<p><b>Wiadomość dostarczona.</b></p>";
+						serviceMsg.append("<p><b>Wiadomość dostarczona.</b></p>");
 
 					if (got > 0)
-						serviceMsg += "<p>Dostarczono: " +
-							Contact.join(oMessage.getReceiversGot(), ", ") + ".</p>";
+					{
+						serviceMsg.append("<p>Dostarczono: ");
+						serviceMsg.append(Contact.join(oMessage.getReceiversGot(), ", "));
+						serviceMsg.append(".</p>");
+					}
 					if (pending > 0)
-						serviceMsg += "<p>Wysyłanie: " +
-							Contact.join(oMessage.getReceiversPending(), ", ") + ".</p>";
+					{
+						serviceMsg.append("<p>Wysyłanie: ");
+						serviceMsg.append(Contact.join(oMessage.getReceiversPending(), ", "));
+						serviceMsg.append(".</p>");
+					}
 					if (failed > 0)
-						serviceMsg += "<p>Nie dostarczono: " +
-							Contact.join(oMessage.getReceiversFailed(), ", ") + ".</p>";
+					{
+						serviceMsg.append("<p>Nie dostarczono: ");
+						serviceMsg.append(Contact.join(oMessage.getReceiversFailed(), ", "));
+						serviceMsg.append(".</p>");
+					}
 
 					HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
-						serviceMsg, false);
+						serviceMsg.toString(), false);
+					break;
+				case ATTACHMENTS:
+					for (File f : oMessage.getAttachedFiles())
+					{
+						serviceMsg.append("<p>");
+						serviceMsg.append(f.getName());
+						serviceMsg.append("</p>");
+					}
+
+					if (serviceMsg.length() == 0)
+						throw new RuntimeException("Powinien być jakiś załącznik");
+
+					HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
+						serviceMsg.toString(), false);
+					break;
+			}
+		}
+		else if (message instanceof IncomingMessage)
+		{
+			IncomingMessage iMessage = (IncomingMessage)message;
+
+			switch (dMesg.getServiceCellUsage())
+			{
+				case ATTACHMENTS:
+					ReceivedFile[] receivedFiles = iMessage.getAttachments();
+
+					if (receivedFiles == null)
+					{
+						HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
+							"<p>Wszystkie załączniki zostały już pobrane.</p>", false);
+						break;
+					}
+
+					assert(receivedFiles.length > 0);
+
+					for (int i = 0; i < receivedFiles.length; i++)
+					{
+						String openLink = "";
+						if (receivedFiles[i].isFile())
+							openLink = String.format(messageAttachmentOpenAction,
+								message.id, i);
+						serviceMsg.append(String.format(
+								messageAttachment, receivedFiles[i].getFileName(),
+								message.id, i, openLink
+							));
+					}
+
+					HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
+						serviceMsg.toString(), false);
 					break;
 			}
 		}
@@ -278,9 +426,157 @@ public class MessagesPanel extends JStickyScrollPane
 
 				dMesg.switchRAWContents();
 			}
+			else if (cmd[0].equals("switchAttachments"))
+			{
+				int id = Integer.parseInt(cmd[1]);
+				DisplayedMessage dMesg = displayedMessages.get(id);
+				assert(dMesg != null);
+
+				dMesg.switchServiceCell(ServiceCellUsage.ATTACHMENTS);
+			}
+			else if (cmd[0].equals("downloadAttachment") || cmd[0].equals("openAttachment"))
+			{
+				int messageId = Integer.parseInt(cmd[1]);
+				int fileNo = Integer.parseInt(cmd[2]);
+
+				DisplayedMessage dMesg = displayedMessages.get(messageId);
+				assert(dMesg != null);
+				IncomingMessage iMesg = (IncomingMessage)dMesg.message;
+
+				ReceivedFile[] attachments = iMesg.getAttachments();
+				assert(attachments.length > fileNo);
+
+				ReceivedFile attachment = attachments[fileNo];
+
+				if (attachment.getState() == TransferredFile.State.TRANSFERRING)
+				{
+					JOptionPane.showMessageDialog(messagesPanel,
+						"Już pobierasz ten plik...", "Pobieranie pliku",
+						JOptionPane.INFORMATION_MESSAGE);
+				}
+				else if (cmd[0].equals("downloadAttachment"))
+				{
+					JFileChooser fileChooser = new JSaveFileChooser();
+					fileChooser.setDialogTitle("Zapisz załącznik jako...");
+					fileChooser.setSelectedFile(new File(attachment.getFileName()));
+					if (fileChooser.showSaveDialog(messagesPanel) == JFileChooser.APPROVE_OPTION)
+					{
+						File saveTo = fileChooser.getSelectedFile();
+						if (saveTo.exists())
+						{
+							if (!saveTo.canWrite())
+								throw new RuntimeException("Plik istnieje i nie można go nadpisać");
+							if (!saveTo.delete())
+								throw new RuntimeException("Nie można usunąć pliku");
+							if (saveTo.exists())
+								throw new RuntimeException("Plik się nie usunął");
+						}
+						
+						attachment.receive(saveTo);
+						chatRoomsView.mainView.mainMenu.fileTransfersView.showTransfers();
+					}
+				}
+				else // cmd[0].equals("openAttachment")
+					openAttachment(attachment);
+			}
 			else
 				throw new RuntimeException("nieznane polecenie: " + cmdStr);
 		}
+	}
+
+	private void openAttachment(final ReceivedFile attachment)
+	{
+		// wykrywanie rozszerzenia (bez niego nie będzie się dało określić, jak
+		// otworzyć plik
+		String ext = null;
+		String[] fileEl = attachment.getFileName().split("\\.");
+		if (fileEl.length > 0)
+		{
+			ext = fileEl[fileEl.length - 1];
+			if (!ext.matches("[a-z0-9A-Z]{1,10}"))
+				ext = null;
+		}
+		if (ext == null)
+		{
+			JOptionPane.showMessageDialog(messagesPanel,
+				"Nie można określić typu pliku. Spróbuj go zapisać i ręcznie uruchomić.", "Nieznany typ pliku",
+				JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// przygotowanie miejsca na plik
+		final File tmp;
+		try
+		{
+			tmp = File.createTempFile("UniLANChat-viewAttachment-", "." + ext);
+			tmp.deleteOnExit();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		//pobranie pliku
+		attachment.addObserver(new Observer()
+		{
+			public void update(Observable o, Object arg)
+			{
+				if (!tmp.exists())
+					throw new RuntimeException("Pobrany plik nie istnieje");
+
+				TransferredFile.State attState = attachment.getState();
+
+				if (attState == TransferredFile.State.ERROR)
+					attachment.deleteObserver(this);
+				else if (attState != TransferredFile.State.COMPLETED)
+					return;
+				attachment.deleteObserver(this);
+
+				// plik został pobrany - próbujemy go otworzyć
+				try
+				{
+					Desktop.getDesktop().open(tmp);
+				}
+				catch (IOException ex)
+				{
+					GUIUtilities.swingInvokeAndWait(new Runnable()
+					{
+						public void run()
+						{
+							System.err.println(tmp.exists());
+							JOptionPane.showMessageDialog(messagesPanel,
+								"Nie udało się wyświetlić pliku \"" +
+								attachment.getFileName() +
+								"\". Spróbuj go zapisać i ręcznie uruchomić.", "Nieznany typ pliku",
+								JOptionPane.WARNING_MESSAGE);
+
+							JFileChooser fileChooser = new JSaveFileChooser();
+							fileChooser.setDialogTitle("Zapisz załącznik jako...");
+							fileChooser.setSelectedFile(new File(attachment.getFileName()));
+							if (fileChooser.showSaveDialog(messagesPanel) != JFileChooser.APPROVE_OPTION)
+								return;
+							File saveTo = fileChooser.getSelectedFile();
+							if (saveTo.exists())
+								saveTo.delete();
+
+							try
+							{
+								SystemProcesses.copyFile(tmp, saveTo);
+							}
+							catch (IOException e)
+							{
+								JOptionPane.showMessageDialog(messagesPanel,
+									"Nie udało się przenieść pliku.", "Nieznany typ pliku",
+									JOptionPane.ERROR_MESSAGE);
+							}
+							System.err.println(tmp.exists());
+						}
+					});
+				}
+				tmp.deleteOnExit();
+			}
+		});
+		attachment.receive(tmp);
 	}
 
 	/**
@@ -296,7 +592,12 @@ public class MessagesPanel extends JStickyScrollPane
 		/**
 		 * W komórce serwisowej wyświetlana jest lista odbiorców.
 		 */
-		RECEIVERS
+		RECEIVERS,
+
+		/**
+		 * W komórce serwisowej wyświetlane są załączniki.
+		 */
+		ATTACHMENTS
 	};
 
 	class DisplayedMessage
@@ -384,19 +685,8 @@ public class MessagesPanel extends JStickyScrollPane
 
 			isRAWContentsShown = !isRAWContentsShown;
 
-			String contents;
-			if (isRAWContentsShown)
-				contents = escapeMessageContents(
-					((IncomingMessage)message).getRawContents(), false);
-			else
-				contents = escapeMessageContents(message.getContents(), true);
-
 			HTMLUtilities.setInnerHTML(messageContentCell,
-				String.format(messageContents,
-					messagesDateFormat.format(message.date),
-					HTMLUtilities.escape(message.getAuthor()),
-					contents
-					),
+				formatMessageContents(message, isRAWContentsShown),
 				false);
 		}
 	}

@@ -33,7 +33,7 @@ class IpmsgFileReceiveRequestHeader
 	{
 		String[] data = raw.split(":");
 
-		if(data.length > 3 && data.length < 2)
+		if (data.length > 3 || data.length < 2)
 			throw new IllegalArgumentException("Niepoprawna liczba sekcji");
 
 		IpmsgFileReceiveRequestHeader header = new IpmsgFileReceiveRequestHeader();

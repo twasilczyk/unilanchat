@@ -37,3 +37,8 @@ p
 	margin: 2px;
 	margin-bottom: 7px;
 }
+
+.message-iconCell p
+{
+	padding-left: 3px;
+}

@@ -1,6 +1,8 @@
 package tools.systemintegration;
 
-import java.io.IOException;
+import java.awt.Desktop;
+import java.io.*;
+import java.net.*;
 import javax.swing.JOptionPane;
 
 import tools.WholeStreamReader;
@@ -56,6 +58,24 @@ public class SystemProcesses
 	 */
 	public static void openURL(String url)
 	{
+		if (Desktop.isDesktopSupported())
+		{
+			boolean success = false;
+			try
+			{
+				Desktop.getDesktop().browse(new URI(url));
+				success = true;
+			}
+			catch (IOException ex)
+			{
+			}
+			catch (URISyntaxException ex)
+			{
+			}
+			if (success)
+				return;
+		}
+
 		String osName = System.getProperty("os.name");
 		try
 		{
@@ -89,6 +109,38 @@ public class SystemProcesses
 		{
 			JOptionPane.showMessageDialog(null,
 				"Error attempting to launch web browser\n" + e.toString());
+		}
+	}
+
+	/**
+	 * Kopiuje plik. Jeżeli plik docelowy istnieje, zostanie zastąpiony. Do
+	 * ścieżki wskazywanej przez plik docelowy muszą być prawa zapisu.
+	 *
+	 * @param source plik źródłowy
+	 * @param destination plik docelowy (może nie istnieć)
+	 * @throws IOException jeżeli wystąpił błąd przy kopiowaniu
+	 */
+	public static void copyFile(File source, File destination) throws IOException
+	{
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
+
+		try
+		{
+			fis = new FileInputStream(source);
+			fos = new FileOutputStream(destination);
+
+			byte[] buffer = new byte[4096];
+			int read;
+			while ((read = fis.read(buffer)) != -1)
+				fos.write(buffer, 0, read);
+		}
+		finally
+		{
+			if (fis != null)
+				fis.close();
+			if (fos != null)
+				fos.close();
 		}
 	}
 }

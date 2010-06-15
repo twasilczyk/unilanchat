@@ -1,5 +1,9 @@
 package protocols;
 
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
+
 /**
  * Wiadomość przychodząca, czyli odebrana przez jedno z kont, do przeczytania
  * przez użytkownika.
@@ -18,6 +22,9 @@ public class IncomingMessage extends Message
 	 * wiadomości.
 	 */
 	protected String rawContents;
+
+	protected final Vector<ReceivedFile> attachments = new Vector<ReceivedFile>();
+	private final AttachmentObserver attachmentObserver = new AttachmentObserver();
 
 	/**
 	 * Nowa wiadomość przychodząca.
@@ -68,6 +75,28 @@ public class IncomingMessage extends Message
 		return rawContents;
 	}
 
+	public void addAttachment(ReceivedFile attachment)
+	{
+		if (attachment == null)
+			throw new NullPointerException();
+		synchronized (attachments)
+		{
+			attachments.add(attachment);
+			attachment.addObserver(attachmentObserver);
+		}
+	}
+
+	public ReceivedFile[] getAttachments()
+	{
+		if (attachments.size() == 0)
+			return null;
+		synchronized (attachments)
+		{
+			ReceivedFile[] ret = new ReceivedFile[attachments.size()];
+			return attachments.toArray(ret);
+		}
+	}
+
 	/**
 	 * Sprawdza, czy wersja surowa jest istotnie (pomijając białe znaki na
 	 * końcach) różna od wyświetlanej.
@@ -79,5 +108,19 @@ public class IncomingMessage extends Message
 		if (rawContents == null)
 			return false;
 		return !rawContents.trim().equals(this.contents.trim());
+	}
+
+	class AttachmentObserver implements Observer
+	{
+		public void update(Observable o, Object arg)
+		{
+			ReceivedFile rFile = (ReceivedFile)o;
+			if (rFile.getState() == TransferredFile.State.COMPLETED)
+				synchronized (attachments)
+				{
+					attachments.remove(rFile);
+				}
+			notifyObservers();
+		}
 	}
 }
