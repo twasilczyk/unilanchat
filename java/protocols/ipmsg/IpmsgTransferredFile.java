@@ -132,6 +132,16 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	}
 
 	/**
+	 * Zwraca kontakt, z którym jest przeprowadzana transmisja.
+	 * 
+	 * @return kontakt powiązany z transmisją
+	 */
+	public IpmsgContact getContact()
+	{
+		return contact;
+	}
+
+	/**
 	 * Metoda synchronizowana, zwraca stan, w którym obecnie znajduje się plik.
 	 *
 	 * @return stan, w którym obecnie znajduje się plik

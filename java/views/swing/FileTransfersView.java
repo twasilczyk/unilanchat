@@ -2,9 +2,10 @@ package views.swing;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.table.*;
 
 import controllers.FileTransfersController;
-import protocols.Account;
+import protocols.*;
 import protocols.ipmsg.*;
 import resources.ResourceManager;
 import tools.*;
@@ -21,7 +22,7 @@ public class FileTransfersView extends JFrame
 
 	protected final ListenableVector<IpmsgTransferredFile> ipmsgTransferredFiles;
 
-	private final FileTransfersListModel fileTransfersListModel;
+	private final FileTransfersTableModel fileTransfersTableModel;
 
 	public FileTransfersView(FileTransfersController fileTransfersController)
 	{
@@ -42,10 +43,10 @@ public class FileTransfersView extends JFrame
 		if (ipmsgTransferredFilesInit == null)
 			throw new NullPointerException();
 		this.ipmsgTransferredFiles = ipmsgTransferredFilesInit;
-		this.fileTransfersListModel = new FileTransfersListModel();
+		this.fileTransfersTableModel = new FileTransfersTableModel();
 
-		setMinimumSize(new Dimension(200, 100));
-		setPreferredSize(new Dimension(400, 100));
+		setMinimumSize(new Dimension(300, 100));
+		setPreferredSize(new Dimension(600, 250));
 		setLayout(new BorderLayout(10, 10));
 		setIconImage(ResourceManager.getIcon("icons/32.png").getImage());
 
@@ -76,62 +77,173 @@ public class FileTransfersView extends JFrame
 		}
 	}
 
-	class FileTransfersList extends JList
+	class FileTransfersList extends JTable
 	{
 		public FileTransfersList()
 		{
-			this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			this.setModel(fileTransfersListModel);
-//			this.setCellRenderer(new FileTransfersListPanelRenderer());
-//			this.addMouseListener(new FileTransfersListListener());
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			setModel(fileTransfersTableModel);
+			setDefaultRenderer(FileTransfersCellRendererProgress.class,
+					new FileTransfersCellRendererProgress());
+			setRowMargin(2);
+			setBackground(Color.WHITE);
+			setShowGrid(false);
+			setOpaque(false);
 		}
 	}
 
-	public class FileTransfersListModel extends AbstractListModel
+	class FileTransfersTableModel extends AbstractTableModel
 	{
-		public FileTransfersListModel()
+		public FileTransfersTableModel()
 		{
 			ipmsgTransferredFiles.addSetListener(new FileTransfersSetListener());
 		}
 
-		public int getSize()
+		public int getRowCount()
 		{
 			return ipmsgTransferredFiles.size();
 		}
 
-		public Object getElementAt(int index)
+		public int getColumnCount()
 		{
-			return ipmsgTransferredFiles.get(index);
+			return 6;
 		}
 
-		protected void refreshList()
+		@Override
+		public String getColumnName(int column)
 		{
-			final FileTransfersListModel model = this;
+			switch (column)
+			{
+				case 0:
+					return "Kierunek";
+				case 1:
+					return "Nazwa pliku";
+				case 2:
+					return "Kontakt";
+				case 3:
+					return "Postęp";
+				case 4:
+					return "Transfer";
+				case 5:
+					return "Status";
+				default:
+					throw new UnsupportedOperationException("Nieprawidłowy numer kolumny");
+			}
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex)
+		{
+			if (columnIndex == 3)
+				return FileTransfersCellRendererProgress.class;
+			return super.getColumnClass(columnIndex);
+		}
+
+		protected final String[] speedSuffixes = {
+			"B/s", "kB/s", "MB/s", "GB/s", "TB/s"
+		};
+
+		public Object getValueAt(int rowIndex, int columnIndex)
+		{
+			if (columnIndex == 0)
+			{
+				if (ipmsgTransferredFiles.get(rowIndex) instanceof ReceivedFile)
+					return "Pobieranie";
+				else
+					return "Wysyłanie";
+			}
+			else if (columnIndex == 1)
+				return ipmsgTransferredFiles.get(rowIndex).getFileName();
+			else if (columnIndex == 2)
+				return ipmsgTransferredFiles.get(rowIndex).getContact().getName();
+			else if (columnIndex == 3)
+			{
+				IpmsgTransferredFile file = ipmsgTransferredFiles.get(rowIndex);
+				long current = file.getTransferredDataSize();
+				Long total = file.getFileSize();
+				if (total == null || total <= 0)
+					return 0.0;
+				else if (total <= current)
+					return 1.0;
+				else
+					return ((double)current)/((double)total);
+			}
+			else if (columnIndex == 4)
+			{
+				double speed = ipmsgTransferredFiles.get(rowIndex).getTransferSpeed();
+				int speedSuffix = 0;
+				while (speed >= 1000 && speedSuffix < speedSuffixes.length - 1)
+				{
+					speed /= 1000;
+					speedSuffix++;
+				}
+
+				if (speed >= 100)
+					return String.format("%.0f %s", speed, speedSuffixes[speedSuffix]);
+				else if (speed >= 10)
+					return String.format("%.1f %s", speed, speedSuffixes[speedSuffix]);
+				else
+					return String.format("%.2f %s", speed, speedSuffixes[speedSuffix]);
+			}
+			else if (columnIndex == 5)
+			{
+				switch (ipmsgTransferredFiles.get(rowIndex).getState())
+				{
+					case COMPLETED:
+						return "Ukończono";
+					case ERROR:
+						return "Błąd";
+					case TRANSFERRING:
+						return "Przesyłanie";
+					case WAITING_FOR_CONNECTION:
+						return "Oczekuje";
+					default:
+						throw new UnsupportedOperationException("Nieznany status");
+				}
+			}
+			else
+				throw new UnsupportedOperationException("Nieprawidłowy numer kolumny");
+		}
+
+		public void refreshData()
+		{
 			SwingUtilities.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					fireContentsChanged(model, 0, Integer.MAX_VALUE);
+					fireTableDataChanged();
 				}
 			});
 		}
 	}
 
-	public class FileTransfersSetListener implements SetListener<IpmsgTransferredFile>
+	class FileTransfersCellRendererProgress implements TableCellRenderer
+	{
+		protected final JProgressBar progressBar = new JProgressBar(0, 100);
+
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+		{
+			Double progress = (Double)value;
+			progressBar.setValue((int)Math.round(progress * 100));
+			return progressBar;
+		}
+	}
+
+	class FileTransfersSetListener implements SetListener<IpmsgTransferredFile>
 	{
 		public void itemAdded(IpmsgTransferredFile item)
 		{
-			fileTransfersListModel.refreshList();
+			fileTransfersTableModel.refreshData();
 		}
 
 		public void itemRemoved(IpmsgTransferredFile item)
 		{
-			fileTransfersListModel.refreshList();
+			fileTransfersTableModel.refreshData();
 		}
 
 		public void itemUpdated(IpmsgTransferredFile item)
 		{
-			fileTransfersListModel.refreshList();
+			fileTransfersTableModel.refreshData();
 		}
 	}
 }

@@ -9,6 +9,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
 
 0.3
+ - możliwość załączania plików do wiadomości przez drag&drop
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
