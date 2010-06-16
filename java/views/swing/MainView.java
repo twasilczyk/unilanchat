@@ -6,6 +6,7 @@ import java.util.*;
 import javax.swing.*;
 
 import controllers.MainController;
+import main.Configuration;
 import main.Main;
 import resources.ResourceManager;
 import tools.*;
@@ -46,7 +47,7 @@ public class MainView extends JFrame implements Observer
 	 */
 	protected MainView(MainController mainControllerObj)
 	{
-		super("Lista kontaktów");
+		super("Lista kontaktów (" + Configuration.getInstance().getNick() + ")");
 
 		this.mainController = mainControllerObj;
 		this.mainController.addObserver(this);
@@ -77,6 +78,8 @@ public class MainView extends JFrame implements Observer
 
 		pack();
 		setLocationRelativeTo(null); //wyśrodkowanie okna
+
+		Configuration.getInstance().addObserver(this);
 	}
 
 	public void update(Observable o, Object gArg)
@@ -116,6 +119,17 @@ public class MainView extends JFrame implements Observer
 					}
 				});
 			}
+		}
+		else if (o instanceof Configuration)
+		{
+			final Configuration conf = (Configuration)o;
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					setTitle("Lista kontaktów (" + conf.getNick() + ")");
+				}
+			});
 		}
 	}
 

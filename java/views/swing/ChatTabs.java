@@ -140,12 +140,15 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 			public void run()
 			{
 				ChatRoomPanel panel = getRoomPanel(item);
+				boolean wasUnread = panel.isUnread();
 				synchronized (thisChatTabs)
 				{
 					remove(panel);
 					if (getTabCount() == 0)
 						chatRoomsView.setVisible(false);
 				}
+				if (wasUnread)
+					chatRoomsView.getAnyUnread();
 			}
 		});
 	}

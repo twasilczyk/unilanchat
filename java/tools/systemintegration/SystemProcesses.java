@@ -113,6 +113,37 @@ public class SystemProcesses
 	}
 
 	/**
+	 * Próbuje otworzyć podany plik w domyślnym powiązanym z nim programem,
+	 * a jeżeli jest to program, nastąpi próba jego uruchomienia.
+	 *
+	 * @param file plik do otworzenia
+	 * @return czy udało się otworzyć plik
+	 */
+	public static boolean openFile(File file)
+	{
+		if (file == null)
+			throw new NullPointerException();
+		if (!file.exists())
+			throw new IllegalArgumentException("Plik nie istnieje");
+
+		boolean success = false;
+		try
+		{
+			Desktop.getDesktop().open(file);
+			success = true;
+		}
+		catch (IOException e) { }
+		catch (UnsupportedOperationException e) { }
+
+		if (success)
+			return true;
+
+		//TODO: tutaj można podjąć jeszcze jakieś próby otworzenia pliku
+
+		return false;
+	}
+
+	/**
 	 * Kopiuje plik. Jeżeli plik docelowy istnieje, zostanie zastąpiony. Do
 	 * ścieżki wskazywanej przez plik docelowy muszą być prawa zapisu.
 	 *

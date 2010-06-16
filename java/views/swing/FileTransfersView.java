@@ -71,9 +71,9 @@ public class FileTransfersView extends JFrame
 	{
 		public FileTransfersListPanel()
 		{
-			this.setViewportView(new FileTransfersList());
-			this.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-			this.setBorder(BorderFactory.createEmptyBorder());
+			setViewportView(new FileTransfersList());
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+			setBorder(BorderFactory.createEmptyBorder());
 		}
 	}
 
@@ -88,7 +88,7 @@ public class FileTransfersView extends JFrame
 			setRowMargin(2);
 			setBackground(Color.WHITE);
 			setShowGrid(false);
-			setOpaque(false);
+			setOpaque(true);
 		}
 	}
 

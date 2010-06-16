@@ -32,7 +32,7 @@ public class OutgoingMessage extends Message
 	 *
 	 * @return autor wiadomości - {@link #selfName}
 	 */
-	public String getAuthor()
+	public String getAuthorName()
 	{
 		return "Ja";
 	}

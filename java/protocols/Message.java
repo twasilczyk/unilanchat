@@ -63,7 +63,7 @@ public abstract class Message extends SimpleObservable
 	 *
 	 * @return autor wiadomości
 	 */
-	public abstract String getAuthor();
+	public abstract String getAuthorName();
 
 	/**
 	 * Zwraca treść wiadomości.

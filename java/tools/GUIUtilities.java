@@ -4,9 +4,6 @@ import java.applet.Applet;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sound.midi.SysexMessage;
 import javax.swing.*;
 import resources.ResourceManager;
 
@@ -94,6 +91,7 @@ public abstract class GUIUtilities
 
 		UIManager.put("FileChooser.listViewBorder",
 				BorderFactory.createEmptyBorder());
+		UIManager.put("FileChooser.readOnly", false);
 	}
 
 	/**
@@ -125,6 +123,8 @@ public abstract class GUIUtilities
 		return true;
 	}
 
+	// <editor-fold desc="Przywoływanie okna na wierzch">
+
 	/**
 	 * Przywołuje okno na wierzch systemowego managera okien. Jest to obejście
 	 * wadliwej implementacji metody {@link Frame#toFront()}. Oryginalna
@@ -154,8 +154,40 @@ public abstract class GUIUtilities
 				Thread.yield();
 		}
 
-		// ukrycie i pokazanie (pod X11 - wszystkich) okien to obejście, gdy nie
-		// da się uzyskać focusa
+		bringWindowToFrontLinuxHack(window);
+
+		window.setVisible(true);
+		window.toFront();
+		window.requestFocus();
+
+		Thread linuxHackRepeater = new Thread()
+		{
+			@Override
+			public void run()
+			{
+				long waitStart = System.currentTimeMillis();
+				while (!window.isActive() &&
+					System.currentTimeMillis() - waitStart < 500)
+					Thread.yield();
+				bringWindowToFrontLinuxHack(window);
+			}
+		};
+		linuxHackRepeater.setDaemon(true);
+		linuxHackRepeater.start();
+	}
+
+	/**
+	 * Obejście problemu nie przywoływania okien na wierzch pod systemem Linux,
+	 * dla metody {@link #bringWindowToFront(java.awt.Frame)}.
+	 *
+	 * Obejście polega zasadniczo na ukryciu i pokazaniu (pod X11 - wszystkich)
+	 * okien, gdy nie można uzyskać focusa.
+	 *
+	 * @param window okno do przywołania
+	 * @see #bringWindowToFront(java.awt.Frame)
+	 */
+	private static void bringWindowToFrontLinuxHack(final Frame window)
+	{
 		window.setVisible(false);
 		if (isLinux)
 		{
@@ -173,10 +205,9 @@ public abstract class GUIUtilities
 				f.setVisible(true);
 		}
 		window.setVisible(true);
-		
-		window.toFront();
-		window.requestFocus();
 	}
+
+	// </editor-fold>
 
 	/**
 	 * Opakowanie {@link SwingUtilities#invokeAndWait}. Funkcję można wywoływać

@@ -581,7 +581,7 @@ public class IpmsgAccount extends Account
 		else
 			chatRoom = contact.getPrivateChatRoom();
 
-		IncomingMessage message = new IncomingMessage(chatRoom, authorName);
+		IncomingMessage message = new IncomingMessage(chatRoom, contact);
 
 		String messageRAWContents, filesAdditionalSection = null;
 		if (packet.data.indexOf('\0') < 0)

@@ -104,11 +104,19 @@ public class ChatRoomsView extends JFrame
 						(ChatRoomPanel)chatTabs.getComponentAt(i);
 				if (chatRoomPanel.isUnread())
 				{
-					this.isAnyUnread = true;
+					if (!this.isAnyUnread)
+					{
+						this.isAnyUnread = true;
+						notifyObservers();
+					}
 					return chatRoomPanel;
 				}
 			}
-			this.isAnyUnread = false;
+			if (this.isAnyUnread)
+			{
+				this.isAnyUnread = false;
+				notifyObservers();
+			}
 			return null;
 		}
 	}
@@ -120,9 +128,18 @@ public class ChatRoomsView extends JFrame
 
 	public void showAnyUnread()
 	{
-		boolean selectedPanelWasUnread =
-				((ChatRoomPanel)chatTabs.getSelectedComponent()).isUnread();
-		
+		Component selectedTab = chatTabs.getSelectedComponent();
+
+		if (selectedTab == null)
+		{
+			isAnyUnread = false;
+			notifyObservers();
+			return;
+		}
+
+		boolean selectedPanelWasUnread = (selectedTab != null &&
+				((ChatRoomPanel)selectedTab).isUnread());
+
 		GUIUtilities.bringWindowToFront(this);
 		if (selectedPanelWasUnread)
 			return;

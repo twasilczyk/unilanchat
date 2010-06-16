@@ -1,8 +1,6 @@
 package protocols;
 
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Wiadomość przychodząca, czyli odebrana przez jedno z kont, do przeczytania
@@ -15,7 +13,7 @@ public class IncomingMessage extends Message
 	/**
 	 * Nazwa autora wiadomości.
 	 */
-	protected final String author;
+	protected final Contact author;
 
 	/**
 	 * Oryginalna (przed ewentualnymi automatycznymi modyfikacjami) treść
@@ -32,7 +30,7 @@ public class IncomingMessage extends Message
 	 * @param room pokój, w ramach którego odebrano wiadomość
 	 * @param author autor wiadomości
 	 */
-	public IncomingMessage(ChatRoom room, String author)
+	public IncomingMessage(ChatRoom room, Contact author)
 	{
 		super(room);
 		if(author == null)
@@ -45,7 +43,17 @@ public class IncomingMessage extends Message
 	 *
 	 * @return nazwa autora
 	 */
-	public String getAuthor()
+	public String getAuthorName()
+	{
+		return author.getName();
+	}
+
+	/**
+	 * Zwraca autora wiadomości.
+	 *
+	 * @return autor wiadomości
+	 */
+	public Contact getAuthor()
 	{
 		return author;
 	}

@@ -14,7 +14,6 @@ import javax.swing.text.html.HTMLDocument;
 import components.swing.*;
 import protocols.*;
 import resources.ResourceManager;
-import tools.GUIUtilities;
 import tools.html.*;
 import tools.systemintegration.SystemProcesses;
 
@@ -26,7 +25,7 @@ import tools.systemintegration.SystemProcesses;
 public class MessagesPanel extends JStickyScrollPane
 {
 	protected final MessagesPanel messagesPanel = this;
-	protected final ChatRoomsView chatRoomsView;
+	protected final ChatRoomPanel chatRoomPanel;
 	
 	protected final JEditorPane messagesPane = new JEditorPane("text/html",
 		"<div id=\"messages\"></div>");
@@ -47,7 +46,7 @@ public class MessagesPanel extends JStickyScrollPane
 	protected static final URL switchRawMessage = ResourceManager.get("msgControls/switch-rawMessage.png");
 	protected static final URL switchAttachments = ResourceManager.get("msgControls/switch-attachments.png");
 
-	public MessagesPanel(ChatRoomsView chatRoomsView)
+	public MessagesPanel(ChatRoomPanel chatRoomPanel)
 	{
 		this.setViewportView(messagesPane);
 		this.setHorizontalScrollBarPolicy(
@@ -55,7 +54,7 @@ public class MessagesPanel extends JStickyScrollPane
 		this.setVerticalScrollBarPolicy(
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		this.setBorder(BorderFactory.createEmptyBorder());
-		this.chatRoomsView = chatRoomsView;
+		this.chatRoomPanel = chatRoomPanel;
 
 		// przygotowanie odnośników DOM
 		messagesDoc = (HTMLDocument)messagesPane.getDocument();
@@ -94,6 +93,9 @@ public class MessagesPanel extends JStickyScrollPane
 		"<p>(%s) <strong>%s:</strong> %s</p>";
 	protected final static String messageServiceContents = //data, autor, informacja
 		"<p>(%s) <strong>%s</strong> <em>%s</em></p>";
+	protected final static String messageAuthorLink = //id, autor
+		"<a href=\"action:openPrivateRoom/%d\">%s</a>";
+
 	protected final static String messageReceiversCell = //id, ikona (html)
 		"<td id=\"message-receivers-%d\">%s</td>";
 	protected final static String messageReceiversIcon =  //id, ikona (url), got, pending, failed
@@ -133,7 +135,6 @@ public class MessagesPanel extends JStickyScrollPane
 	protected String formatMessageContents(Message message, boolean rawContents)
 	{
 		String contents;
-
 		if (rawContents)
 		{
 			if (!(message instanceof IncomingMessage))
@@ -144,6 +145,14 @@ public class MessagesPanel extends JStickyScrollPane
 		}
 		else
 			contents = escapeMessageContents(message.getContents(), true);
+
+		String nick;
+		if (chatRoomPanel.chatRoom instanceof PrivateChatRoom ||
+			message instanceof OutgoingMessage)
+			nick = HTMLUtilities.escape(message.getAuthorName());
+		else
+			nick = String.format(messageAuthorLink, message.id,
+				HTMLUtilities.escape(message.getAuthorName()));
 
 		if (contents.isEmpty())
 		{
@@ -157,16 +166,14 @@ public class MessagesPanel extends JStickyScrollPane
 
 			return String.format(messageServiceContents,
 				messagesDateFormat.format(message.date),
-				HTMLUtilities.escape(message.getAuthor()),
-				komunikat
+				nick, komunikat
 				);
 		}
 		else
 		{
 			return String.format(messageContents,
 				messagesDateFormat.format(message.date),
-				HTMLUtilities.escape(message.getAuthor()),
-				contents
+				nick, contents
 				);
 		}
 	}
@@ -473,11 +480,21 @@ public class MessagesPanel extends JStickyScrollPane
 						}
 						
 						attachment.receive(saveTo);
-						chatRoomsView.mainView.mainMenu.fileTransfersView.showTransfers();
+						chatRoomPanel.chatRoomsView.mainView.mainMenu.
+								fileTransfersView.showTransfers();
 					}
 				}
 				else // cmd[0].equals("openAttachment")
 					openAttachment(attachment);
+			}
+			else if (cmd[0].equals("openPrivateRoom"))
+			{
+				int id = Integer.parseInt(cmd[1]);
+				
+				DisplayedMessage dMesg = displayedMessages.get(id);
+				assert(dMesg != null);
+				IncomingMessage iMesg = (IncomingMessage)dMesg.message;
+				chatRoomPanel.chatRoomsView.showRoom(iMesg.getAuthor().getPrivateChatRoom());
 			}
 			else
 				throw new RuntimeException("nieznane polecenie: " + cmdStr);
@@ -533,47 +550,47 @@ public class MessagesPanel extends JStickyScrollPane
 				attachment.deleteObserver(this);
 
 				// plik został pobrany - próbujemy go otworzyć
-				try
+				if (SystemProcesses.openFile(tmp))
 				{
-					Desktop.getDesktop().open(tmp);
+					tmp.deleteOnExit();
+					return;
 				}
-				catch (IOException ex)
+
+				// nie udało się otworzyć - przenosimy tam, gdzie user sobie zażyczy
+				SwingUtilities.invokeLater(new Runnable()
 				{
-					GUIUtilities.swingInvokeAndWait(new Runnable()
+					public void run()
 					{
-						public void run()
+						System.err.println(tmp.exists());
+						JOptionPane.showMessageDialog(messagesPanel,
+							"Nie udało się wyświetlić pliku \"" +
+							attachment.getFileName() +
+							"\". Spróbuj go zapisać i ręcznie uruchomić.", "Nieznany typ pliku",
+							JOptionPane.WARNING_MESSAGE);
+
+						JFileChooser fileChooser = new JSaveFileChooser();
+						fileChooser.setDialogTitle("Zapisz załącznik jako...");
+						fileChooser.setSelectedFile(new File(attachment.getFileName()));
+						if (fileChooser.showSaveDialog(messagesPanel) != JFileChooser.APPROVE_OPTION)
+							return;
+						File saveTo = fileChooser.getSelectedFile();
+						if (saveTo.exists())
+							saveTo.delete();
+
+						try
 						{
-							System.err.println(tmp.exists());
-							JOptionPane.showMessageDialog(messagesPanel,
-								"Nie udało się wyświetlić pliku \"" +
-								attachment.getFileName() +
-								"\". Spróbuj go zapisać i ręcznie uruchomić.", "Nieznany typ pliku",
-								JOptionPane.WARNING_MESSAGE);
-
-							JFileChooser fileChooser = new JSaveFileChooser();
-							fileChooser.setDialogTitle("Zapisz załącznik jako...");
-							fileChooser.setSelectedFile(new File(attachment.getFileName()));
-							if (fileChooser.showSaveDialog(messagesPanel) != JFileChooser.APPROVE_OPTION)
-								return;
-							File saveTo = fileChooser.getSelectedFile();
-							if (saveTo.exists())
-								saveTo.delete();
-
-							try
-							{
-								SystemProcesses.copyFile(tmp, saveTo);
-							}
-							catch (IOException e)
-							{
-								JOptionPane.showMessageDialog(messagesPanel,
-									"Nie udało się przenieść pliku.", "Nieznany typ pliku",
-									JOptionPane.ERROR_MESSAGE);
-							}
-							System.err.println(tmp.exists());
+							SystemProcesses.copyFile(tmp, saveTo);
 						}
-					});
-				}
-				tmp.deleteOnExit();
+						catch (IOException e)
+						{
+							JOptionPane.showMessageDialog(messagesPanel,
+								"Nie udało się przenieść pliku.", "Nieznany typ pliku",
+								JOptionPane.ERROR_MESSAGE);
+						}
+
+						tmp.delete();
+					}
+				});
 			}
 		});
 		attachment.receive(tmp);
