@@ -197,6 +197,10 @@ public class FileTransfersView extends JFrame
 						return "Przesyłanie";
 					case WAITING_FOR_CONNECTION:
 						return "Oczekuje";
+					case CANCELLED:
+						return "Anulowano";
+					case PREPARING:
+						return "Przygotowywanie";
 					default:
 						throw new UnsupportedOperationException("Nieznany status");
 				}

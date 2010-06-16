@@ -1,6 +1,7 @@
 package main;
 
 import controllers.MainController;
+import java.io.File;
 import tools.*;
 import tools.systemintegration.SystemDirectories;
 

@@ -67,6 +67,14 @@ public class IpmsgAccount extends Account
 		return null;
 	}
 
+	public void cancelFiles(String ip, long packetID)
+	{
+		for(IpmsgTransferredFile file: transferredFiles)
+			if(file.contact.ip.equals(ip) && file.packetID == packetID &&
+			file.state != TransferredFile.State.COMPLETED)
+				file.setState(TransferredFile.State.CANCELLED);
+	}
+
 	// <editor-fold defaultstate="collapsed" desc="Wątek połączenia">
 
 	private IpmsgConnectionThread connectionThread;
@@ -254,6 +262,14 @@ public class IpmsgAccount extends Account
 					postMessageThread.confirmMessage(contact, Long.parseLong(packet.data));
 				}
 				catch (NumberFormatException e) { }
+				break;
+			case IpmsgPacket.COMM_RELEASEFILES:
+				System.out.println("Release: " + packet);
+				try
+				{
+					cancelFiles(packet.ip, Long.parseLong(packet.data));
+				}
+				catch (NumberFormatException ex) { }
 				break;
 			default:
 				System.out.println("Niezidentyfikowany pakiet: " + packet);

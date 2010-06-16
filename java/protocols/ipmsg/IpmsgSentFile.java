@@ -34,8 +34,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 			throw new FileNotFoundException("Plik \"" + file.getAbsolutePath() + "\" nie istnieje");
 		this.file = file;
 		this.isFile = file.isFile();
-		if(isFile)
-			this.fileSize = file.length();
+		calculateFileSize();
 		this.contact = contact;
 		this.fileID = nextFileID++;
 		this.packetID = packetID;
@@ -91,6 +90,36 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 	}
 
 	/**
+	 * Oblicza rozmiar pliku. Dla katalogu będzie to suma długości
+	 * wszytkich plików wewnątrz katalogu
+	 */
+	protected void calculateFileSize()
+	{
+		if(isFile)
+			fileSize = file.length();
+		else
+		{
+			Stack<DirectoryNode> stack = new Stack<DirectoryNode>();
+			stack.push(new DirectoryNode(file.listFiles()));
+			long filesSize = 0;
+			while(!stack.empty())
+			{
+				File nextFile = stack.peek().getNextFile();
+				if(nextFile == null)
+				{
+					stack.pop();
+					continue;
+				}
+				else if(nextFile.isFile())
+					filesSize += nextFile.length();
+				else
+					stack.push(new DirectoryNode(nextFile.listFiles()));
+			}
+			fileSize = filesSize;
+		}
+	}
+
+	/**
 	 * Klasa wątku wysyłającego plik.
 	 */
 	protected class SendingThread extends Thread
@@ -121,9 +150,9 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				int readChunkSize;
 				long transferredSize = 0;
 
-				setState(TransferredFile.State.TRANSFERRING);
 				if (isFile)
 				{
+					setState(TransferredFile.State.TRANSFERRING);
 					fileInputStream = new FileInputStream(file);
 					while(offset != 0)
 						offset -= fileInputStream.skip(offset);
@@ -139,7 +168,8 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				{
 					Stack<DirectoryNode> stack = new Stack<DirectoryNode>();
 					IpmsgHierarchicalFileHeader header = new IpmsgHierarchicalFileHeader(file);
-					
+
+					setState(TransferredFile.State.TRANSFERRING);
 					outputStream.write(header.toRawData());
 					stack.push(new DirectoryNode(file.listFiles()));
 					while(!stack.empty())
@@ -156,7 +186,6 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 							header = new IpmsgHierarchicalFileHeader(nextFile);
 							if(nextFile.isFile())
 							{
-								setFileSize(nextFile.length());
 								outputStream.write(header.toRawData());
 								fileInputStream = new FileInputStream(nextFile);
 								while((readChunkSize = fileInputStream.read(buffer)) != -1)
@@ -165,6 +194,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 									transferredSize += readChunkSize;
 									setTransferredDataSize(transferredSize);
 								}
+								fileInputStream.close();
 							}
 							else
 							{
@@ -178,6 +208,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 			}
 			catch (IOException ex)
 			{
+				System.out.println(ex.getMessage());
 				setState(TransferredFile.State.ERROR);
 			}
 			finally
@@ -194,25 +225,25 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				}
 			}
 		}
+	}
 
-		class DirectoryNode
+	class DirectoryNode
+	{
+		File[] files;
+		int currentPosition = 0;
+
+		public DirectoryNode(File[] files)
 		{
-			File[] files;
-			int currentPosition = 0;
+			if(files == null)
+				throw new NullPointerException();
+			this.files = files;
+		}
 
-			public DirectoryNode(File[] files)
-			{
-				if(files == null)
-					throw new NullPointerException();
-				this.files = files;
-			}
-
-			public File getNextFile()
-			{
-				if(currentPosition < files.length)
-					return files[currentPosition++];
-				return null;
-			}
+		public File getNextFile()
+		{
+			if(currentPosition < files.length)
+				return files[currentPosition++];
+			return null;
 		}
 	}
 }

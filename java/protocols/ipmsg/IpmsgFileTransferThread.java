@@ -123,7 +123,6 @@ public class IpmsgFileTransferThread extends Thread
 					}
 					catch (IllegalArgumentException ex)
 					{
-						System.out.println("blad parsowania");
 					}
 				}
 
@@ -181,6 +180,7 @@ public class IpmsgFileTransferThread extends Thread
 				catch (IOException ex1)
 				{
 				}
+				throw new RuntimeException(ex);
 			}
 		}
 	}

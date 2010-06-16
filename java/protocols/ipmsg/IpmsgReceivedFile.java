@@ -111,13 +111,14 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 					}
 
 					if(transferredSize != fileSize)
-						throw new IOException();
+						throw new IllegalArgumentException("Ilosc przeslanych danych niezgodna z deklaracja");
 				}
 				else
 				{
 					File tempFile = null;
 					int readByte, i;
 					long headerSize;
+					boolean estimateDirectorySize = fileSize == 0L;
 
 					// Dopoki jestesmy wewnatrz katalogu
 					while(tempFile == null ||
@@ -129,7 +130,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 						while((readByte = socketInputStream.read()) != -1 && readByte != ':')
 						{
 							if(i >= bufferSize)
-								throw new IOException();
+								throw new RuntimeException("Przekroczono rozmiar bufora na naglowek");
 							buffer[i++] = (byte)readByte;
 						}
 
@@ -139,16 +140,16 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 						}
 						catch(NumberFormatException ex)
 						{
-							throw new IOException();
+							throw new IllegalArgumentException("Nieudalo sie zparsowac dlugosci naglowka");
 						}
 
 						if(readByte != ':')
-							throw new IOException();
+							throw new IllegalArgumentException("Niepoprawna liczba sekcji");
 
 						buffer[i++] = (byte)readByte;
 
 						if(headerSize > bufferSize)
-							throw new IOException();
+							throw new RuntimeException("Przekroczono rozmiar bufora na naglowek");
 
 						headerSize -= i;
 
@@ -168,7 +169,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 						}
 						catch (IllegalArgumentException ex)
 						{
-							throw new IOException();
+							throw new IllegalArgumentException("Nieudalo sie zparsowac naglowka");
 						}
 						// Koniec czytania naglowka
 
@@ -179,17 +180,18 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 						{
 							// Pierwsze utworzenie musi byc katalogiem
 							if(tempFile == null)
-								throw new IOException();
+								throw new IllegalArgumentException("Pierwszy naglowek byl plikiem, oczekiwano katalogu");
 							if(!tempFile2.createNewFile())
-								throw new IOException();
+								throw new RuntimeException("Nieudalo sie utworzyc pliku");
 							fileOutputStream = new FileOutputStream(tempFile2);
 							long dataSizeLeft = hierarchicalHeader.fileSize;
-							setFileSize(hierarchicalHeader.fileSize);
+							if (estimateDirectorySize)
+								setFileSize(hierarchicalHeader.fileSize);
 							while(dataSizeLeft != 0)
 							{
 								readChunkSize = socketInputStream.read(buffer, 0, (int)Math.min(dataSizeLeft, (long)bufferSize));
 								if(readChunkSize == -1 && dataSizeLeft != 0)
-									throw new IOException();
+									throw new IllegalArgumentException("Nieoczekiwany koniec danych");
 								fileOutputStream.write(buffer, 0, readChunkSize);
 								dataSizeLeft -= readChunkSize;
 								transferredSize += readChunkSize;
@@ -200,18 +202,20 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 						else if(hierarchicalHeader.fileAttribute == IpmsgTransferredFile.FLAG_FILE_DIR)
 						{
 							if(!tempFile2.mkdir())
-								throw new IOException();
+								throw new RuntimeException("Nieudalo sie utworzyc katalou");
 							tempFile = tempFile2;
 						}
 						else if(hierarchicalHeader.fileAttribute == IpmsgTransferredFile.FLAG_FILE_RETPARENT)
 						{
 							// Pierwse utworzenie musi byc katalogiem
 							if(tempFile == null)
-								throw new IOException();
+								throw new IllegalArgumentException("Pierwszy naglowek" +
+										"byl komenda powrotu do katalogu wyzej," +
+										"oczekiwano katalogu");
 							tempFile = tempFile.getParentFile();
 						}
 						else
-							throw new IOException("Nieznana flaga przesylania folderow");
+							throw new IllegalArgumentException("Nieznana flaga przesylania folderow");
 					}
 				}
 				setState(TransferredFile.State.COMPLETED);
@@ -219,9 +223,6 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 			catch (IOException ex)
 			{
 				setState(TransferredFile.State.ERROR);
-				// Jesli plik zostal utworzony przez nas i byl blad to usuwamy
-				if(fileOutputStream != null)
-					file.delete();
 			}
 			finally
 			{
