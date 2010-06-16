@@ -8,19 +8,26 @@ JNI_CPP_INC = jni/jni_helper.cpp
 JNI_CPP_INCDIR = -I$(JAVA_ROOT)/include -I$(JAVA_ROOT)/include/linux
 JAVA_BIN_DIR = $(JAVA_ROOT)/bin/
 
+LAUNCH4J_URL = http://sourceforge.net/projects/launch4j/files/launch4j-3/3.0.1/launch4j-3.0.1-linux.tgz/download
+
 ifeq ($(DEBUGMODE), 1)
 	JAVA_BUILD_FLAGS = -Xlint:all,-serial -g
 else
 	JAVA_BUILD_FLAGS = -Xlint:all,-serial
 endif
 
-dist: jni-bin java-build launcher-build
+dist: jni-bin java-build
 	mkdir dist
 	cd java-build ; jar cfme ../dist/UniLANChat.jar ../manifest.mf main.Main  *
-	cp launcher-build/UniLANChat.exe dist
-	cp launcher-build/UniLANChat dist
+ifeq ($(DEBUGMODE), 1)
+	cp launcher/unix/UniLANChat-debug dist/UniLANChat
+else
+	cp launcher/unix/UniLANChat dist/UniLANChat
+endif
+	chmod +x dist/UniLANChat
+	cp launcher/windows/UniLANChat.exe dist/UniLANChat.exe
 
-all: dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
+all: UniLANChat-src.tar.gz dist java-doc UniLANChat-bin.zip UniLANChat-bin.tar.gz UniLANChat-doc.tar.gz
 
 java-build:
 	mkdir java-build
@@ -51,17 +58,13 @@ jni-bin: \
 	java/jni/libtools_systemintegration_X11StartupNotification.so \
 	java/jni/libtools_systemintegration_X11StartupNotification-64.so
 
-launcher-build:
+launcher-rebuild:
 	mkdir launcher-build
-	cd launcher-build ; tar xzf ../launcher/windows/launch4j-3.0.1-linux.tgz
+	cd launcher-build ; wget $(LAUNCH4J_URL) -O launch4j.tgz
+	cd launcher-build ; tar xzf launch4j.tgz
 	cd launcher-build/launch4j ; ./launch4j ../../launcher/windows/launcher.xml
 	chmod -x launcher-build/UniLANChat.exe
-ifeq ($(DEBUGMODE), 1)
-	cp launcher/unix/UniLANChat-debug launcher-build/UniLANChat
-else
-	cp launcher/unix/UniLANChat launcher-build/UniLANChat
-endif
-	chmod +x launcher-build/UniLANChat
+	cp launcher-build/UniLANChat.exe launcher/windows
 
 java-doc:
 	mkdir java-doc
@@ -85,6 +88,9 @@ UniLANChat-bin.tar.gz: dist-zip
 UniLANChat-doc.tar.gz: dist-zip
 	cd dist-zip ; tar --owner nobody --group nobody -czf ../UniLANChat-doc.tar.gz UniLANChat-doc
 
+UniLANChat-src.tar.gz: clean
+	tar --owner nobody --group nobody --create --gzip --file=UniLANChat-src.tar.gz --exclude=Makefile --exclude=.svn *
+
 clean:
 	@rm -f -r dist
 	@rm -f -r java-doc
@@ -94,6 +100,7 @@ clean:
 	@rm -f UniLANChat-bin.zip
 	@rm -f UniLANChat-bin.tar.gz
 	@rm -f UniLANChat-doc.tar.gz
+	@rm -f UniLANChat-src.tar.gz
 	@rm -f jni/tools_systemintegration_X11StartupNotification.h
 
 clean-all: clean

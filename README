@@ -84,6 +84,10 @@ Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefi
    cross-kompilatora, więc można wykonać tą kompilację na innej maszynie,
    a następnie przenieść wynik do katalogu java/jni
 
+ * make launcher-rebuild
+   służy do przebudowania launcherów, które wymagają kompilacji (w tej chwili
+   tylko wersja dla Windows)
+
 ################################################################################
 ## ZNANE PROBLEMY
 ################################################################################

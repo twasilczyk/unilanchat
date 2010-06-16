@@ -3,10 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.2
- - przenieść kompilator launchera poza folder trunk (np. do tools), w źródłach
-   trzymać tylko binarkę, a kompilować (wraz z pobieraniem kompilatora z svn)
-   jedynie na wyraźne życzenie (dodatkowa sekcja w Makefile)
- - do Makefile dodać sekcję UniLANChat-src.tar.gz
  - wyświetlanie bieżącego nicka w widocznym miejscu
  - w pokoju głównym, po kliknięciu na nick rozmówcy, otwiera się okno rozmowy
    prywatnej
