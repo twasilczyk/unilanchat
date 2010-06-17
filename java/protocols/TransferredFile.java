@@ -12,7 +12,31 @@ public interface TransferredFile extends ObservableInterface
 	/**
 	 * Stany w jakich może znależć się przesyłany plik.
 	 */
-	public enum State { PREPARING, WAITING_FOR_CONNECTION, TRANSFERRING, CANCELLED, ERROR, COMPLETED };
+	public enum State {
+		/**
+		 * Przygotowywanie do transferu, moment gdy obliczany jest rozmiar folderu
+		 */
+		PREPARING,
+		/**
+		 * Oczekiwanie na połączenie
+		 */
+		WAITING_FOR_CONNECTION,
+		/**
+		 * Przesyłanie
+		 */
+		TRANSFERRING,
+		/**
+		 * Wysyłanie zostało anulowane
+		 */
+		CANCELLED,
+		/**
+		 * Błąd w przesyłaniu
+		 */
+		ERROR,
+		/**
+		 * Zakończono pomyślnie
+		 */
+		COMPLETED };
 
 	/**
 	 * Zwraca stan, w którym obecnie znajduje się plik.

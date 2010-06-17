@@ -193,7 +193,7 @@ Strona projektu: \href{http://ipmsg.org}{ipmsg.org}.
 Domyślnie wykorzystywanym portem (zarówno TCP, jak i UDP) jest 2425 -- aby zachować możliwość
 pełnej komunikacji, należy mieć w firewallu otworzone je także na połączenia przychodzące.
 
-\subsection{Pakiety UDP}
+\subsection{Pakiety UDP}\label{sec:udpPackets}
 
 Pakiety UDP są przesyłane w następującym formacie (jako czysty tekst):
 \begin{verbatim}
@@ -280,7 +280,35 @@ Zasadniczą różnicą między \texttt{ABSENCE} a \texttt{ENTRY} jest nie wysył
 
 %%% Przesyłanie wiadomości %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{\textnormal{\texttt{SENDMSG}} -- wysłanie wiadomości}
+\subsubsection{\textnormal{\texttt{SENDMSG}} -- wysłanie wiadomości}\label{sec:sendMsg}
+
+Sekcja danych:
+\begin{verbatim}
+	<treść wiadomości>\0<<numer pliku>:<nazwa pliku>:<rozmiar pliku>:
+	<czas ostatniej modyfikacji>:<atrybut>
+	<:dodatkowy atrybut=wartość<,wartość>*>*:\b:>+
+\end{verbatim}
+
+\begin{description}
+	\item[treść wiadomości] -- treść przesyłanej wiadomości, może być pusta;
+	\item[numer pliku] -- numer pliku w obrębie pakietu, w którym jest inicjowane
+	jego wysyłanie;
+	\item[nazwa pliku] -- nazwa pliku, jeśli w nazwie występuje znak ':' należy go zastąpić przez '::';
+	\item[rozmiar pliku] -- rozmiar pliku, dla folderu oryginalny klient ustawia
+	to pole równe 0, w implementacji UniLANChat jest to suma długości wszystkich
+	plików znajdujących się w folderze;
+	\item[atrybut] -- jedna z wartości:
+	\begin{description}
+		\item[\textnormal{\texttt{FILE\_REGULAR}}] -- plik właściwy;
+		\item[\textnormal{\texttt{FILE\_DIR}}] -- folder;
+	\end{description}
+	\item[dodatkowy atrybut] -- dodatkowe informacje o pliku;
+	\item[wartość] -- jedna z wartości dodatkowego atrybutu.
+	\item[\textbackslash b] -- znak Bell, kod ASCII o numerze 7.
+\end{description}
+
+
+
 \subsubsection{\textnormal{\texttt{RECVMSG}} -- potwierdzenie odebrania wiadomości}
 \subsubsection{\textnormal{\texttt{READMSG}} -- potwierdzenie przeczytania wiadomości}
 \subsubsection{\textnormal{\texttt{DELMSG}} -- powiadomienie o odrzuceniu wiadomości}
@@ -291,7 +319,58 @@ Zasadniczą różnicą między \texttt{ABSENCE} a \texttt{ENTRY} jest nie wysył
 \subsubsection{\textnormal{\texttt{GETPUBKEY}} -- zapytanie o klucz publiczny RSA}
 \subsubsection{\textnormal{\texttt{ANSPUBKEY}} -- przesłanie klucza publicznego RSA}
 
-\subsection{Nagłówki strumieni TCP}
+\subsection{Nagłówki strumieni TCP}\label{sec:tcpHeaders}
+
+Nagłówki strumieni TCP mają tą samą strukturę jak te opisane w sekcji \nameref{sec:udpPackets} z
+wyjątkiem nagłówka kontrolującego wysyłanie folderów.
+
+Sekcja danych:
+
+\begin{verbatim}
+	<numer pakietu>:<numer pliku>[:domiar]:
+\end{verbatim}
+
+gdzie:
+\begin{description}
+	\item[numer pakietu] -- numer pakietu, który inicjował wysyłanie danego pliku;
+	\item[numer pliku] -- numer pliku, z pakietu inicjującego identyfikowanego przez numer pliku;
+	\item[domiar] -- liczba początkowych bajtów, która ma zostać pominięta podczas wysyłania,
+	występuje jedynie w przypadku polecenia \texttt{GETFILEDATA} i jest wtedy polem wymaganym.
+\end{description}
+Wszystkie powyższe wartości są zapisane w systemie szesnastkowym.
+
+\subsubsection{\textnormal{\texttt{GETFILEDATA}} -- odbieranie pliku}
+
+Wysyłany, gdy użytkownik żąda od serwera wysłania pliku.
+
+\subsubsection{\textnormal{\texttt{GETDIRFILES}} -- odbieranie folderu}
+
+Wysyłany, gdy użytkownik żąda od serwera wysłania folderu.
+
+\subsubsection{Nagłówek kontrolujący wysyłanie folderów}\label{sec:hierarchicalFileHeader}
+
+\begin{verbatim}
+	<rozmiar nagłówka>:<nazwa pliku>:<rozmiar pliku>:
+	<atrybut><:dodatkowy atrybut=wartość<,wartość>*>*:<dane>
+\end{verbatim}
+
+gdzie:
+\begin{description}
+	\item[rozmiar nagłówka] -- rozmiar nagłówka w bajtach, liczony aż do ostatniego bajtu przed danymi;
+	\item[nazwa pliku] -- nazwa pliku, jeśli w nazwie występuje znak ':' należy go zastąpić przez '::';
+	\item[rozmiar pliku] -- oznacza rozmiar pliku w bajtach, określa jednocześnie długość pola dane;
+	\item[atrybut] -- jedna z wartości:
+	\begin{description}
+		\item[\textnormal{\texttt{FILE\_REGULAR}}] -- plik właściwy;
+		\item[\textnormal{\texttt{FILE\_DIR}}] -- folder;
+		\item[\textnormal{\texttt{FILE\_RETPARENT}}] -- nakaz powrotu do katalogu nadrzędnego,
+		używany odczas przechodzenia drzewa katalogów;
+	\end{description}
+	\item[dodatkowy atrybut] -- dodatkowe informacje o pliku;
+	\item[wartość] -- jedna z wartości dodatkowego atrybutu;
+	\item[dane] -- dane z pliku, o długości równej polu rozmiar pliku.
+\end{description}
+Wszystkie powyższe wartości są zapisane w systemie szesnastkowym z wyjątkiem nazwy pliku oraz danych.
 
 \subsection{Scenariusze komunikacji}
 
@@ -326,7 +405,39 @@ UniLANChat wykorzystuje to także do ustawienia statusu opisowego (technicznie -
 	\item klient wysyła na adres broadcast pakiet \texttt{ABSENCE}.
 \end{enumerate}
 
+\subsubsection{Przesyłanie plików}
 
+\begin{enumerate}
+	\item Nadawca pliku wysyła do odbiorcy inicjujący pakiet UDP, z komendą \texttt{SENDMSG}
+	wraz z ustawioną flagą \texttt{FILEATTACH} oraz z sekcją danych opisaną w \nameref{sec:sendMsg}
+	\item dla każdego pliku zawartego w sekcji danych odbiorca wykonuje jedno połączenie
+	do nadawcy używając protokołu TCP na domyślnym porcie. Wysyła pakiet \texttt{GETFILEDATA}
+	w przypadku odbierania pliku właściwego, albo \texttt{GETDIRFILES} w przypadku folderu
+	z sekcją danych opisaną w \nameref{sec:tcpHeaders} na początek strumienia TCP i oczekuje na
+	napływające dane.
+	\item nadawca odczytuje żądanie wysłania pliku ze strumienia, odnajduje go na swojej liście plików oczekujących
+	na wysłanie i zależnie od rodzaju przesyłanego pliku wysyła dane na dwa sposoby:
+	\begin{itemize}
+		\item jeśli żądanie dotyczyło pliku właściwego to kopiuje dane pliku bajt po bajcie do
+		strumienia TCP. Komunikacja kończy się wraz z ostatnim wysłanym bajtem
+		\item jeśli żądanie dotyczyło folderu to przechodzi drzewo katalogu algorytmem DFS\footnote{patrz: \nameref{sec:dictionary}}
+		wypisując nagłówki opisane w \nameref{sec:hierarchicalFileHeader} do strumienia TCP
+		pamiętając o następujących zasadach:
+		\begin{itemize}
+			\item jako pierwszy wypisywany jest nagłówek \texttt{FILE\_DIR} dla
+			katalogu, który jest wysyłany
+			\item wchodząc katalog niżej wypisywany jest nagłówek \texttt{FILE\_DIR} dla katalogu,
+			który jest właśnie odwiedzany
+			\item napotykając na plik wypisywany jest nagłówek \texttt{FILE\_REGULAR}
+			wraz z danymi tego pliku w polu dane
+			\item wychodząc z rekursji wypisywany jest nagłówek \texttt{FILE\_RETPARENT}
+		\end{itemize}
+		odbiorca rekonstruuje drzewo katalogu odczytując nagłówki wraz z danymi,
+		wykonując symetryczne akcje do każdego z nagłówków. Komunikacja kończy się, gdy
+		zostanie wypisany nagłówek \texttt{FILE\_RETPARENT} wychodzący z katalogu
+		będącego korzeniem drzewa DFS
+	\end{itemize}
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -338,6 +449,7 @@ UniLANChat wykorzystuje to także do ustawienia statusu opisowego (technicznie -
 	\item[JNI, Java Native Interface]
 	\item[unicast]
 	\item[unix timestamp]
+	\item[DFS] -- algorytm przechodzenia grafu wgłąb
 \end{description}
 
 

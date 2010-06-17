@@ -83,7 +83,7 @@ public class IpmsgFileTransferThread extends Thread
 	 * Wątek wyszukujący plik na liście plików danego konta.
 	 * Przekazuje wysyłanie pliku do odpowiedniego obiektu.
 	 */
-	protected class FileRecognitionThread extends Thread
+	class FileRecognitionThread extends Thread
 	{
 		protected Socket socket;
 

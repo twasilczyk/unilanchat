@@ -122,7 +122,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 	/**
 	 * Klasa wątku wysyłającego plik.
 	 */
-	protected class SendingThread extends Thread
+	class SendingThread extends Thread
 	{
 		protected Socket socket;
 

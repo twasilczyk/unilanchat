@@ -67,6 +67,14 @@ public class IpmsgAccount extends Account
 		return null;
 	}
 
+	/**
+	 * Ustawia status na CANCELLED wszystkim plikom, które
+	 * miały zostać wysłane  od tego samego użytkownika i były inicjowane
+	 * tym samym pakietem.
+	 *
+	 * @param ip ip użytkownika, do którego miały być wysłane pliki
+	 * @param packetID ID pakietu inicjującego
+	 */
 	public void cancelFiles(String ip, long packetID)
 	{
 		for(IpmsgTransferredFile file: transferredFiles)

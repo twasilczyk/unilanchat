@@ -108,7 +108,7 @@ public class Updater extends Observable
 		thread.start();
 	}
 
-	protected class UpdaterThread extends Thread
+	class UpdaterThread extends Thread
 	{
 		public UpdaterThread()
 		{

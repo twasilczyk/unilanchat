@@ -55,7 +55,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 	/**
 	 * Wątek zajmujący się pobieraniem pliku.
 	 */
-	protected class ReceivingThread extends Thread
+	class ReceivingThread extends Thread
 	{
 		IpmsgReceivedFile receivedFile;
 
