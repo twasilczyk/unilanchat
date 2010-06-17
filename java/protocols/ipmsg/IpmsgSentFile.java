@@ -136,6 +136,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				throw new SocketException("Gniazdo nie jest polaczone");
 			this.socket = socket;
 			this.offset = offset;
+			setPriority(getPriority() - 1);
 		}
 
 		@Override public void run()

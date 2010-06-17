@@ -344,6 +344,8 @@ class AttachedFileList extends JStickyScrollPane
 
 			JLabel fileNameLabel = new JLabel(file.getName(), fsView.getSystemIcon(file), SwingConstants.LEFT);
 			fileNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+			fileNameLabel.setMinimumSize(
+					new Dimension(50, fileNameLabel.getMinimumSize().height));
 
 			add(fileNameLabel, BorderLayout.WEST);
 			add(removeButton, BorderLayout.CENTER);

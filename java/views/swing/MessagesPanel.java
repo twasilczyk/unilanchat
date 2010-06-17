@@ -356,13 +356,17 @@ public class MessagesPanel extends JStickyScrollPane
 				case ATTACHMENTS:
 					ReceivedFile[] receivedFiles = iMessage.getAttachments();
 
+					int filesCount = (receivedFiles == null) ? 0 : receivedFiles.length;
+					if (dMesg.renderedAttachmentsCount == filesCount)
+						break;
+					dMesg.renderedAttachmentsCount = filesCount;
+
 					if (receivedFiles == null)
 					{
 						HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
 							"<p>Wszystkie załączniki zostały już pobrane.</p>", false);
 						break;
 					}
-
 					assert(receivedFiles.length > 0);
 
 					for (int i = 0; i < receivedFiles.length; i++)
@@ -501,6 +505,17 @@ public class MessagesPanel extends JStickyScrollPane
 		}
 	}
 
+	/**
+	 * To jest mały memleak, aby otwarte pliki nie były usuwane zbyt szybko.
+	 * Niektóre aplikacje oddają sterowanie po otworzeniu pliku.
+	 * Np. w przypadku archiwów, może ono zostać otwarte w zewnętrznym
+	 * programie, sterowanie zostanie przekazane z powrotem do naszego programu,
+	 * wykonywany wątek się zakończy, a garbage collector (zależnie od
+	 * implementacji) usunie obiekt pliku wraz z nim. Ten kontener zapobiega
+	 * oznaczeniu pliku jako obiektu bez powiązań.
+	 */
+	private static Vector<File> openedFiles = new Vector<File>();
+
 	private void openAttachment(final ReceivedFile attachment)
 	{
 		// wykrywanie rozszerzenia (bez niego nie będzie się dało określić, jak
@@ -552,6 +567,7 @@ public class MessagesPanel extends JStickyScrollPane
 				// plik został pobrany - próbujemy go otworzyć
 				if (SystemProcesses.openFile(tmp))
 				{
+					openedFiles.add(tmp);
 					tmp.deleteOnExit();
 					return;
 				}
@@ -631,6 +647,13 @@ public class MessagesPanel extends JStickyScrollPane
 
 		public Element messageContentCell;
 
+		/**
+		 * Pozwala na nie przerysowywanie załączników, jeżeli ich lista się nie
+		 * zmieniła. Załączniki można tylko dodawać (na samym początku), albo
+		 * usuwać (po jednym), więc przechowywanie ich liczby może się sprawdzić.
+		 */
+		public int renderedAttachmentsCount = 0;
+
 		protected Element serviceCell;
 		protected ServiceCellUsage serviceCellUsage = ServiceCellUsage.UNUSED;
 
@@ -667,6 +690,7 @@ public class MessagesPanel extends JStickyScrollPane
 
 			serviceCell = null;
 			serviceCellUsage = ServiceCellUsage.UNUSED;
+			renderedAttachmentsCount = 0;
 		}
 
 		public void showInServiceCell(ServiceCellUsage what)

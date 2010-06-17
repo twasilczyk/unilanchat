@@ -175,8 +175,14 @@ public class FileTransfersView extends JFrame
 					return ((double)current)/((double)total);
 			}
 			else if (columnIndex == 6)
-				return StringUtilities.formatFileSize(
-					ipmsgTransferredFiles.get(rowIndex).getTransferSpeed()) + "/s";
+			{
+				IpmsgTransferredFile file = ipmsgTransferredFiles.get(rowIndex);
+
+				if (file.getState() != TransferredFile.State.TRANSFERRING)
+					return "-";
+
+				return StringUtilities.formatFileSize(file.getTransferSpeed()) + "/s";
+			}
 			else if (columnIndex == 7)
 			{
 				switch (ipmsgTransferredFiles.get(rowIndex).getState())

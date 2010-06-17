@@ -64,6 +64,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 			if(receivedFile == null)
 				throw new NullPointerException();
 			this.receivedFile = receivedFile;
+			setPriority(getPriority() - 1);
 		}
 
 		@Override public void run()
@@ -110,8 +111,13 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 							break;
 					}
 
-					if(transferredSize != fileSize)
-						throw new IllegalArgumentException("Ilosc przeslanych danych niezgodna z deklaracja");
+					if (transferredSize < fileSize)
+					{ // nie przesłano całego pliku
+						setState(TransferredFile.State.ERROR);
+						return;
+					}
+					if (transferredSize > fileSize)
+						throw new IllegalArgumentException("Przesłano za dużo danych");
 				}
 				else
 				{
