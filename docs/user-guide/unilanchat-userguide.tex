@@ -1,0 +1,198 @@
+\documentclass[11pt,leqno]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\usepackage{amsmath,amssymb}
+\usepackage{bbm}
+\usepackage{amsthm}
+
+\setlength{\headheight}{14pt}
+
+\pagestyle{fancy}
+\lhead{UniLANChat}
+\rhead{Podręcznik użytkownika}
+
+\usepackage[
+pdfborder={0,0,0},
+pdftitle={UniLANChat - podrecznik użytkownika},
+pdfauthor={Tomasz Wasilczyk},
+pdfdisplaydoctitle=true
+]{hyperref}
+
+\def\changemargin#1{\list{}{\rightmargin#1\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\makeatletter
+	\renewcommand\@seccntformat[1]{\csname the#1\endcsname.\quad}
+	\renewcommand\numberline[1]{#1.\hskip0.7em}
+	\newcommand\BSLASH{\char`\\}
+\makeatother
+
+\author{Tomasz Wasilczyk, Piotr Gajowiak}
+\title{UniLANChat -- podręcznik użytkownika}
+
+\begin{document}
+
+\pagenumbering{alph}
+\begin{titlepage}
+\begin{center}
+	\vspace*{6cm}
+	\textsc{\LARGE UniLANChat}\\[0.25cm]
+	\textsc{\Large Podręcznik użytkownika}\\[1cm]
+	Tomasz Wasilczyk, Piotr Gajowiak
+	\vfill
+	\today
+\end{center}
+\end{titlepage}
+\pagenumbering{arabic}
+
+\tableofcontents
+
+\section{Instalacja}
+
+Instalacja programu polega na wypakowaniu archiwum do dowolnego katalogu, do którego użytkownik
+końcowy ma prawa odczytu. Nie jest wymagane prawo zapisu, ponieważ program do przechowywania danych
+stałych (np. konfiguracyjnych) używa katalogu domowego użytkownika, a do danych tymczasowych,
+katalogu tymczasowego systemu.
+
+Program wymaga do działania Java Runtime Environment, najlepiej wersję pobraną bezpośrednio ze
+strony producenta. Nie jest gwarantowane, że na innych implementacjach (np. OpenJDK) program będzie 
+działał poprawnie.
+
+\section{Uruchomienie}
+
+Pod systemem Linux należy uruchomić skrypt \texttt{./UniLANChat} (być może będzie trzeba nadać mu
+uprawnienia do wykonywania), natomiast pod systemem Windows uruchomić program \texttt{UniLANChat.exe}.
+Można też bezpośrednio uruchomić program, dwukrotnie klikając na archiwum \texttt{UniLANChat.jar},
+lub poleceniem \texttt{java -jar ./UniLANChat.jar}.
+
+Przed uruchomieniem programu \textbf{należy wyłączyć program IPMessenger} oraz inne programy
+korzystające z tego protokołu. W przeciwnym wypadku, nie będzie można dołączyć do sieci.
+
+\subsection{Parametry uruchomienia}\label{sec:parameters}
+
+Program przy uruchomieniu może przyjmować parametry:
+\begin{itemize}
+	\item \textbf{-\--nick} \texttt{<nick>} -- nick, którym będzie się posługiwał użytkownik --
+	wyświetlany na listach kontaktów innych użytkowników;
+	\item \textbf{-\--user-dir} \texttt{<dir>} -- katalog, w którym mają być przechowywane dane
+	konfiguracyjne użytkownika (zamiast katalogu domowego). Potrzebne m.in. przy przygotowywaniu
+	przenośnej (np. do instalacji na dysku USB) wersji programu.
+\end{itemize}
+
+\section{Konfiguracja}
+
+Konfiguracja (tymczasowo) jest przeprowadzana przez edycję pliku \texttt{config.xml}, który znajduje
+się w katalogu użytkownika, czyli \texttt{\~{ }/.UniLANChat} dla Linuxa, oraz
+\texttt{C:}\textbackslash \texttt{Documents and Settings}\textbackslash
+\texttt{Uzytkownik}\textbackslash \texttt{Dane aplikacji}\textbackslash
+\texttt{UniLANChat} w przypadku Windowsa.
+
+Należy pamiętać, aby w czasie edycji tego pliku, program był wyłączony. W przeciwnym razie być może
+nadpisze on wprowadzone zmiany, bez ich odczytywania. Plik musi być zapisany w formatowaniu UTF-8.
+
+W pliku dostępne są sekcje:
+\begin{itemize}
+	\item \textbf{nick} -- nick użytkownika, tak jak opisany w sekcji \nameref{sec:parameters};
+	\item \textbf{ignoreAutoResponses} -- czy ignorować automatyczne odpowiedzi użytkowników,
+	na wypadek nieobecności (domyślnie tak). W oryginalnej implementacji IPMessengera, użytkownik
+	może ustawić sobie taki tekst, który jest odsyłany każdemu, kto spróbuje mu wysłać jakąś
+	wiadomość. Wspomniane wiadomości mogą być uciążliwe, jeżeli korzysta się z kanału głównego;
+	\item \textbf{autoUpdate} -- czy mają być włączone automatyczne aktualizacje;
+	\item \textbf{debugMode} -- czy ma być włączony tryb debug.
+\end{itemize}
+
+\section{Automatyczna aktualizacja}
+
+Program korzysta z modułu automatycznej aktualizacji. W tej chwili działa on w ten sposób, że
+pobiera z serwera numer najnowszej wersji oraz porównuje z własną. Jeżeli się nie zgadzają,
+wyświetla komunikat z powiadomieniem, po którego zaakceptowaniu użytkownik jest odsyłany na stronę
+projektu, aby użytkownik ręcznie zainstalował sobie nową wersję.
+
+\section{Interfejs użytkownika}
+
+W tej chwili jedynym zaimplementowanym rodzajem interfejsu użytkownika jest interfejs okienkowy.
+Jest on wzorowany na innych, popularnych komunikatorach, a przede wszystkim programie
+Pidgin\footnote{http://www.pidgin.im}.
+
+Jego głównym komponentem jest ikona w obszarze powiadomień systemu (Tray), za pośrednictwem której
+użytkownik może uzyskać dostęp do okna głównego (listy plików) oraz odbierać powiadomienia o nowych
+wiadomościach (jeżeli są jakieś nieprzeczytane wiadomości, kliknięcie w ikonę przeniesie do okna
+rozmowy, zamiast do listy kontaktów).
+
+\subsection{Lista kontaktów}
+
+Okno listy kontaktów zawiera przede wszystkim samą listę z kontaktami (aby rozpocząć rozmowę
+z wybranym kontaktem, należy dwa razy kliknąć na napis mu odpowiadający). Nad listą z kontaktami
+znajduje się przycisk głównego pokoju rozmów, który służy do komunikacji ze wszystkimi dostępnymi
+kontaktami. Na samej górze okna znajduje się menu, przez które jest dostęp do widoku transferowanych
+plików oraz kończenia pracy programu.
+
+Pod listą plików znajduje się panel wyboru statusu, na którym możemy wybrać jego rodzaj (czy jesteśmy
+dostępni, ,,zajęci'', czy rozłączeni), a także status opisowy: aby go zmienić, należy wybrać
+z menu opcję ,,Zmień opis'', wpisać opis w pole, które pojawi się pod spodem, a następnie
+zatwierdzić enterem, albo przyciskiem po prawej. Status opisowy wyświetla się na liście kontaktów,
+po prawej strony od użytkownika, który go sobie ustawił.
+
+Elementy na liście kontaktów składają się z nazwy kontaktu, jego statusu (ikona po lewej), jego
+statusu opisowego (szary tekst po prawej) oraz ikony protokołu (w tej chwili obsługiwany jest tylko
+IPMsg).
+
+\subsection{Lista przesyłanych plików}
+
+Lista przesyłanych plików zawiera zarówno pliki wysyłane, jak i odbierane. Na uwagę zasługuje sposób
+obliczania rozmiaru przesyłanych folderów. W przypadku komunikacji z drugim egzemplarzem programu
+UniLANChat, jest to prawidłowy rozmiar całego przesyłanego katalogu. Oryginalna implementacja
+IPMessengera nie dostarcza jednak takich informacji, więc rozmiar katalogu jest obliczany w trakcie
+jego przesyłania. Skutkuje to efektem ,,skakania'' paska postępu. Gdy osiąga on maksimum, pasek
+cofa się o pewien zakres, a następnie znowu postępuje -- działa to w ten sposób, ponieważ po
+przesłaniu całości pliku program dopiero otrzymuje informacje o kolejnym i aktualizuje rozmiar
+katalogu.
+
+\subsection{Okno rozmów}
+
+Okno rozmów zawiera zakładki z rozmowami, które można zamykać przez kliknięcie na wybraną środkowym
+przyciskiem myszy, lub przez opcję z menu (Rozmowa - Zamknij rozmowę). W centralnej części okna
+wyświetlony jest przebieg rozmowy, pod którym jest pole wpisywania wiadomości. Aby wprowadzić
+wiadomość wielolinijkową, należy użyć kombinacji Shift-Enter. Aby wysłać wprowadzoną wiadomość należy
+użyć przycisku Enter.
+
+Aby dołączyć do wiadomości pliki, należy wybrać opcję z menu (Rozmowa - Wyślij plik), wybrać plik,
+który następnie pojawi się nad polem wpisywania wiadomości. Po wpisaniu wiadomości należy ją
+zatwierdzić klawiszem Enter.
+
+Po prawej stronie od wiadomości na liście widoczne są klikalne ikony:
+\begin{itemize}
+	\item \textbf{ikona statusu wiadomości} -- informuje o postępie w dostarczaniu wiadomości
+	do adresatów (być może wielu -- w pokojach publicznych):
+	\begin{itemize}
+		\item szara -- wiadomość nie posiada adresatów (np. jeżeli nikogo nie ma w pokoju publicznym);
+		\item żółta -- wiadomość jest rozsyłana;
+		\item zielona -- wiadomość udało się dostarczyć do wszystkich adresatów;
+		\item czerwona -- nie udało się dostarczyć wiadomości do wszystkich adresatów (być może
+		do kogoś się udało);
+	\end{itemize}
+	po kliknięciu na tą ikonę, pod wiadomością wyświetlają się szczegółowe listy (do kogo się udało
+	dostarczyć);
+	\item \textbf{ikona oryginalnej wiadomości} -- oryginalna implementacja IPMsg do każdej odpowiedzi
+	dołącza wiadomość, na którą się odpowiada (podobnie, jak w komunikacji email). Przy prezentacji
+	w formie rozmowy, utrudniało by to czytanie, więc wszystkie linie oznaczone jako cytat są
+	przed wyświetleniem usuwane. Jeżeli jednak użytkownik zechce obejrzeć oryginalną wiadomość,
+	wystarczy że kliknie na opisywaną ikonę z literą ,,R'';
+	\item \textbf{ikona załącznika} -- jeżeli widnieje przy wysyłanej wiadomości, po jej kliknięciu
+	pojawi się po prostu lista wysłanych plików. Jeżeli jednak to inny użytkownik przesyła pliki lub
+	foldery, obok każdego z nich pojawi się opcja zapisu na dysk oraz (w przypadku plików) opcja
+	otworzenia bez wybierania konkretnego folderu. Na przykład, jeżeli jest to obrazek, po kliknięciu
+	,,otwórz'' zostanie on automatycznie pobrany do folderu tymczasowego oraz otworzony w domyślnym
+	programie graficznym.
+\end{itemize}
+
+W publicznym pokoju rozmów, nazwy wypowiadających się użytkowników są linkami, po kliknięciu w które
+otwiera się prywatny pokój rozmowy z danym użytkownikiem.
+
+
+\end{document}

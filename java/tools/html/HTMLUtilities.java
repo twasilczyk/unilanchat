@@ -68,28 +68,6 @@ public class HTMLUtilities
 	}
 
 	/**
-	 * Łączy ciągi podanym separatorem.
-	 *
-	 * @todo funkcja nie jest ściśle związana z HTML, przydało by się ją
-	 * wydzielić do osobnej klasy
-	 * @param strings tablica ciągów do złączenia
-	 * @param separator separator
-	 * @return połączony ciąg, rozdzielony separatorami
-	 */
-	public static String join(String[] strings, String separator)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < strings.length; i++)
-		{
-			if (i > 0)
-				sb.append(separator);
-			sb.append(strings[i]);
-		}
-		return sb.toString();
-	}
-
-	/**
 	 * Wyrażenie regularne znajdujące adresy URL.
 	 */
 	protected static final Pattern tagURLsPattern =

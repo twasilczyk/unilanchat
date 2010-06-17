@@ -280,15 +280,47 @@ Zasadniczą różnicą między \texttt{ABSENCE} a \texttt{ENTRY} jest nie wysył
 
 %%% Przesyłanie wiadomości %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{\textnormal{\texttt{SENDMSG}} -- wysłanie wiadomości}\label{sec:sendMsg}
+\subsubsection{\textnormal{\texttt{SENDMSG}} -- wysłanie wiadomości}\label{sec:udpPackets:sendMsg}
+
+Pakiet z wysyłaną wiadomością, może zawierać także informacje o załącznikach (które są później
+przesyłane osobnym kanałem). Wiadomość może być szyfrowana (format w tej chwili nie jest tutaj
+opisany).
+
+Flagi:
+\begin{itemize}
+	\item \texttt{SENDCHECK} -- nadawca oczekuje na potwierdzenie dostarczenia wiadomości
+	(\texttt{RECVMSG}), jeżeli ono nie dojdzie, wiadomość jest wysyłana ponownie;
+	\item \texttt{SECRET} -- wiadomość jest zapieczętowana, w implementacji UniLANChat ignorowana;
+	\item \texttt{READCHECK} -- nadawca zostanie poinformowany o próbie otworzenia wiadomości,
+	używana razem z SECRET. W implementacji UniLANChat ignorowana;
+	\item \texttt{BROADCAST} -- wiadomość do wszystkich obecnych w sieci. Na takie pakiety nie są
+	odsyłane potwierdzenia odbioru. Oryginalna implementacja IPMsg korzysta z tej flagi także dla
+	pakietów, które są rozsyłane tylko do wybranej grupy odbiorców;
+	\item \texttt{MULTICAST} -- wiadomość do wybranej grupy odbiorców. Na te pakiety są odsyłane
+	potwierdzenia odbioru. Ta flaga jest używana w implementacji UniLANChat dla wszystkich grupowych
+	rozmów (ze względu na wspomniane potwierdzenia odbioru);
+	\item \texttt{MULTICAST\_NEW} -- odpowiednik \texttt{MULTICAST}, ale zarezerwowany dla przyszłych
+	wersji protokołu;
+	\item \texttt{NOPOPUP} -- flaga nieprawidłowa w wersji protokołu Draft-9, ignorowana;
+	\item \texttt{AUTORET} -- flaga oznaczająca, że odpowiedź jest automatyczna. Jest to
+	zabezpieczenie przed efektem "ping-pong", między dwoma osobami z ustawioną automatyczną
+	informacją o nieobecności;
+	\item \texttt{RETRY};
+	\item \texttt{PASSWORD} -- flaga zapieczętowania i zabezpieczenia hasłem (ignorowana).
+	W oryginalnej implementacji ipmsg użytkownik przed odpieczętowaniem (i przeczytaniem
+	wiadomości) musi podać swoje hasło, ustawione wcześniej w programie (domyślnie puste);
+	\item \texttt{NOLOG} -- flaga sugerująca, aby nie zapisywać danej wiadomości
+	w logu (ignorowana);
+	\item \texttt{NOADDLIST}.
+\end{itemize}
 
 Sekcja danych:
 \begin{verbatim}
-	<treść wiadomości>\0<<numer pliku>:<nazwa pliku>:<rozmiar pliku>:
+	<treść wiadomości>[\0<<numer pliku>:<nazwa pliku>:<rozmiar pliku>:
 	<czas ostatniej modyfikacji>:<atrybut>
-	<:dodatkowy atrybut=wartość<,wartość>*>*:\b:>+
+	<:dodatkowy atrybut=wartość<,wartość>*>*:\b:>+]
 \end{verbatim}
-
+gdzie:
 \begin{description}
 	\item[treść wiadomości] -- treść przesyłanej wiadomości, może być pusta;
 	\item[numer pliku] -- numer pliku w obrębie pakietu, w którym jest inicjowane
@@ -307,17 +339,39 @@ Sekcja danych:
 	\item[\textbackslash b] -- znak Bell, kod ASCII o numerze 7.
 \end{description}
 
-
-
 \subsubsection{\textnormal{\texttt{RECVMSG}} -- potwierdzenie odebrania wiadomości}
+
+Potwierdzenie odebrania wiadomości informuje odbiorcę, że wiadomość przez niego wysłana została
+odebrana.
+
+Sekcja danych: identyfikator pakietu z potwierdzaną wiadomością (w formacie dziesiętnym).
+
+%TODO: flagi
+
 \subsubsection{\textnormal{\texttt{READMSG}} -- potwierdzenie przeczytania wiadomości}
+
+Potwierdzenie otworzenia zapieczętowanej wiadomości (pakiet ignorowany) -- jeżeli 
+w wiadomości (\texttt{SENDMSG}) była ustawiona flaga \texttt{READCHECK}.
+
+%TODO: flagi, sekcja danych
+
 \subsubsection{\textnormal{\texttt{DELMSG}} -- powiadomienie o odrzuceniu wiadomości}
+
+Odpowiednik \texttt{READMSG}, ale informujący o odrzuceniu wiadomości.
+
+%TODO: flagi, sekcja danych
+
 \subsubsection{\textnormal{\texttt{ANSREADMSG}} -- potwierdzenie odebrania \textnormal{\texttt{READMSG}} lub \textnormal{\texttt{DELMSG}}}
+
+Potwierdzenie odebrania pakietów \texttt{READMSG} lub \texttt{DELMSG}, działa podobnie do
+\texttt{RECVMSG}. Pakiet ignorowany.
+
+%TODO: flagi, sekcja danych
 
 %%% Wymiana kluczy RSA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{\textnormal{\texttt{GETPUBKEY}} -- zapytanie o klucz publiczny RSA}
-\subsubsection{\textnormal{\texttt{ANSPUBKEY}} -- przesłanie klucza publicznego RSA}
+%\subsubsection{\textnormal{\texttt{GETPUBKEY}} -- zapytanie o klucz publiczny RSA}
+%\subsubsection{\textnormal{\texttt{ANSPUBKEY}} -- przesłanie klucza publicznego RSA}
 
 \subsection{Nagłówki strumieni TCP}\label{sec:tcpHeaders}
 
@@ -405,11 +459,20 @@ UniLANChat wykorzystuje to także do ustawienia statusu opisowego (technicznie -
 	\item klient wysyła na adres broadcast pakiet \texttt{ABSENCE}.
 \end{enumerate}
 
+\subsubsection{Wysłanie wiadomości nieszyfrowanej}\label{sec:scenario:message}
+
+\begin{enumerate}
+	\item Nadawca pliku wysyła do odbiorcy pakiet \texttt{SENDMSG}, z wiadomością;
+	\item odbiorca odsyła nadawcy pakiet \texttt{RECVMSG};
+	\item jeżeli nadawca w określonym czasie nie otrzyma pakietu z potwierdzeniem,
+	ponawia próbę wysłania.
+\end{enumerate}
+
 \subsubsection{Przesyłanie plików}
 
 \begin{enumerate}
-	\item Nadawca pliku wysyła do odbiorcy inicjujący pakiet UDP, z komendą \texttt{SENDMSG}
-	wraz z ustawioną flagą \texttt{FILEATTACH} oraz z sekcją danych opisaną w \nameref{sec:sendMsg}
+	\item Nadawca pliku wysyła do odbiorcy wiadomość (patrz \nameref{sec:scenario:message})
+	wraz z ustawioną flagą \texttt{FILEATTACH} oraz z sekcją danych opisaną w \nameref{sec:udpPackets:sendMsg}
 	\item dla każdego pliku zawartego w sekcji danych odbiorca wykonuje jedno połączenie
 	do nadawcy używając protokołu TCP na domyślnym porcie. Wysyła pakiet \texttt{GETFILEDATA}
 	w przypadku odbierania pliku właściwego, albo \texttt{GETDIRFILES} w przypadku folderu
@@ -444,12 +507,19 @@ UniLANChat wykorzystuje to także do ustawienia statusu opisowego (technicznie -
 \section{Słownik pojęć} \label{sec:dictionary}
 
 \begin{description}
-	\item[broadcast]
-	\item[czat p2p]
-	\item[JNI, Java Native Interface]
-	\item[unicast]
-	\item[unix timestamp]
-	\item[DFS] -- algorytm przechodzenia grafu wgłąb
+	\item[broadcast] -- rozsyłanie jednego pakietu do wszystkich znajdujących się w sieci
+	komputerów.
+	\item[czat p2p] -- protokół rozmów tekstowych w sieci bez pośrednictwa serwera, w której każdy
+	z użytkowników trzyma lokalnie listę wszystkich uczestników rozmowy.
+	\item[JNI, Java Native Interface] -- metoda pozwalająca w programach napisanych w Javie używać
+	kodu natywnego, czyli kompilowanego dla konkretnego typu maszyny. Pozwala to korzystać z innych
+	języków programowania, takich jak C++.
+	\item[unicast] -- przeciwieństwo \textit{broadcast}u, czyli wysłanie jednego pakietu do jednego
+	odbiorcy.
+	\item[unix timestamp] -- czas reprezentowany jako liczba sekund od 1 stycznia 1970, godz. 0:00.
+	\item[DFS] -- algorytm przechodzenia grafu w głąb, czyli przeszukiwanie zaczyna się
+	od korzenia i przechodzi w dół do gałęzi, a następnie cofa się o jeden poziom w górę
+	i przeszukuje kolejnego potomka bieżącego węzła.
 \end{description}
 
 

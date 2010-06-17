@@ -68,7 +68,7 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	/**
 	 * Rozmiar pliku
 	 */
-	protected Long fileSize = null;
+	protected long fileSize = 0;
 
 	/**
 	 * Stan, w którym aktualnie znajduje się transferowany plik.
@@ -126,7 +126,7 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	 * transferowanych do tej pory włączając w to transferowany w danej chwili
 	 * plik
 	 */
-	public synchronized Long getFileSize()
+	public synchronized long getFileSize()
 	{
 		return fileSize;
 	}
@@ -215,8 +215,6 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	 */
 	protected synchronized  void setFileSize(Long fileSize)
 	{
-		if(this.fileSize == null)
-			this.fileSize = 0L;
 		this.fileSize += fileSize;
 		setChanged();
 	}

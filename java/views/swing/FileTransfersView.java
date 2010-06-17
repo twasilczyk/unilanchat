@@ -106,7 +106,7 @@ public class FileTransfersView extends JFrame
 
 		public int getColumnCount()
 		{
-			return 6;
+			return 8;
 		}
 
 		@Override
@@ -117,14 +117,18 @@ public class FileTransfersView extends JFrame
 				case 0:
 					return "Kierunek";
 				case 1:
-					return "Nazwa pliku";
-				case 2:
 					return "Kontakt";
+				case 2:
+					return "Nazwa pliku";
 				case 3:
-					return "Postęp";
+					return "Rozmiar";
 				case 4:
-					return "Transfer";
+					return "Przesłano";
 				case 5:
+					return "Postęp";
+				case 6:
+					return "Transfer";
+				case 7:
 					return "Status";
 				default:
 					throw new UnsupportedOperationException("Nieprawidłowy numer kolumny");
@@ -134,14 +138,10 @@ public class FileTransfersView extends JFrame
 		@Override
 		public Class<?> getColumnClass(int columnIndex)
 		{
-			if (columnIndex == 3)
+			if (columnIndex == 5)
 				return FileTransfersCellRendererProgress.class;
 			return super.getColumnClass(columnIndex);
 		}
-
-		protected final String[] speedSuffixes = {
-			"B/s", "kB/s", "MB/s", "GB/s", "TB/s"
-		};
 
 		public Object getValueAt(int rowIndex, int columnIndex)
 		{
@@ -153,39 +153,31 @@ public class FileTransfersView extends JFrame
 					return "Wysyłanie";
 			}
 			else if (columnIndex == 1)
-				return ipmsgTransferredFiles.get(rowIndex).getFileName();
-			else if (columnIndex == 2)
 				return ipmsgTransferredFiles.get(rowIndex).getContact().getName();
+			else if (columnIndex == 2)
+				return ipmsgTransferredFiles.get(rowIndex).getFileName();
 			else if (columnIndex == 3)
+				return StringUtilities.formatFileSize(
+					ipmsgTransferredFiles.get(rowIndex).getFileSize());
+			else if (columnIndex == 4)
+				return StringUtilities.formatFileSize(
+					ipmsgTransferredFiles.get(rowIndex).getTransferredDataSize());
+			else if (columnIndex == 5)
 			{
 				IpmsgTransferredFile file = ipmsgTransferredFiles.get(rowIndex);
 				long current = file.getTransferredDataSize();
-				Long total = file.getFileSize();
-				if (total == null || total <= 0)
+				long total = file.getFileSize();
+				if (total <= 0)
 					return 0.0;
 				else if (total <= current)
 					return 1.0;
 				else
 					return ((double)current)/((double)total);
 			}
-			else if (columnIndex == 4)
-			{
-				double speed = ipmsgTransferredFiles.get(rowIndex).getTransferSpeed();
-				int speedSuffix = 0;
-				while (speed >= 1000 && speedSuffix < speedSuffixes.length - 1)
-				{
-					speed /= 1000;
-					speedSuffix++;
-				}
-
-				if (speed >= 100)
-					return String.format("%.0f %s", speed, speedSuffixes[speedSuffix]);
-				else if (speed >= 10)
-					return String.format("%.1f %s", speed, speedSuffixes[speedSuffix]);
-				else
-					return String.format("%.2f %s", speed, speedSuffixes[speedSuffix]);
-			}
-			else if (columnIndex == 5)
+			else if (columnIndex == 6)
+				return StringUtilities.formatFileSize(
+					ipmsgTransferredFiles.get(rowIndex).getTransferSpeed()) + "/s";
+			else if (columnIndex == 7)
 			{
 				switch (ipmsgTransferredFiles.get(rowIndex).getState())
 				{

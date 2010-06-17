@@ -57,13 +57,12 @@ public interface TransferredFile extends ObservableInterface
 	 * Zwraca rozmiar przesyłanego pliku.
 	 *
 	 * W przypadku niektórych implementacji, nie da się określić dokładnego
-	 * rozmiaru pliku (najczęściej katalogu). W tym przypadku, jeżeli nie
-	 * wiadomo nic o tym rozmiarze, zostanie zwrócony null. Jeżeli można
-	 * częściowo go oszacować - zwracane jest oszacowanie.
+	 * rozmiaru pliku (najczęściej katalogu). W tym przypadku zwracane jest
+	 * jedynie oszacowanie (być może zero).
 	 *
 	 * @return rozmiar pliku (lub null, jeżeli nieznany)
 	 */
-	abstract public Long getFileSize();
+	abstract public long getFileSize();
 
 	/**
 	 * Zwraca ilość już przesłanych danych.

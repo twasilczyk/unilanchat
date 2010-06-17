@@ -76,8 +76,11 @@ dist-zip: dist java-doc
 	mkdir dist-zip
 	mkdir dist-zip/UniLANChat-bin
 	mkdir dist-zip/UniLANChat-doc
+	mkdir dist-zip/UniLANChat-doc/javadoc
 	cp -r dist/* dist-zip/UniLANChat-bin
-	cp -r java-doc/* dist-zip/UniLANChat-doc
+	cp -r java-doc/* dist-zip/UniLANChat-doc/javadoc
+	cp docs/developers-guide/unilanchat-devguide.pdf dist-zip/UniLANChat-doc
+	cp docs/user-guide/unilanchat-userguide.pdf dist-zip/UniLANChat-doc
 
 UniLANChat-bin.zip: dist-zip
 	cd dist-zip ; zip -r ../UniLANChat-bin.zip UniLANChat-bin

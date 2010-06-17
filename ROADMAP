@@ -2,10 +2,8 @@ Plany rozwoju programu UniLANChat. Niniejszy dokument jest luźnym planem, podan
 tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmienić.
 
 
-0.2
- - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
-
 0.3
+ - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
  - możliwość załączania plików do wiadomości przez drag&drop
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
