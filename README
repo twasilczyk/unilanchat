@@ -118,6 +118,14 @@ Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefi
 ## WYDANE WERSJE
 ################################################################################
 
+ * 0.2 (2010-06-18)
+   Obsługa przesyłania plików i katalogów; poprawki w interfejsie użytkownika
+   (bieżący nick użytkownika wyświetla się w tytule okna kontaktów, w publicznym
+   pokoju rozmów kliknięcie na nick rozmówcy otwiera prywatny pokój rozmów);
+   lepsza obsługa interfejsów sieciowych (np. szybka reakcja na zmiany ich
+   konfiguracji); dodane menu debug. Dodano także podręczniki: użytkownika
+   i programisty.
+
  * 0.1 (2010-05-20)
    Pierwsze publiczne wydanie rozwojowe. Program obsługuje częściowo protokół
    ipmsg, m.in. bez możliwości szyfrowania i przesyłania plików.
