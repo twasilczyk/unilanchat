@@ -197,13 +197,20 @@ class IpmsgPacket
 	 */
 	public final static long FLAG_DIALUP = 0x00010000;
 
+		// </editor-fold>
+
+		// <editor-fold desc="Powiadamianie o obecności, przesyłanie wiadomości">
+
 	/**
-	 * Powiadomienie o dołączeniu pliku do wiadomości.
+	 * W pakietach powiadamiania o obecności: informuje, że klient wspiera
+	 * transfer plików.
+	 * W pakietach dotyczących przesyłania wiadomości: powiadomienie o
+	 * dołączeniu pliku do wiadomości.
 	 */
 	public final static long FLAG_FILEATTACH = 0x00200000;
 
 	public final static long FLAG_ENCRYPT = 0x00400000;
-
+	
 		// </editor-fold>
 
 		// <editor-fold desc="Przesyłanie wiadomości">

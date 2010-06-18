@@ -488,6 +488,7 @@ public class IpmsgAccount extends Account
 		IpmsgPacket packet = new IpmsgPacket(userName);
 		packet.ip = ip;
 		packet.setCommand(command);
+		packet.setFlag(IpmsgPacket.FLAG_FILEATTACH, true);
 
 		if (this.userStatus == Contact.UserStatus.ONLINE)
 			packet.setFlag(IpmsgPacket.FLAG_ABSENCE, false);

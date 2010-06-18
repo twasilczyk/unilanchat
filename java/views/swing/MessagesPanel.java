@@ -356,11 +356,6 @@ public class MessagesPanel extends JStickyScrollPane
 				case ATTACHMENTS:
 					ReceivedFile[] receivedFiles = iMessage.getAttachments();
 
-					int filesCount = (receivedFiles == null) ? 0 : receivedFiles.length;
-					if (dMesg.renderedAttachmentsCount == filesCount)
-						break;
-					dMesg.renderedAttachmentsCount = filesCount;
-
 					if (receivedFiles == null)
 					{
 						HTMLUtilities.setInnerHTML(dMesg.getServiceCell(),
@@ -368,6 +363,10 @@ public class MessagesPanel extends JStickyScrollPane
 						break;
 					}
 					assert(receivedFiles.length > 0);
+
+					if (dMesg.renderedAttachmentsCount == receivedFiles.length)
+						break;
+					dMesg.renderedAttachmentsCount = receivedFiles.length;
 
 					for (int i = 0; i < receivedFiles.length; i++)
 					{
