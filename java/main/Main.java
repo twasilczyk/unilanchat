@@ -21,7 +21,7 @@ public abstract class Main
 	 * Oznaczenie numeru wersji w formacie:
 	 * <code>&lt;numer główny&gt;.&lt;numer dodatkowy&gt;[.&lt;numer wydania&gt;]</code>.
 	 */
-	public static final String version = "0.2";
+	public static final String version = "0.2.1";
 
 	/**
 	 * Czy jest to build testowy. Stabilne wydania mają ustawioną tą flagę
