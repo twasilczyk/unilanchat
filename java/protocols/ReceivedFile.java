@@ -12,7 +12,7 @@ public interface ReceivedFile extends TransferredFile
 	/**
 	 * Odbiera plik i zapisuje go do pliku o ścieżce zadanej w parametrze.
 	 *
-	 * @param path ścieżka, pod którą należy zapisać plik
+	 * @param target ścieżka, pod którą należy zapisać plik
 	 */
 	public void receive(File target);
 }

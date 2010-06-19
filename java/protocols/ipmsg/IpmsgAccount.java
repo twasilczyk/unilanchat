@@ -272,7 +272,6 @@ public class IpmsgAccount extends Account
 				catch (NumberFormatException e) { }
 				break;
 			case IpmsgPacket.COMM_RELEASEFILES:
-				System.out.println("Release: " + packet);
 				try
 				{
 					cancelFiles(packet.ip, Long.parseLong(packet.data));

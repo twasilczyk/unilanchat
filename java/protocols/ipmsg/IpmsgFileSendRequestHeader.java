@@ -105,10 +105,7 @@ class IpmsgFileSendRequestHeader
 		{
 			header.extendedAttributes = new String[fields.length - 3];
 			for(int k = 0; k < fields.length - 3; k++)
-			{
-				System.out.println(fields[k + 3].trim());
 				header.extendedAttributes[k] = fields[k + 3].trim();
-			}
 		}
 
 		return header;

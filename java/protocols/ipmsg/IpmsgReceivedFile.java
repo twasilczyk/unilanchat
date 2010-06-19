@@ -35,7 +35,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 	/**
 	 * Odbiera plik i zapisuje go do pliku o ścieżce zadanej w parametrze.
 	 *
-	 * @param path ścieżka, pod którą należy zapisać plik
+	 * @param target ścieżka, pod którą należy zapisać plik
 	 */
 	public synchronized void receive(File target)
 	{
@@ -47,6 +47,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 		if(thread != null && thread.isAlive())
 			throw new RuntimeException("Plik jest wlasnie pobierany");
 
+		state = State.WAITING_FOR_CONNECTION;
 		thread = new ReceivingThread(this);
 		thread.setDaemon(true);
 		thread.start();
@@ -61,6 +62,7 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 
 		public ReceivingThread(IpmsgReceivedFile receivedFile)
 		{
+			super("ULC-IpMsg-IpmsgReceivedFile-ReceivingThread");
 			if(receivedFile == null)
 				throw new NullPointerException();
 			this.receivedFile = receivedFile;

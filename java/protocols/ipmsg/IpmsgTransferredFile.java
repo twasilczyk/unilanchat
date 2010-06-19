@@ -73,7 +73,7 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	/**
 	 * Stan, w którym aktualnie znajduje się transferowany plik.
 	 */
-	protected State state = State.WAITING_FOR_CONNECTION;
+	protected State state = State.READY;
 
 	/**
 	 * Rozmiar przesłanych już danych.
@@ -227,7 +227,7 @@ public abstract class IpmsgTransferredFile extends Observable implements Transfe
 	{
 		if(notificationTimer == null)
 		{
-			notificationTimer = new Timer();
+			notificationTimer = new Timer("ULC-IpMsg-IpmsgTransferredFile-NotificationTimer");
 			notificationTimer.schedule(new NotificationTimerTask(getTransferredDataSize()), 0,
 					NotificationTimerTask.interval);
 		}

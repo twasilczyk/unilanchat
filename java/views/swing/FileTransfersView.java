@@ -187,6 +187,8 @@ public class FileTransfersView extends JFrame
 			{
 				switch (ipmsgTransferredFiles.get(rowIndex).getState())
 				{
+					case READY:
+						return "Nowy";
 					case COMPLETED:
 						return "Ukończono";
 					case ERROR:
@@ -197,8 +199,6 @@ public class FileTransfersView extends JFrame
 						return "Oczekuje";
 					case CANCELLED:
 						return "Anulowano";
-					case PREPARING:
-						return "Przygotowywanie";
 					default:
 						throw new UnsupportedOperationException("Nieznany status");
 				}

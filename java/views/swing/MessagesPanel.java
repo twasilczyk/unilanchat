@@ -458,10 +458,16 @@ public class MessagesPanel extends JStickyScrollPane
 
 				ReceivedFile attachment = attachments[fileNo];
 
-				if (attachment.getState() == TransferredFile.State.TRANSFERRING)
+				if (attachment.getState() != TransferredFile.State.READY)
 				{
+					String message;
+					if (attachment.getState() == TransferredFile.State.TRANSFERRING ||
+						attachment.getState() == TransferredFile.State.WAITING_FOR_CONNECTION)
+						message = "Już pobierasz ten plik...";
+					else
+						message = "Już wcześniej pobrałeś ten plik...";
 					JOptionPane.showMessageDialog(messagesPanel,
-						"Już pobierasz ten plik...", "Pobieranie pliku",
+						message, "Pobieranie pliku",
 						JOptionPane.INFORMATION_MESSAGE);
 				}
 				else if (cmd[0].equals("downloadAttachment"))
@@ -576,7 +582,6 @@ public class MessagesPanel extends JStickyScrollPane
 				{
 					public void run()
 					{
-						System.err.println(tmp.exists());
 						JOptionPane.showMessageDialog(messagesPanel,
 							"Nie udało się wyświetlić pliku \"" +
 							attachment.getFileName() +

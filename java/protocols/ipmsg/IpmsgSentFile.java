@@ -69,6 +69,7 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				throw new RuntimeException("Plik jest wlasnie wysylany");
 			if(isFile && (offset > fileSize || offset < 0))
 				throw new RuntimeException("Zly offset: " + Long.toString(offset));
+			state = State.WAITING_FOR_CONNECTION;
 			thread = new SendingThread(socket, offset);
 			thread.setDaemon(true);
 			transferredDataSize = 0;
@@ -130,6 +131,8 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 
 		public SendingThread(Socket socket, Long offset) throws SocketException
 		{
+			super("ULC-IpMsg-IpmsgSentFile-SendingThread");
+
 			if (socket == null)
 				throw new NullPointerException();
 			if (!socket.isConnected())
@@ -209,8 +212,8 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 			}
 			catch (IOException ex)
 			{
-				System.out.println(ex.getMessage());
 				setState(TransferredFile.State.ERROR);
+				throw new RuntimeException(ex);
 			}
 			finally
 			{

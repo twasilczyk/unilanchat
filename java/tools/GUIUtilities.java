@@ -169,7 +169,13 @@ public abstract class GUIUtilities
 				while (!window.isActive() &&
 					System.currentTimeMillis() - waitStart < 500)
 					Thread.yield();
-				bringWindowToFrontLinuxHack(window);
+				SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						bringWindowToFrontLinuxHack(window);
+					}
+				});
 			}
 		};
 		linuxHackRepeater.setDaemon(true);

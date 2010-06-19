@@ -37,6 +37,7 @@ public class IpmsgFileTransferThread extends Thread
 	 */
 	public IpmsgFileTransferThread(IpmsgAccount account)
 	{
+		super("ULC-IpMsg-IpmsgFileTransferThread");
 		if(account == null)
 			throw new NullPointerException();
 		this.account = account;
@@ -63,8 +64,8 @@ public class IpmsgFileTransferThread extends Thread
 					socket.setSoTimeout(socketTimeout);
 				}
 				catch(SocketException ex)
-				{// Pomyslec co tu zrobic gdy nie mozna ustawic timeouta
-					System.err.println("nie ustawil sie timeout");
+				{
+					throw new RuntimeException(ex);
 				}
 
 				FileRecognitionThread thread = new FileRecognitionThread(socket);
@@ -73,8 +74,7 @@ public class IpmsgFileTransferThread extends Thread
 			}
 			catch (IOException ex)
 			{
-				// Tu nalezy informacje o tym bledzie gdzies zapisac
-				System.out.println(ex.getMessage());
+				throw new RuntimeException(ex);
 			}
 		}
 	}
@@ -91,6 +91,8 @@ public class IpmsgFileTransferThread extends Thread
 
 		public FileRecognitionThread(Socket socket) throws SocketException
 		{
+			super("ULC-IpMsg-FileRecognitionThread");
+
 			if(socket == null)
 				throw new NullPointerException();
 			if(!socket.isConnected())
