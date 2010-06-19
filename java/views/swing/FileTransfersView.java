@@ -61,10 +61,16 @@ public class FileTransfersView extends JFrame
 
 	public void showTransfers()
 	{
-		if (getState() == Frame.ICONIFIED)
-			setState(Frame.NORMAL);
-		setVisible(true);
-		requestFocus();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (getState() == Frame.ICONIFIED)
+					setState(Frame.NORMAL);
+				setVisible(true);
+				requestFocus();
+			}
+		});
 	}
 
 	class FileTransfersListPanel extends JScrollPane

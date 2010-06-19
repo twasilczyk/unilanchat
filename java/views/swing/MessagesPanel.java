@@ -14,6 +14,7 @@ import javax.swing.text.html.HTMLDocument;
 import components.swing.*;
 import protocols.*;
 import resources.ResourceManager;
+import tools.HeavyObjectLoader;
 import tools.html.*;
 import tools.systemintegration.SystemProcesses;
 
@@ -45,6 +46,24 @@ public class MessagesPanel extends JStickyScrollPane
 	protected static final URL statusDelivered = ResourceManager.get("msgControls/status-delivered.png");
 	protected static final URL switchRawMessage = ResourceManager.get("msgControls/switch-rawMessage.png");
 	protected static final URL switchAttachments = ResourceManager.get("msgControls/switch-attachments.png");
+
+	protected static final HeavyObjectLoader<JSaveFileChooser> attachmentSaveFileChooser =
+		new HeavyObjectLoader<JSaveFileChooser>();
+
+	static
+	{
+		attachmentSaveFileChooser.load(
+			new HeavyObjectLoader.SwingInitializer<JSaveFileChooser>()
+		{
+			@Override
+			public JSaveFileChooser buildSwing()
+			{
+				JSaveFileChooser chooser = new JSaveFileChooser();
+				chooser.setDialogTitle("Zapisz załącznik jako...");
+				return chooser;
+			}
+		});
+	}
 
 	public MessagesPanel(ChatRoomPanel chatRoomPanel)
 	{
@@ -472,12 +491,16 @@ public class MessagesPanel extends JStickyScrollPane
 				}
 				else if (cmd[0].equals("downloadAttachment"))
 				{
-					JFileChooser fileChooser = new JSaveFileChooser();
-					fileChooser.setDialogTitle("Zapisz załącznik jako...");
-					fileChooser.setSelectedFile(new File(attachment.getFileName()));
-					if (fileChooser.showSaveDialog(messagesPanel) == JFileChooser.APPROVE_OPTION)
+					JFileChooser fileChooser = attachmentSaveFileChooser.get();
+					File saveTo = null;
+					synchronized(attachmentSaveFileChooser)
 					{
-						File saveTo = fileChooser.getSelectedFile();
+						fileChooser.setSelectedFile(new File(attachment.getFileName()));
+						if (fileChooser.showSaveDialog(messagesPanel) == JFileChooser.APPROVE_OPTION)
+							saveTo = fileChooser.getSelectedFile();
+					}
+					if (saveTo != null)
+					{
 						if (saveTo.exists())
 						{
 							if (!saveTo.canWrite())
@@ -487,10 +510,10 @@ public class MessagesPanel extends JStickyScrollPane
 							if (saveTo.exists())
 								throw new RuntimeException("Plik się nie usunął");
 						}
-						
+
 						attachment.receive(saveTo);
 						chatRoomPanel.chatRoomsView.mainView.mainMenu.
-								fileTransfersView.showTransfers();
+								fileTransfersView.get().showTransfers();
 					}
 				}
 				else // cmd[0].equals("openAttachment")
@@ -588,12 +611,15 @@ public class MessagesPanel extends JStickyScrollPane
 							"\". Spróbuj go zapisać i ręcznie uruchomić.", "Nieznany typ pliku",
 							JOptionPane.WARNING_MESSAGE);
 
-						JFileChooser fileChooser = new JSaveFileChooser();
-						fileChooser.setDialogTitle("Zapisz załącznik jako...");
-						fileChooser.setSelectedFile(new File(attachment.getFileName()));
-						if (fileChooser.showSaveDialog(messagesPanel) != JFileChooser.APPROVE_OPTION)
-							return;
-						File saveTo = fileChooser.getSelectedFile();
+						JFileChooser fileChooser = attachmentSaveFileChooser.get();
+						File saveTo;
+						synchronized(attachmentSaveFileChooser)
+						{
+							fileChooser.setSelectedFile(new File(attachment.getFileName()));
+							if (fileChooser.showSaveDialog(messagesPanel) != JFileChooser.APPROVE_OPTION)
+								return;
+							saveTo = fileChooser.getSelectedFile();
+						}
 						if (saveTo.exists())
 							saveTo.delete();
 

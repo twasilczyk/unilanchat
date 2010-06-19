@@ -3,14 +3,15 @@ package views.swing;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import javax.swing.*;
-
-import components.swing.JStickyScrollPane;
 import java.util.Vector;
+import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+
+import components.swing.*;
 import protocols.*;
-import tools.GUIUtilities;
-import tools.SetListener;
+import resources.ResourceManager;
+import tools.*;
+import tools.html.HTMLUtilities;
 
 /**
  * Panel pokoju rozmów, zawierający listę wiadomości oraz pole do ich wysyłania.
@@ -33,9 +34,17 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 	protected final static int minInputHeight = 25;
 	protected final static int maxInputHeight = 100;
 
+	protected final JPanel tabComponent = new JPanel(new BorderLayout(4, 0));
+	protected final JLabel tabTitle = new JLabel("rozmowa");
+	protected final JImagePanel tabIcon = new JImagePanel();
+
+	protected final static Image statusOnline = ResourceManager.getImage("status/online.png");
+	protected final static Image statusBusy = ResourceManager.getImage("status/busy.png");
+	protected final static Image statusOffline = ResourceManager.getImage("status/offline.png");
+
 	protected boolean unread = false;
 
-	public ChatRoomPanel(ChatRoom chatRoom, ChatRoomsView chatRoomsView)
+	public ChatRoomPanel(final ChatRoom chatRoom, final ChatRoomsView chatRoomsView)
 	{
 		this.chatRoomsView = chatRoomsView;
 		this.chatRoom = chatRoom;
@@ -59,19 +68,105 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		inputScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
 		messagesPanel.addKeyListener(new MessagesPanelListener());
+
+		// budowanie komponentu zakładki (czyli tego, czym się wybiera karty)
+		
+		tabComponent.setOpaque(false);
+
+		tabIcon.setPreferredSize(new Dimension(11, 11));
+		tabIcon.setVisible(chatRoom instanceof PrivateChatRoom);
+		tabComponent.add(tabIcon, BorderLayout.WEST);
+
+		tabComponent.add(tabTitle, BorderLayout.CENTER);
+
+		JButton tabCloseButton = new JButton(ResourceManager.getIcon("closeIcon.png"));
+		tabCloseButton.setMargin(new Insets(
+			Math.min(tabCloseButton.getMargin().top, 3),
+			Math.min(tabCloseButton.getMargin().left, 3),
+			Math.min(tabCloseButton.getMargin().bottom, 3),
+			Math.min(tabCloseButton.getMargin().right, 3)));
+		tabCloseButton.setBorderPainted(false);
+		tabComponent.add(tabCloseButton, BorderLayout.EAST);
+
+		tabCloseButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				chatRoomsView.chatController.getChatRoomList().remove(chatRoom);
+			}
+		});
+	}
+
+	public JPanel getTabComponent()
+	{
+		return tabComponent;
+	}
+
+	protected void updateRoomTitle()
+	{
+		String title = chatRoom.getTitle();
+		if (title.isEmpty())
+			title = "rozmowa";
+		if (isUnread())
+			tabTitle.setText("<html><b>" + HTMLUtilities.escape(title) + "</b></html>");
+		else
+			tabTitle.setText(HTMLUtilities.escapeForSwing(title));
+
+		if (chatRoom instanceof PrivateChatRoom)
+		{
+			PrivateChatRoom privRoom = (PrivateChatRoom)chatRoom;
+			switch (privRoom.getContact().getStatus())
+			{
+				case ONLINE:
+					tabIcon.image = statusOnline;
+					break;
+				case BUSY:
+					tabIcon.image = statusBusy;
+					break;
+				case OFFLINE:
+					tabIcon.image = statusOffline;
+					break;
+			}
+			tabIcon.invalidate();
+		}
+	}
+
+	protected static final HeavyObjectLoader<JFileChooser> attachmentLoadFileChooser =
+		new HeavyObjectLoader<JFileChooser>();
+
+	static
+	{
+		attachmentLoadFileChooser.load(
+			new HeavyObjectLoader.SwingInitializer<JFileChooser>()
+		{
+			@Override
+			public JFileChooser buildSwing()
+			{
+				JFileChooser chooser = new JFileChooser();
+				chooser.setDialogTitle("Wybierz pliki do wysłania");
+				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				chooser.setMultiSelectionEnabled(true);
+				chooser.setFileHidingEnabled(false);
+				return chooser;
+			}
+		});
 	}
 
 	public void showFileAttachDialog()
 	{
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setDialogTitle("Wybierz pliki do wysłania");
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		fileChooser.setMultiSelectionEnabled(true);
-		fileChooser.setFileHidingEnabled(false);
-		if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
-			return;
+		JFileChooser fileChooser = attachmentLoadFileChooser.get();
 
-		attachedFileList.addFiles(fileChooser.getSelectedFiles());
+		File[] selectedFiles;
+
+		synchronized(attachmentLoadFileChooser)
+		{
+			if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+				return;
+			selectedFiles = fileChooser.getSelectedFiles();
+		}
+
+		if (selectedFiles.length > 0)
+			attachedFileList.addFiles(selectedFiles);
 	}
 
 	class InputPaneListener implements KeyListener
@@ -227,7 +322,6 @@ class AttachedFileList extends JStickyScrollPane
 	private final static FileSystemView fsView = FileSystemView.getFileSystemView();
 
 	private static Dimension fileElementDimension = new Dimension(0, 24);
-	private static Font removeButtonFont = new Font("Arial", Font.PLAIN, 10);
 
 	public AttachedFileList()
 	{
@@ -332,8 +426,13 @@ class AttachedFileList extends JStickyScrollPane
 			setPreferredSize(fileElementDimension);
 			setMaximumSize(fileElementDimension);
 
-			JButton removeButton = new JButton("x");
-			removeButton.setFont(removeButtonFont);
+			JButton removeButton = new JButton(ResourceManager.getIcon("closeIcon.png"));
+			removeButton.setBorderPainted(false);
+			removeButton.setMargin(new Insets(
+				Math.min(removeButton.getMargin().top, 3),
+				Math.min(removeButton.getMargin().left, 3),
+				Math.min(removeButton.getMargin().bottom, 3),
+				Math.min(removeButton.getMargin().right, 3)));
 			removeButton.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)

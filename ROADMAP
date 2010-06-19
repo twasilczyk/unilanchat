@@ -8,8 +8,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
- - BUG: zakładki pokoi rozmów czasem zmieniają tytuły np. prywatne na "Pokój
-   główny", gdy osoba z którą się rozmawia coś odpisze
  - logowanie przebiegu rozmów, podgląd logów
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
@@ -33,7 +31,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - reagowanie na wstrzymywanie (uśpienie) i wznawianie pracy komputera
  - obsłużyć wersję protokołu iptux ("1_iptux_0"), ten klient może wysyłać
    pakiety COMM_BR_ISGETLIST2
- - przycisk zamykania zakładek rozmów
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
    inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
 

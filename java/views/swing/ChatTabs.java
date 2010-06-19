@@ -6,9 +6,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import protocols.*;
-import resources.ResourceManager;
 import tools.*;
-import tools.html.HTMLUtilities;
 
 /**
  * Zakładki z otwartymi pokojami rozmów.
@@ -21,10 +19,6 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 
 	protected final ChatRoomsView chatRoomsView;
 	protected final ChatRoomList chatRoomList;
-
-	protected final static Icon statusOnline = ResourceManager.getIcon("status/online.png");
-	protected final static Icon statusBusy = ResourceManager.getIcon("status/busy.png");
-	protected final static Icon statusOffline = ResourceManager.getIcon("status/offline.png");
 
 	public ChatTabs(ChatRoomsView chatRoomsView)
 	{
@@ -101,16 +95,6 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 		return (ChatRoomPanel)sel;
 	}
 
-	protected synchronized void setTitleAt(ChatRoomPanel panel, String title)
-	{
-		super.setTitleAt(indexOfComponent(panel), title);
-	}
-
-	protected synchronized void setIconAt(ChatRoomPanel panel, Icon icon)
-	{
-		super.setIconAt(indexOfComponent(panel), icon);
-	}
-
 	public void mousePressed(MouseEvent e) { }
 	public void mouseReleased(MouseEvent e) { }
 	public void mouseEntered(MouseEvent e) { }
@@ -124,9 +108,9 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 			{
 				synchronized (thisChatTabs)
 				{
-					addTab("rozmowa",
-						null,
-						new ChatRoomPanel(item, chatRoomsView));
+					ChatRoomPanel panel = new ChatRoomPanel(item, chatRoomsView);
+					addTab("rozmowa", null, panel);
+					setTabComponentAt(indexOfComponent(panel), panel.getTabComponent());
 				}
 				updateRoomTitle(item);
 			}
@@ -218,32 +202,11 @@ public class ChatTabs extends JTabbedPane implements MouseListener, SetListener<
 			public void run()
 			{
 				ChatRoomPanel panel = getRoomPanel(room);
+				if (panel == null)
+					return;
 
-				String title = room.getTitle();
-				if (title.isEmpty())
-					title = "rozmowa";
-				if (getRoomPanel(room).isUnread())
-					setTitleAt(panel, "<html><b>" + HTMLUtilities.escape(title) + "</b></html>");
-				else
-					setTitleAt(panel, HTMLUtilities.escapeForSwing(title));
+				panel.updateRoomTitle();
 				updateWindowTitle();
-				
-				if (room instanceof PrivateChatRoom)
-				{
-					PrivateChatRoom privRoom = (PrivateChatRoom)room;
-					switch (privRoom.getContact().getStatus())
-					{
-						case ONLINE:
-							setIconAt(panel, statusOnline);
-							break;
-						case BUSY:
-							setIconAt(panel, statusBusy);
-							break;
-						case OFFLINE:
-							setIconAt(panel, statusOffline);
-							break;
-					}
-				}
 			}
 		});
 	}

@@ -7,7 +7,7 @@ import javax.swing.*;
 import main.*;
 import protocols.Account;
 import protocols.ipmsg.IpmsgAccount;
-import tools.ProcessingQueue;
+import tools.*;
 
 /**
  * Komponent wyświetlający główne menu programu.
@@ -19,8 +19,10 @@ public class MainMenu extends JMenuBar
 	final MainView mainView;
 	final MainMenuListener mainMenuListener = new MainMenuListener();
 
-	AboutView aboutView;
-	FileTransfersView fileTransfersView;
+	HeavyObjectLoader<AboutView> aboutView =
+			new HeavyObjectLoader<AboutView>(1000);
+	HeavyObjectLoader<FileTransfersView> fileTransfersView =
+			new HeavyObjectLoader<FileTransfersView>(1000);
 
 	class MainMenuListener implements ActionListener
 	{
@@ -31,31 +33,23 @@ public class MainMenu extends JMenuBar
 				mainView.getMainController().applicationClose();
 			else if (cmd.equals("application.transfers"))
 			{
-				if (fileTransfersView == null) // widok nie musi być od razu gotowy
-					SwingUtilities.invokeLater(new Runnable()
+				Main.backgroundProcessing.invokeLater(new Runnable()
+				{
+					public void run()
 					{
-						public void run()
-						{
-							if (fileTransfersView != null)
-								fileTransfersView.showTransfers();
-						}
-					});
-				else
-					fileTransfersView.showTransfers();
+						fileTransfersView.get().showTransfers();
+					}
+				});
 			}
 			else if (cmd.equals("help.about"))
 			{
-				if (aboutView == null) // widok nie musi być od razu gotowy
-					SwingUtilities.invokeLater(new Runnable()
+				Main.backgroundProcessing.invokeLater(new Runnable()
+				{
+					public void run()
 					{
-						public void run()
-						{
-							if (aboutView != null)
-								aboutView.showAbout();
-						}
-					});
-				else
-					aboutView.showAbout();
+						aboutView.get().showAbout();
+					}
+				});
 			}
 			else if (cmd.equals("debug.refreshIpmsg"))
 			{
@@ -97,14 +91,22 @@ public class MainMenu extends JMenuBar
 	{
 		this.mainView = mainViewP;
 
-		SwingUtilities.invokeLater(new Runnable()
+		fileTransfersView.load(new HeavyObjectLoader.SwingInitializer<FileTransfersView>()
 		{
-			public void run()
+			@Override
+			public FileTransfersView buildSwing()
 			{
-				// utworzenie tych okien zajmuje dużo czasu, a nie potrzebujemy
-				// ich od razu po starcie aplikacji
-				aboutView = new AboutView();
-				fileTransfersView = new FileTransfersView(mainView.mainController.getFileTransfersController());
+				return new FileTransfersView(
+					mainView.mainController.getFileTransfersController());
+			}
+		});
+
+		aboutView.load(new HeavyObjectLoader.SwingInitializer<AboutView>()
+		{
+			@Override
+			public AboutView buildSwing()
+			{
+				return new AboutView();
 			}
 		});
 

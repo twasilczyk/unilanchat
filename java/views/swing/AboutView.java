@@ -49,10 +49,16 @@ public class AboutView extends JFrame
 
 	public void showAbout()
 	{
-		if (getState() == Frame.ICONIFIED)
-			setState(Frame.NORMAL);
-		setVisible(true);
-		requestFocus();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (getState() == Frame.ICONIFIED)
+					setState(Frame.NORMAL);
+				setVisible(true);
+				requestFocus();
+			}
+		});
 	}
 
 	class AboutViewListener implements HyperlinkListener, ActionListener
