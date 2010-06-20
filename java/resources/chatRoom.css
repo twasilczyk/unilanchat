@@ -42,3 +42,13 @@ p
 {
 	padding-left: 3px;
 }
+
+.messageAuthorLink
+{
+	color: black;
+}
+
+.messageAuthorLink:hover
+{
+	color: #666666;
+}

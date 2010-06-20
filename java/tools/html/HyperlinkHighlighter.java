@@ -45,6 +45,11 @@ public class HyperlinkHighlighter
 	protected final Style styleHover;
 
 	/**
+	 * Reguły pobrane z arkusza styli.
+	 */
+	protected final StyleContext cssRules;
+
+	/**
 	 * Główny konstruktor.
 	 *
 	 * @param pane komponent, którego zawartość ma być podświetlana
@@ -59,13 +64,13 @@ public class HyperlinkHighlighter
 		pane.addMouseListener(paneListener);
 		pane.addMouseMotionListener(paneListener);
 		
-		StyleContext ss = doc.getStyleSheet();
-		Style styleHoverT = ss.getStyle("a:hover");
+		cssRules = doc.getStyleSheet();
+		Style styleHoverT = cssRules.getStyle("a:hover");
 		if (styleHoverT == null)
-			styleHoverT = ss.addStyle("a:hover", null);
-		Style styleNormalT = ss.getStyle("a");
+			styleHoverT = cssRules.addStyle("a:hover", null);
+		Style styleNormalT = cssRules.getStyle("a");
 		if (styleNormalT == null)
-			styleNormalT = ss.addStyle("a", null);
+			styleNormalT = cssRules.addStyle("a", null);
 		this.styleHover = styleHoverT;
 		this.styleNormal = styleNormalT;
 	}
@@ -152,8 +157,31 @@ public class HyperlinkHighlighter
 				throw new NullPointerException();
 			int start = el.getStartOffset();
 			int end = el.getEndOffset();
-			doc.setCharacterAttributes(start, end - start,
-					highlight?styleHover:styleNormal, false);
+
+			Style newStyle;
+
+			if (highlight)
+			{
+				newStyle = styleHover;
+				for (String className : HTMLUtilities.getElementClassNames(el))
+				{
+					Style elStyle = cssRules.getStyle("." + className + ":hover");
+					if (elStyle != null)
+						newStyle = elStyle;
+				}
+			}
+			else
+			{
+				newStyle = styleNormal;
+				for (String className : HTMLUtilities.getElementClassNames(el))
+				{
+					Style elStyle = cssRules.getStyle("." + className);
+					if (elStyle != null)
+						newStyle = elStyle;
+				}
+			}
+
+			doc.setCharacterAttributes(start, end - start, newStyle, false);
 		}
 	}
 }

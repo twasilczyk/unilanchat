@@ -210,22 +210,22 @@ public class StatusPanel extends JPanel implements Observer
 				{
 					case ONLINE:
 						statusLabel.setText("Dostępny");
-						statusIcon.image = iconOnline;
+						statusIcon.setImage(iconOnline);
 						break;
 					case BUSY:
 						statusLabel.setText("Zaraz wracam");
-						statusIcon.image = iconBusy;
+						statusIcon.setImage(iconBusy);
 						break;
 					case OFFLINE:
 						statusLabel.setText("Rozłączony");
-						statusIcon.image = iconOffline;
+						statusIcon.setImage(iconOffline);
 						break;
 				}
 			}
 			else if (value instanceof String)
 			{
 				statusLabel.setText("Zmień opis");
-				statusIcon.image = null;
+				statusIcon.setImage(null);
 			}
 			else
 				throw new IllegalArgumentException();

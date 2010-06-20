@@ -77,6 +77,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		tabIcon.setVisible(chatRoom instanceof PrivateChatRoom);
 		tabComponent.add(tabIcon, BorderLayout.WEST);
 
+		tabTitle.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
 		tabComponent.add(tabTitle, BorderLayout.CENTER);
 
 		JButton tabCloseButton = new JButton(ResourceManager.getIcon("closeIcon.png"));
@@ -118,16 +119,15 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 			switch (privRoom.getContact().getStatus())
 			{
 				case ONLINE:
-					tabIcon.image = statusOnline;
+					tabIcon.setAndRefreshImage(statusOnline);
 					break;
 				case BUSY:
-					tabIcon.image = statusBusy;
+					tabIcon.setAndRefreshImage(statusBusy);
 					break;
 				case OFFLINE:
-					tabIcon.image = statusOffline;
+					tabIcon.setAndRefreshImage(statusOffline);
 					break;
 			}
-			tabIcon.invalidate();
 		}
 	}
 

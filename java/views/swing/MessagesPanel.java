@@ -113,7 +113,7 @@ public class MessagesPanel extends JStickyScrollPane
 	protected final static String messageServiceContents = //data, autor, informacja
 		"<p>(%s) <strong>%s</strong> <em>%s</em></p>";
 	protected final static String messageAuthorLink = //id, autor
-		"<a href=\"action:openPrivateRoom/%d\">%s</a>";
+		"<a class=\"messageAuthorLink\" href=\"action:openPrivateRoom/%d\">%s</a>";
 
 	protected final static String messageReceiversCell = //id, ikona (html)
 		"<td id=\"message-receivers-%d\">%s</td>";

@@ -206,18 +206,18 @@ class ContactListPanelRenderer implements ListCellRenderer
 		switch (contact.getStatus())
 		{
 			case ONLINE:
-				userIcon.image = iconOnline;
+				userIcon.setImage(iconOnline);
 				break;
 			case OFFLINE:
-				userIcon.image = iconOffline;
+				userIcon.setImage(iconOffline);
 				break;
 			case BUSY:
-				userIcon.image = iconBusy;
+				userIcon.setImage(iconBusy);
 				break;
 		}
 
 		if (contact instanceof protocols.ipmsg.IpmsgContact)
-			protocolIcon.image = iconIpmsg;
+			protocolIcon.setImage(iconIpmsg);
 		else
 			assert(false);
 

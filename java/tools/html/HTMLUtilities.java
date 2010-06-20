@@ -2,6 +2,7 @@ package tools.html;
 
 import java.io.*;
 import java.net.URL;
+import java.util.*;
 import java.util.regex.*;
 import javax.swing.SwingUtilities;
 import javax.swing.text.*;
@@ -255,5 +256,35 @@ public class HTMLUtilities
 				}
 			}
 		});
+	}
+
+	public static String[] getElementClassNames(Element link)
+	{
+		Vector<String> classNames = new Vector<String>();
+
+		AttributeSet attr = link.getAttributes();
+
+		Enumeration attrNames = attr.getAttributeNames();
+		while (attrNames.hasMoreElements())
+		{
+			Object attrName = attrNames.nextElement();
+			if (!(attrName instanceof HTML.Tag))
+				continue;
+
+			Object tag = attr.getAttribute(attrName);
+			if (tag == null)
+				throw new NullPointerException();
+			if (!(tag instanceof SimpleAttributeSet))
+				continue;
+			
+			Object tagClassName = ((SimpleAttributeSet)tag).getAttribute(HTML.Attribute.CLASS);
+			if (tagClassName == null)
+				continue;
+			assert(tagClassName instanceof String);
+			
+			classNames.addElement((String)tagClassName);
+		}
+
+		return classNames.toArray(new String[classNames.size()]);
 	}
 }
