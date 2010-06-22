@@ -122,6 +122,11 @@ Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefi
 ## WYDANE WERSJE
 ################################################################################
 
+ * 0.2.1 (2010-06-22)
+   Wersja broniona jako rezultat projektu licencjackiego (Instytut Infomatyki
+   UWr). Poprawione bugi, lepszy UI zakładek rozmów, szybsze działanie na
+   wolniejszych komputerach.
+
  * 0.2 (2010-06-18)
    Obsługa przesyłania plików i katalogów; poprawki w interfejsie użytkownika
    (bieżący nick użytkownika wyświetla się w tytule okna kontaktów, w publicznym
