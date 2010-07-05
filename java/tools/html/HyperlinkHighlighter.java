@@ -77,12 +77,20 @@ public class HyperlinkHighlighter
 
 	class PaneListener implements MouseListener, MouseMotionListener
 	{
-		public void mouseClicked(MouseEvent arg0) { }
-		public void mousePressed(MouseEvent arg0) { }
-		public void mouseReleased(MouseEvent arg0) { }
-		public void mouseDragged(MouseEvent arg0) { }
-		public void mouseEntered(MouseEvent arg0) { }
-		public void mouseExited(MouseEvent arg0) { }
+		public void mouseClicked(MouseEvent e) { }
+		public void mousePressed(MouseEvent e) { }
+		public void mouseReleased(MouseEvent e) { }
+		public void mouseDragged(MouseEvent e) { }
+
+		public void mouseEntered(MouseEvent e)
+		{
+			mouseMoved(e);
+		}
+
+		public void mouseExited(MouseEvent e)
+		{
+			removeHyperlinkHighlight();
+		}
 
 		public void mouseMoved(MouseEvent e)
 		{

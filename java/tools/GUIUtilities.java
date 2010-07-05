@@ -154,11 +154,15 @@ public abstract class GUIUtilities
 				Thread.yield();
 		}
 
-		bringWindowToFrontLinuxHack(window);
+		if (isLinux)
+			bringWindowToFrontLinuxHack(window);
 
 		window.setVisible(true);
 		window.toFront();
 		window.requestFocus();
+
+		if (!isLinux)
+			return;
 
 		Thread linuxHackRepeater = new Thread()
 		{
@@ -195,21 +199,20 @@ public abstract class GUIUtilities
 	private static void bringWindowToFrontLinuxHack(final Frame window)
 	{
 		window.setVisible(false);
-		if (isLinux)
-		{
-			Vector<Frame> visibleFrames = new Vector<Frame>();
-			for (Frame f : Frame.getFrames())
-				if (f.isVisible())
-				{
-					if (f.getClass().getCanonicalName().equals(
-						"sun.awt.X11.XTrayIconPeer.XTrayIconEmbeddedFrame"))
-						continue;
-					f.setVisible(false);
-					visibleFrames.add(f);
-				}
-			for (Frame f : visibleFrames)
-				f.setVisible(true);
-		}
+
+		Vector<Frame> visibleFrames = new Vector<Frame>();
+		for (Frame f : Frame.getFrames())
+			if (f.isVisible())
+			{
+				if (f.getClass().getCanonicalName().equals(
+					"sun.awt.X11.XTrayIconPeer.XTrayIconEmbeddedFrame"))
+					continue;
+				f.setVisible(false);
+				visibleFrames.add(f);
+			}
+		for (Frame f : visibleFrames)
+			f.setVisible(true);
+		
 		window.setVisible(true);
 	}
 
