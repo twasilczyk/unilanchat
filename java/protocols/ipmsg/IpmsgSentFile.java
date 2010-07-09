@@ -210,6 +210,10 @@ public class IpmsgSentFile extends IpmsgTransferredFile
 				}
 				setState(TransferredFile.State.COMPLETED);
 			}
+			catch (SocketException ex)
+			{
+				setState(TransferredFile.State.ERROR);
+			}
 			catch (IOException ex)
 			{
 				setState(TransferredFile.State.ERROR);

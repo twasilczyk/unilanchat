@@ -228,9 +228,14 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 				}
 				setState(TransferredFile.State.COMPLETED);
 			}
+			catch (SocketException ex)
+			{
+				setState(TransferredFile.State.ERROR);
+			}
 			catch (IOException ex)
 			{
 				setState(TransferredFile.State.ERROR);
+				throw new RuntimeException(ex);
 			}
 			finally
 			{
