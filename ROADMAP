@@ -3,6 +3,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.3
+ - gniazdo-serwer do transferu plików powinno być inicjowane przy otwieraniu
+   sesji IPmsg, a nie w konstruktorze konta
+ - podpowiedzi do opcji w ustawieniach
  - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
  - możliwość załączania plików do wiadomości przez drag&drop
  - uzupełnić komentarze w pakiecie views.swing

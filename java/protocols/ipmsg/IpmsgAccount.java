@@ -31,6 +31,8 @@ public class IpmsgAccount extends Account
 		super(contactList, chatRoomList);
 		fileTransferThread = new IpmsgFileTransferThread(this);
 		fileTransferThread.start();
+
+		Configuration.getInstance().addObserver(new ConfigurationObserver());
 	}
 
 	@Override public boolean isGroupsSupported()
@@ -38,6 +40,8 @@ public class IpmsgAccount extends Account
 		return true;
 	}
 
+	// <editor-fold defaultstate="collapsed" desc="Transfer plików">
+	
 	/**
 	 * Zbiór plików oczekujących na wysłanie, bądź odebranie.
 	 *
@@ -55,7 +59,7 @@ public class IpmsgAccount extends Account
 	 */
 	public IpmsgSentFile getSentFile(String ip, IpmsgFileReceiveRequestHeader header)
 	{
-		for(IpmsgTransferredFile file: transferredFiles)
+		for (IpmsgTransferredFile file: transferredFiles)
 		{
 			if (file instanceof IpmsgSentFile &&
 					((IpmsgSentFile)file).contact.ip.equals(ip) &&
@@ -77,10 +81,21 @@ public class IpmsgAccount extends Account
 	 */
 	public void cancelFiles(String ip, long packetID)
 	{
-		for(IpmsgTransferredFile file: transferredFiles)
-			if(file.contact.ip.equals(ip) && file.packetID == packetID &&
-			file.state != TransferredFile.State.COMPLETED)
+		for (IpmsgTransferredFile file: transferredFiles)
+			if (file.contact.ip.equals(ip) && file.packetID == packetID &&
+				file.state != TransferredFile.State.COMPLETED)
 				file.setState(TransferredFile.State.CANCELLED);
+	}
+	
+	// </editor-fold>
+
+	class ConfigurationObserver implements Observer
+	{
+		public void update(Observable o, Object arg)
+		{
+			assert(o instanceof Configuration);
+			statusNotify(IpmsgPacket.COMM_ABSENCE);
+		}
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Wątek połączenia">

@@ -196,8 +196,16 @@ public class MainController extends SimpleObservable implements Observer
 	public void applicationClose()
 	{
 		setStatus(Contact.UserStatus.OFFLINE);
-		Configuration.saveInstance(Main.getAppDir() + "config.xml");
+		saveConfiguration();
 		System.exit(0);
+	}
+
+	/**
+	 * Zapisuje bieżącą konfigurację do domyślnego pliku konfiguracji.
+	 */
+	public void saveConfiguration()
+	{
+		Configuration.saveInstance(Main.getAppDir() + "config.xml");
 	}
 
 	/**

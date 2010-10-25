@@ -23,6 +23,8 @@ public class MainMenu extends JMenuBar
 			new HeavyObjectLoader<AboutView>(1000);
 	HeavyObjectLoader<FileTransfersView> fileTransfersView =
 			new HeavyObjectLoader<FileTransfersView>(1000);
+	HeavyObjectLoader<ConfigurationView> configurationView =
+			new HeavyObjectLoader<ConfigurationView>(1000);
 
 	class MainMenuListener implements ActionListener
 	{
@@ -48,6 +50,16 @@ public class MainMenu extends JMenuBar
 					public void run()
 					{
 						aboutView.get().showAbout();
+					}
+				});
+			}
+			else if (cmd.equals("application.configuration"))
+			{
+				Main.backgroundProcessing.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						configurationView.get().showConfiguration();
 					}
 				});
 			}
@@ -110,6 +122,15 @@ public class MainMenu extends JMenuBar
 			}
 		});
 
+		configurationView.load(new HeavyObjectLoader.SwingInitializer<ConfigurationView>()
+		{
+			@Override
+			public ConfigurationView buildSwing()
+			{
+				return new ConfigurationView(mainView.mainController);
+			}
+		});
+
 		JMenu menuProgram = new JMenu("Program");
 		menuProgram.addActionListener(mainMenuListener);
 		this.add(menuProgram);
@@ -118,6 +139,11 @@ public class MainMenu extends JMenuBar
 		itemTransfers.setActionCommand("application.transfers");
 		itemTransfers.addActionListener(mainMenuListener);
 		menuProgram.add(itemTransfers);
+
+		JMenuItem itemConfiguration = new JMenuItem("Ustawienia");
+		itemConfiguration.setActionCommand("application.configuration");
+		itemConfiguration.addActionListener(mainMenuListener);
+		menuProgram.add(itemConfiguration);
 
 		JMenuItem itemZamknij = new JMenuItem("Zamknij");
 		itemZamknij.setActionCommand("application.close");

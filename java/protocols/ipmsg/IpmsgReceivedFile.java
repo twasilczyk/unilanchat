@@ -245,7 +245,8 @@ public class IpmsgReceivedFile extends IpmsgTransferredFile implements ReceivedF
 					// Jesli udalo sie otworzyc strumien dla pliku to zamykamy
 					if(fileOutputStream != null)
 						fileOutputStream.close();
-					socket.close();
+					if (socket != null)
+						socket.close();
 				}
 				catch (IOException ex1)
 				{

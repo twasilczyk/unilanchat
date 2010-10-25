@@ -186,8 +186,12 @@ public class MainView extends JFrame implements Observer
 		TrayInitThread trayInitThread = new TrayInitThread();
 
 		MainViewInitializator init = new MainViewInitializator(mainController);
-		if (!GUIUtilities.swingInvokeAndWait(init) || !init.wasSuccessful())
+		boolean temp = GUIUtilities.swingInvokeAndWait(init);
+		if (!temp || !init.wasSuccessful())
+		{
+			System.err.println("Nie załadowano głównego widoku: (" + temp + ";" + init.wasSuccessful() + ")");
 			return false;
+		}
 
 		try
 		{
@@ -195,7 +199,10 @@ public class MainView extends JFrame implements Observer
 		}
 		catch (InterruptedException ex) { }
 		if (trayInitThread.trayIcon == null)
+		{
+			System.err.println("Nie załadowano ikony w trayu");
 			return false;
+		}
 		init.getMainView().trayIcon = trayInitThread.trayIcon;
 		init.getMainView().finishTrayInitialization();
 

@@ -33,6 +33,7 @@ public class AboutView extends JFrame
 		setPreferredSize(new Dimension(350, 300));
 		setLayout(new BorderLayout());
 		setIconImage(ResourceManager.getIcon("icons/32.png").getImage());
+		addKeyListener(aboutViewListener);
 
 		wholePanel.add(new TitleBar(), BorderLayout.NORTH);
 
@@ -61,7 +62,7 @@ public class AboutView extends JFrame
 		});
 	}
 
-	class AboutViewListener implements HyperlinkListener, ActionListener
+	class AboutViewListener implements HyperlinkListener, ActionListener, KeyListener
 	{
 		public void hyperlinkUpdate(HyperlinkEvent e)
 		{
@@ -75,6 +76,18 @@ public class AboutView extends JFrame
 				setVisible(false);
 			else
 				assert(false);
+		}
+
+		public void keyTyped(KeyEvent e) { }
+		public void keyReleased(KeyEvent e) { }
+
+		public void keyPressed(KeyEvent e)
+		{
+			if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+			{
+				actionPerformed(new ActionEvent(e.getSource(), e.getID(), "close"));
+				return;
+			}
 		}
 	}
 
@@ -103,6 +116,7 @@ public class AboutView extends JFrame
 			JButton closeButton = new JButton("Zamknij");
 			closeButton.setActionCommand("close");
 			closeButton.addActionListener(aboutViewListener);
+			closeButton.addKeyListener(aboutViewListener);
 
 			add(closeButton, BorderLayout.EAST);
 		}
@@ -114,6 +128,7 @@ public class AboutView extends JFrame
 		{
 			setBackground(Color.WHITE);
 			setEditable(false);
+			addKeyListener(aboutViewListener);
 
 			try
 			{

@@ -47,7 +47,7 @@ public class IpmsgFileTransferThread extends Thread
 		}
 		catch (IOException ex)
 		{
-			throw new RuntimeException("Nie można utworzyć gniazda" +
+			throw new RuntimeException("Nie można utworzyć gniazda " +
 					"nasłuchującego na portcie: " + Integer.toString(serverPort));
 		}
 	}
