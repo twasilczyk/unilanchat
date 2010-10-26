@@ -1,5 +1,6 @@
 package protocols.ipmsg;
 
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
@@ -16,11 +17,6 @@ import tools.ListenableVector;
 public class IpmsgAccount extends Account
 {
 	/**
-	 * Wątek zajmujący się transferem plików.
-	 */
-	protected IpmsgFileTransferThread fileTransferThread;
-
-	/**
 	 * Główny konstruktor.
 	 *
 	 * @param contactList lista kontaktów, z której ma korzystać konto
@@ -29,8 +25,6 @@ public class IpmsgAccount extends Account
 	public IpmsgAccount(ContactList contactList, ChatRoomList chatRoomList)
 	{
 		super(contactList, chatRoomList);
-		fileTransferThread = new IpmsgFileTransferThread(this);
-		fileTransferThread.start();
 
 		Configuration.getInstance().addObserver(new ConfigurationObserver());
 	}
@@ -103,6 +97,11 @@ public class IpmsgAccount extends Account
 	private IpmsgConnectionThread connectionThread;
 
 	/**
+	 * Wątek zajmujący się transferem plików.
+	 */
+	protected IpmsgFileTransferThread fileTransferThread;
+
+	/**
 	 * Sprawdza, czy połączenie jest nawiązane.
 	 *
 	 * @return <code>true</code>, jeżeli połączono
@@ -124,6 +123,15 @@ public class IpmsgAccount extends Account
 			return true;
 		if (setConnected)
 		{
+			try
+			{
+				fileTransferThread = new IpmsgFileTransferThread(this);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
 			connectionThread = new IpmsgConnectionThread(this);
 			while (!connectionThread.isConnected &&
 					!connectionThread.failedConnecting)
@@ -134,6 +142,7 @@ public class IpmsgAccount extends Account
 				}
 				catch (InterruptedException e)
 				{
+					fileTransferThread.interrupt();
 					return false;
 				}
 			}
@@ -142,11 +151,13 @@ public class IpmsgAccount extends Account
 				contactsThread.speedupRefresh();
 				return true;
 			}
+			fileTransferThread.interrupt();
 			return false;
 		}
 		else
 		{
 			connectionThread.disconnect();
+			fileTransferThread.interrupt();
 			return true;
 		}
 	}

@@ -3,8 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.3
- - gniazdo-serwer do transferu plików powinno być inicjowane przy otwieraniu
-   sesji IPmsg, a nie w konstruktorze konta
  - podpowiedzi do opcji w ustawieniach
  - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
  - możliwość załączania plików do wiadomości przez drag&drop
@@ -24,6 +22,9 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - tylko jedna instancja programu
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
+ - lista kontaktów: oznaczanie kontaktów, z którymi występują problemy
+   w transmisji (czyli są już w kolejce do oznaczenia jako niedostępni, ale
+   jeszcze nie osiągnęli timeoutu)
  - ipmsg: szyfrowanie (wymaga znajomych na liście kontaktów), dodawanie kluczy
    publicznych do znajomych kontaktów
  - automatyczne uruchamianie wraz ze startem systemu
@@ -36,6 +37,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    pakiety COMM_BR_ISGETLIST2
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
    inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
+ - pod Win7 jeżeli przycisk ze statusami ma hover, jego tekst jest niewidoczny
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)

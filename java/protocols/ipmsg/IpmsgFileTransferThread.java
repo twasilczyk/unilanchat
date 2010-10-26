@@ -2,6 +2,8 @@ package protocols.ipmsg;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Klasa zajmująca się transferem pliku w obrębie danego konta użytkownika.
@@ -28,56 +30,76 @@ public class IpmsgFileTransferThread extends Thread
 	/**
 	 * Domyślny timeout na zaakceptowanym połączeniu.
 	 */
-	public static final int socketTimeout = 5000;
+	public static final int connectionSocketTimeout = 5000;
 
 	/**
 	 * Konstruktor wątku dla danego konta.
 	 *
 	 * @param account konto dla którego działa wątek.
 	 */
-	public IpmsgFileTransferThread(IpmsgAccount account)
+	public IpmsgFileTransferThread(IpmsgAccount account) throws IOException
 	{
 		super("ULC-IpMsg-IpmsgFileTransferThread");
 		if(account == null)
 			throw new NullPointerException();
+		setDaemon(true);
 		this.account = account;
-		try
-		{
-			serverSocket = new ServerSocket(serverPort);
-		}
-		catch (IOException ex)
-		{
-			throw new RuntimeException("Nie można utworzyć gniazda " +
-					"nasłuchującego na portcie: " + Integer.toString(serverPort));
-		}
+		serverSocket = new ServerSocket(serverPort);
+		serverSocket.setSoTimeout(500);
+		start();
 	}
 
 	@Override public void run()
 	{
-		while(true)
+		Socket socket = null;
+
+		try
 		{
-			try
+			while(true)
 			{
-				Socket socket = serverSocket.accept();
 				try
 				{
-					socket.setSoTimeout(socketTimeout);
+					if (isInterrupted())
+						break;
+
+					try
+					{
+						socket = serverSocket.accept();
+						socket.setSoTimeout(connectionSocketTimeout);
+					}
+					catch (SocketTimeoutException e)
+					{
+						continue;
+					}
+
+					if (isInterrupted())
+						break;
+
+					FileRecognitionThread thread = new FileRecognitionThread(socket);
+					thread.setDaemon(true);
+					thread.start();
 				}
-				catch(SocketException ex)
+				catch (IOException ex)
 				{
 					throw new RuntimeException(ex);
 				}
-
-				FileRecognitionThread thread = new FileRecognitionThread(socket);
-				thread.setDaemon(true);
-				thread.start();
 			}
-			catch (IOException ex)
+		}
+		finally
+		{
+			try
 			{
-				throw new RuntimeException(ex);
+				serverSocket.close();
+				if (socket != null && socket.isConnected())
+					socket.close();
+			}
+			catch (IOException ex2)
+			{
 			}
 		}
 	}
+
+	private static int fileRecognitionThreadCount = 0;
 
 	/**
 	 * Wątek wyszukujący plik na liście plików danego konta.
@@ -91,7 +113,8 @@ public class IpmsgFileTransferThread extends Thread
 
 		public FileRecognitionThread(Socket socket) throws SocketException
 		{
-			super("ULC-IpMsg-FileRecognitionThread");
+			super("ULC-IpMsg-FileRecognitionThread-" +
+				(fileRecognitionThreadCount++));
 
 			if(socket == null)
 				throw new NullPointerException();

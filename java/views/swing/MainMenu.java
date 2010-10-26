@@ -69,6 +69,11 @@ public class MainMenu extends JMenuBar
 					if (acc instanceof IpmsgAccount)
 						((IpmsgAccount)acc).speedupContactsRefresh();
 			}
+			else if (cmd.equals("debug.printIfaces"))
+			{
+				for (java.net.Inet4Address addr : net.InterfaceInfoProvider.getLocalAdresses())
+					System.out.println(addr);
+			}
 			else
 				assert(false);
 		}
@@ -169,6 +174,11 @@ public class MainMenu extends JMenuBar
 			itemRefreshIpmsg.setActionCommand("debug.refreshIpmsg");
 			itemRefreshIpmsg.addActionListener(mainMenuListener);
 			menuDebug.add(itemRefreshIpmsg);
+
+			JMenuItem itemPrintIfaces = new JMenuItem("Wypisz interfejsy");
+			itemPrintIfaces.setActionCommand("debug.printIfaces");
+			itemPrintIfaces.addActionListener(mainMenuListener);
+			menuDebug.add(itemPrintIfaces);
 
 			JMenuItem itemPQueueMonitor = new JMenuItem("Monitor kolejki zadań: nieznany");
 			menuDebug.add(itemPQueueMonitor);

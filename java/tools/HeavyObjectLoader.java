@@ -62,13 +62,13 @@ public class HeavyObjectLoader<T>
 		loaderThread.start();
 	}
 
-	private static int HeavyObjectLoaderThreadCount = 0;
+	private static int heavyObjectLoaderThreadCount = 0;
 
 	class HeavyObjectLoaderThread extends Thread
 	{
 		public HeavyObjectLoaderThread()
 		{
-			super("HeavyObjectLoaderThread-" + (HeavyObjectLoaderThreadCount++));
+			super("HeavyObjectLoaderThread-" + (heavyObjectLoaderThreadCount++));
 			setDaemon(true);
 			setPriority(getPriority() - 1);
 		}
