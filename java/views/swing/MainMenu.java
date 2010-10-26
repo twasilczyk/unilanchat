@@ -71,8 +71,22 @@ public class MainMenu extends JMenuBar
 			}
 			else if (cmd.equals("debug.printIfaces"))
 			{
+				StringBuilder msg = new StringBuilder();
+
+				msg.append("Adresy lokalne:\n");
 				for (java.net.Inet4Address addr : net.InterfaceInfoProvider.getLocalAdresses())
-					System.out.println(addr);
+				{
+					msg.append(addr);
+					msg.append('\n');
+				}
+				msg.append("\nAdresy broadcast:\n");
+				for (java.net.Inet4Address addr : net.InterfaceInfoProvider.getBroadcastAdresses())
+				{
+					msg.append(addr);
+					msg.append('\n');
+				}
+				JOptionPane.showMessageDialog(mainView, msg.toString(),
+					"Interfejsy sieciowe", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else
 				assert(false);
@@ -175,7 +189,7 @@ public class MainMenu extends JMenuBar
 			itemRefreshIpmsg.addActionListener(mainMenuListener);
 			menuDebug.add(itemRefreshIpmsg);
 
-			JMenuItem itemPrintIfaces = new JMenuItem("Wypisz interfejsy");
+			JMenuItem itemPrintIfaces = new JMenuItem("Interfejsy sieciowe");
 			itemPrintIfaces.setActionCommand("debug.printIfaces");
 			itemPrintIfaces.addActionListener(mainMenuListener);
 			menuDebug.add(itemPrintIfaces);

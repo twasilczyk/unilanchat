@@ -154,19 +154,22 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 
 	public void showFileAttachDialog()
 	{
-		JFileChooser fileChooser = attachmentLoadFileChooser.get();
+		final JFileChooser fileChooser = attachmentLoadFileChooser.get();
+		final ChatRoomPanel thisObj = this;
 
-		File[] selectedFiles;
-
-		synchronized(attachmentLoadFileChooser)
+		SwingUtilities.invokeLater(new Runnable()
 		{
-			if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
-				return;
-			selectedFiles = fileChooser.getSelectedFiles();
-		}
+			public void run()
+			{
+				File[] selectedFiles;
 
-		if (selectedFiles.length > 0)
-			attachedFileList.addFiles(selectedFiles);
+				if (fileChooser.showOpenDialog(thisObj) != JFileChooser.APPROVE_OPTION)
+					return;
+				selectedFiles = fileChooser.getSelectedFiles();
+				if (selectedFiles.length > 0)
+					attachedFileList.addFiles(selectedFiles);
+			}
+		});
 	}
 
 	class InputPaneListener implements KeyListener

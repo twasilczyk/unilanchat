@@ -6,6 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import controllers.ChatController;
+import main.Main;
 import protocols.*;
 import resources.ResourceManager;
 import tools.*;
@@ -222,7 +223,13 @@ public class ChatRoomsView extends JFrame
 			if (cmd.equals("conversation.close"))
 				chatTabs.chatRoomList.remove(chatTabs.getSelectedRoom().getChatRoom());
 			else if (cmd.equals("conversation.attachFile"))
-			chatTabs.getSelectedRoom().showFileAttachDialog();
+				Main.backgroundProcessing.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						chatTabs.getSelectedRoom().showFileAttachDialog();
+					}
+				});
 		}
 	}
 

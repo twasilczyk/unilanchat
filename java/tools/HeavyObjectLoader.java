@@ -195,6 +195,9 @@ public class HeavyObjectLoader<T>
 	 */
 	public T get()
 	{
+		if (SwingUtilities.isEventDispatchThread())
+			throw new RuntimeException("Nie powinno być wykonywane z EventDispatchThread");
+
 		if (isReady)
 			return obj;
 

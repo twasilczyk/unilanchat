@@ -197,7 +197,8 @@ public class Configuration extends Observable
 
 		try
 		{
-			BufferedWriter out = new BufferedWriter(new FileWriter(file));
+			BufferedWriter out = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(file), configurationCharset));
 			out.write(data);
 			out.close();
 		}
