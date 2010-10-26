@@ -2,6 +2,7 @@ package views.swing;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Vector;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -89,10 +90,17 @@ public class ConfigurationView extends JFrame
 				setVisible(false);
 				loadControlsFromConfiguration();
 			}
-			else if(e.getActionCommand().equals("ok"))
+			else if (e.getActionCommand().equals("ok"))
 			{
 				setVisible(false);
 				saveConfigurationFromControls();
+			}
+			else if (e.getActionCommand().startsWith("hint-"))
+			{
+				int hintID = Integer.parseInt(e.getActionCommand().substring(5));
+
+				JOptionPane.showMessageDialog(controlsPanel, hintList.get(hintID),
+					"Pomoc", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else
 				assert(false);
@@ -112,15 +120,18 @@ public class ConfigurationView extends JFrame
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Kontrolki konfiguracji">
-	
+
+	protected static final Vector<String> hintList = new Vector<String>();
+
 	private final GridBagConstraints gridBagConstraints = new GridBagConstraints();
 	private final Border controlLabelBorder = BorderFactory.createEmptyBorder(0, 0, 0, 10);
 	{
 		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.insets = new Insets(5, 0, 0, 0);
+		gridBagConstraints.gridy = 0;
 	}
 
-	private synchronized void addControl(Component comp, String label)
+	private synchronized void addControl(Component comp, String label, String hint)
 	{
 		if (comp == null)
 			throw new NullPointerException();
@@ -136,11 +147,28 @@ public class ConfigurationView extends JFrame
 			controlsPanel.add(controlLabel, gridBagConstraints);
 		}
 
-		gridBagConstraints.weightx = 0.8;
+		gridBagConstraints.weightx = 0.7;
 		gridBagConstraints.gridx = 1;
 		controlsPanel.add(comp, gridBagConstraints);
-
 		comp.addKeyListener(configurationViewListener);
+
+		if (hint != null)
+		{
+			hintList.add(hint);
+			int hintIndex = hintList.indexOf(hint);
+
+			gridBagConstraints.weightx = 0.1;
+			gridBagConstraints.gridx = 2;
+
+			JButton hintButton = new JButton("?");
+			hintButton.addActionListener(configurationViewListener);
+			hintButton.setActionCommand("hint-" + hintIndex);
+			hintButton.setBorderPainted(false);
+			controlsPanel.add(hintButton, gridBagConstraints);
+			hintButton.addKeyListener(configurationViewListener);
+		}
+
+		gridBagConstraints.gridy++;
 	}
 	
 	protected final JTextField fieldNick = new JTextField();
@@ -149,13 +177,25 @@ public class ConfigurationView extends JFrame
 
 	protected final void prepareControls()
 	{
-		addControl(fieldNick, "Nick:");
+		addControl(fieldNick, "Nick:", null);
 
 		fieldIgnoreAutoResponses.setText("Ignoruj automatyczne odpowiedzi");
-		addControl(fieldIgnoreAutoResponses, null);
+		addControl(fieldIgnoreAutoResponses, null,
+			"Oryginalny klient IPMsg pozwala ustawić \"automatyczną odpowiedź\" " +
+			"na każdą otrzymaną wiadomość.\nTakie wiadomości bywają mało " +
+			"użyteczne (zazwyczaj brzmią np. \"zaraz wracam\"), za to mogą " +
+			"być\nuciążliwe, szczególnie podczas rozmowy w pokoju głównym.\n\n" +
+			"Ta opcja pozwala na ignorowanie takich wiadomości, bez " +
+			"wpływu na pozostałe.");
 
 		fieldAutoUpdate.setText("Automatycznie sprawdzaj aktualizacje");
-		addControl(fieldAutoUpdate, null);
+		addControl(fieldAutoUpdate, null,
+			"Program może sprawdzać, czy jest już dostępna jego nowa wersja, a " +
+			"gdy taka się pojawi,\npoinformować o tym użytkownika i skierować go " +
+			"na stronę, z której można ją pobrać.\n\n" +
+			"W czasie sprawdzania numeru wersji, nie są wysyłane żadne prywatne " +
+			"dane (co można\nzweryfikować przeglądając kod źródłowy), a sama " +
+			"instalacja nowej wersji musi być\nprzeprowadzona ręcznie przez użytkownika.");
 		
 		loadControlsFromConfiguration();
 	}

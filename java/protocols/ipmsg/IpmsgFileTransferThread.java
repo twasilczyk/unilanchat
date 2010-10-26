@@ -2,8 +2,6 @@ package protocols.ipmsg;
 
 import java.io.*;
 import java.net.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Klasa zajmująca się transferem pliku w obrębie danego konta użytkownika.
