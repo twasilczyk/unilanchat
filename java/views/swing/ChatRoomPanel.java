@@ -108,6 +108,8 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 		String title = chatRoom.getTitle();
 		if (title.isEmpty())
 			title = "rozmowa";
+		if (title.length() > 20)
+			title = title.substring(0, 17) + "...";
 		if (isUnread())
 			tabTitle.setText("<html><b>" + HTMLUtilities.escape(title) + "</b></html>");
 		else

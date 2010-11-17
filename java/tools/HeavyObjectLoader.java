@@ -91,7 +91,8 @@ public class HeavyObjectLoader<T>
 				{
 					synchronized(this)
 					{
-						wait();
+						if (initializer == null)
+							wait();
 					}
 				}
 				catch (InterruptedException ex)
