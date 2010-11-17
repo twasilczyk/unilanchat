@@ -74,7 +74,12 @@ public class MainView extends JFrame implements Observer
 
 		add(new MainRoomButtonPanel(), BorderLayout.NORTH);
 		add(new ContactListPanel(this), BorderLayout.CENTER);
-		add(new StatusPanel(mainController), BorderLayout.SOUTH);
+
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
+		bottomPanel.add(new WarningNotificationPanel(Main.userNotifications));
+		bottomPanel.add(new StatusPanel(mainController));
+		add(bottomPanel, BorderLayout.SOUTH);
 
 		pack();
 		setLocationRelativeTo(null); //wyśrodkowanie okna

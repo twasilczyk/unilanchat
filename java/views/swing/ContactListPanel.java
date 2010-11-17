@@ -156,14 +156,8 @@ class ContactListPanelRenderer implements ListCellRenderer
 		userNamePanel.add(userName, BorderLayout.WEST);
 		userNamePanel.add(userTextStatus, BorderLayout.CENTER);
 
-		int statusTextSize = userTextStatus.getFont().getSize(); //domyślnie 13 w KDE, w Windowsie mniej
-		if (statusTextSize >= 13)
-			statusTextSize -= 4;
-		else if (statusTextSize >= 10)
-			statusTextSize = 9;
-		userTextStatus.setFont(new Font(userTextStatus.getFont().getName(),
-			userTextStatus.getFont().getStyle(),
-			statusTextSize));
+		userTextStatus.setFont(userTextStatus.getFont().deriveFont(
+			(float)(userTextStatus.getFont().getSize() * 0.7)));
 
 		userIcon.setPreferredSize(new Dimension(12, 12));
 		protocolIcon.setPreferredSize(new Dimension(12, 12));

@@ -37,6 +37,10 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
    inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
  - pod Win7 jeżeli przycisk ze statusami ma hover, jego tekst jest niewidoczny
+ - rozszerzone komunikaty o problemach (pod listą kontaktów): dynamiczne
+   przyciski (np. ponów próbę), unique po typie komunikatu (String z nazwą
+   typu?), możliwość usuwania komunikatów danego typu (np. po nawiązaniu
+   połączenia)
 
 1.0 (pierwsza wersja finalna)
  - wiele języków (przynajmniej Polski i Angielski)
@@ -49,8 +53,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: przy modyfikacji listy kontaktów może zmienić się zaznaczony kontakt -
    zaznaczony indeks pozostaje w miejscu, kontakty się przesuwają
  - wykrywanie (i oznaczanie) kontaktów, których firewall nie wpuszcza pakietów
- - powiadamianie o błędach tak, jak w pidginie (panel z komunikatem pod listą
-   kontaktów)
  - wykrywanie lub zgadywanie, że ustawienia firewall lub NAT nie pozwalają na
    komunikację, informowanie o tym użytkownika
  - bug 001-linux-multiple-broadcast: problem z wykrywaniem adresów broadcast

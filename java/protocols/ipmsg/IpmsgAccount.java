@@ -123,15 +123,6 @@ public class IpmsgAccount extends Account
 			return true;
 		if (setConnected)
 		{
-			try
-			{
-				fileTransferThread = new IpmsgFileTransferThread(this);
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				return false;
-			}
 			connectionThread = new IpmsgConnectionThread(this);
 			while (!connectionThread.isConnected &&
 					!connectionThread.failedConnecting)
@@ -148,8 +139,24 @@ public class IpmsgAccount extends Account
 			}
 			if (connectionThread.isConnected)
 			{
+				try
+				{
+					fileTransferThread = new IpmsgFileTransferThread(this);
+				}
+				catch (IOException e)
+				{
+					throw new RuntimeException(e);
+				}
 				contactsThread.speedupRefresh();
 				return true;
+			}
+			if (connectionThread.failedConnecting)
+			{
+				Main.userNotifications.add("Problem z siecią IPMsg",
+					"Nie udało się dołączyć do sieci IPMsg. Sprawdź, czy na " +
+					"pewno wyłączyłeś wszystkie inne programy korzystające z tej " +
+					"sieci (np. oryginalny klient IPMsg).");
+				return false;
 			}
 			fileTransferThread.interrupt();
 			return false;

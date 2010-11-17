@@ -194,6 +194,18 @@ public class IpmsgFileTransferThread extends Thread
 				// Ostatecznie oddelegowujemy plik do wyslania
 				file.send(socket, header.offset);
 			}
+			catch (SocketTimeoutException ex)
+			{
+				try
+				{
+					socket.close();
+				}
+				catch (IOException ex1)
+				{
+				}
+
+				throw new RuntimeException("TODO: zaimplementować obsługę SocketTimeoutException", ex);
+			}
 			catch (IOException ex)
 			{
 				try

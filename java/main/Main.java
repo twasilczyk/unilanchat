@@ -16,7 +16,12 @@ public abstract class Main
 	/**
 	 * Główna kolejka dla zadań do wykonania w tle.
 	 */
-	public static ProcessingQueue backgroundProcessing = new ProcessingQueue();
+	public static final ProcessingQueue backgroundProcessing = new ProcessingQueue();
+
+	/**
+	 * Stos ostrzeżeń dla użytkownika.
+	 */
+	public static final UserNotificationsStack userNotifications = new UserNotificationsStack();
 
 	/**
 	 * Oznaczenie numeru wersji w formacie:
