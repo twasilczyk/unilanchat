@@ -195,6 +195,7 @@ public class MainController extends SimpleObservable implements Observer
 	 */
 	public void applicationClose()
 	{
+		notifyObservers("applicationClose");
 		setStatus(Contact.UserStatus.OFFLINE);
 		saveConfiguration();
 		System.exit(0);

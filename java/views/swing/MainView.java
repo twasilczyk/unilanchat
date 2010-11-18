@@ -82,7 +82,17 @@ public class MainView extends JFrame implements Observer
 		add(bottomPanel, BorderLayout.SOUTH);
 
 		pack();
-		setLocationRelativeTo(null); //wyśrodkowanie okna
+
+		Configuration.WindowDimensions frameDim =
+			Configuration.getInstance().getMainViewDimensions();
+		if (frameDim == null)
+			setLocationRelativeTo(null); //wyśrodkowanie okna
+		else
+		{
+			frameDim = frameDim.shrinkToVisible();
+			setSize(frameDim.width, frameDim.height);
+			setLocation(frameDim.left, frameDim.top);
+		}
 
 		Configuration.getInstance().addObserver(this);
 	}
@@ -123,6 +133,17 @@ public class MainView extends JFrame implements Observer
 							SystemProcesses.openURL(updater.getHomepage());
 					}
 				});
+			}
+		}
+		else if (o == mainController && gArg instanceof String)
+		{
+			String arg = (String)gArg;
+			if (arg.equals("applicationClose"))
+			{
+				Configuration.getInstance().setMainViewDimensions(
+					new Configuration.WindowDimensions(
+						getLocation().x, getLocation().y,
+						getWidth(), getHeight()));
 			}
 		}
 		else if (o instanceof Configuration)

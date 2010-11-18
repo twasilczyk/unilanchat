@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Observable;
@@ -62,25 +63,14 @@ public class Configuration extends Observable
 	{
 		Element configurationEl = serializationDoc.createElement("configuration");
 
-		Element nickEl = serializationDoc.createElement("nick");
-		configurationEl.appendChild(nickEl);
-		Text nickVal = serializationDoc.createTextNode(getNick());
-		nickEl.appendChild(nickVal);
+		XMLUtilities.appendTextNode(configurationEl, "nick", getNick());
+		XMLUtilities.appendTextNode(configurationEl, "ignoreAutoResponses", ignoreAutoResponses);
+		XMLUtilities.appendTextNode(configurationEl, "autoUpdate", autoUpdate);
+		XMLUtilities.appendTextNode(configurationEl, "debugMode", debugMode);
 
-		Element ignoreAutoResponsesEl = serializationDoc.createElement("ignoreAutoResponses");
-		configurationEl.appendChild(ignoreAutoResponsesEl);
-		Text ignoreAutoResponsesVal = serializationDoc.createTextNode(ignoreAutoResponses ? "true" : "false");
-		ignoreAutoResponsesEl.appendChild(ignoreAutoResponsesVal);
-
-		Element autoUpdateEl = serializationDoc.createElement("autoUpdate");
-		configurationEl.appendChild(autoUpdateEl);
-		Text autoUpdateVal = serializationDoc.createTextNode(autoUpdate ? "true" : "false");
-		autoUpdateEl.appendChild(autoUpdateVal);
-
-		Element debugModeEl = serializationDoc.createElement("debugMode");
-		configurationEl.appendChild(debugModeEl);
-		Text debugModeVal = serializationDoc.createTextNode(debugMode ? "true" : "false");
-		debugModeEl.appendChild(debugModeVal);
+		if (mainViewDimensions != null)
+			configurationEl.appendChild(mainViewDimensions.serialize(
+				serializationDoc, "mainViewDimensions"));
 
 		return configurationEl;
 	}
@@ -100,32 +90,22 @@ public class Configuration extends Observable
 		NodeList list = node.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++)
 		{
-			if (list.item(i).getNodeType() != Node.ELEMENT_NODE)
-				continue;
-			Node tempNode = list.item(i);
-			if (tempNode.getNodeName().trim().equals("nick"))
-				conf.nick = list.item(i).getTextContent().trim();
-			else if (tempNode.getNodeName().trim().equals("ignoreAutoResponses"))
-			{
-				if (tempNode.getTextContent().equals("true"))
-					conf.ignoreAutoResponses = true;
-				else if (tempNode.getTextContent().equals("false"))
-					conf.ignoreAutoResponses = false;
-			}
-			else if (tempNode.getNodeName().trim().equals("autoUpdate"))
-			{
-				if (tempNode.getTextContent().equals("true"))
-					conf.autoUpdate = true;
-				else if (tempNode.getTextContent().equals("false"))
-					conf.autoUpdate = false;
-			}
-			else if (tempNode.getNodeName().trim().equals("debugMode"))
-			{
-				if (tempNode.getTextContent().equals("true"))
-					conf.debugMode = true;
-				else if (tempNode.getTextContent().equals("false"))
-					conf.debugMode = false;
-			}
+			Node currentNode = list.item(i);
+			String currentNodeName = currentNode.getNodeName();
+			
+			if (currentNodeName.equals("nick"))
+				conf.nick = currentNode.getTextContent().trim();
+			else if (currentNodeName.equals("ignoreAutoResponses"))
+				conf.ignoreAutoResponses = XMLUtilities.getBoolValue(currentNode,
+					conf.ignoreAutoResponses);
+			else if (currentNodeName.equals("autoUpdate"))
+				conf.autoUpdate = XMLUtilities.getBoolValue(currentNode,
+					conf.autoUpdate);
+			else if (currentNodeName.equals("debugMode"))
+				conf.debugMode = XMLUtilities.getBoolValue(currentNode,
+					conf.debugMode);
+			else if (currentNodeName.equals("mainViewDimensions"))
+				conf.mainViewDimensions = WindowDimensions.deserialize(currentNode);
 		}
 
 		return conf;
@@ -322,6 +302,147 @@ public class Configuration extends Observable
 		debugMode = enabled;
 	}
 
+	private WindowDimensions mainViewDimensions = null;
+
+	/**
+	 * Pobiera zapisaną konfigurację wymiarów okna głównego.
+	 *
+	 * @return obiekt konfiguracji wymiarów okna programu lub <code>null</code>,
+	 * jeżeli ma być domyślna
+	 */
+	public WindowDimensions getMainViewDimensions()
+	{
+		return mainViewDimensions;
+	}
+
+	/**
+	 * Ustawia konfigurację wymiarów okna głównego.
+	 *
+	 * @param mainViewDimensions wymiary okna głównego
+	 */
+	public void setMainViewDimensions(WindowDimensions mainViewDimensions)
+	{
+		if (mainViewDimensions == null)
+			throw new NullPointerException();
+		this.mainViewDimensions = mainViewDimensions;
+	}
+
 	// </editor-fold>
+
+	/**
+	 * Klasa przechowująca położenie i wymiary okna
+	 */
+	public static class WindowDimensions
+	{
+		/**
+		 * Odległość okna od lewej krawędzi ekranu.
+		 */
+		public final int left;
+		
+		/**
+		 * Odległość okna od górnej krawędzi ekranu.
+		 */
+		public final int top;
+
+		/**
+		 * Szerokość okna.
+		 */
+		public final int width;
+
+		/**
+		 * Wysokość okna.
+		 */
+		public final int height;
+
+		public WindowDimensions(int left, int top, int width, int height)
+		{
+			this.left = left;
+			this.top = top;
+			this.width = width;
+			this.height = height;
+		}
+
+		/**
+		 * Serializuje obiekt wymiarów okna do obiektu drzewa XML.
+		 * @return drzewo XML reprezentujące wymiary okna
+		 */
+		public Node serialize(Document serializationDoc, String elementName)
+		{
+			Element winDimEl = serializationDoc.createElement(elementName);
+
+			XMLUtilities.appendTextNode(winDimEl, "left", left);
+			XMLUtilities.appendTextNode(winDimEl, "top", top);
+			XMLUtilities.appendTextNode(winDimEl, "width", width);
+			XMLUtilities.appendTextNode(winDimEl, "height", height);
+
+			return winDimEl;
+		}
+
+		/**
+		 * Zwraca obiekt wymiarów okna na podstawie drzewa XML zadanego parametrem
+		 *
+		 * @param node drzewo XML
+		 * @return utworzony obiekt wymiarów okna
+		 */
+		public static WindowDimensions deserialize(Node node)
+		{
+			Integer left, top, width, height;
+			left = top = width = height = null;
+
+			NodeList list = node.getChildNodes();
+			for (int i = 0; i < list.getLength(); i++)
+			{
+				Node currentNode = list.item(i);
+				String currentNodeName = currentNode.getNodeName();
+
+				if (currentNodeName.equals("left"))
+					left = XMLUtilities.getIntValue(currentNode, null);
+				else if(currentNodeName.equals("top"))
+					top = XMLUtilities.getIntValue(currentNode, null);
+				else if (currentNodeName.equals("width"))
+					width = XMLUtilities.getIntValue(currentNode, null);
+				else if (currentNodeName.equals("height"))
+					height = XMLUtilities.getIntValue(currentNode, null);
+			}
+
+			try
+			{
+				return new WindowDimensions(left, top, width, height);
+			}
+			catch (NullPointerException ex) // jeżeli jakaś wartość nie będzie podana
+			{
+				return null;
+			}
+		}
+
+		/**
+		 * Przycina wymiary okna do rozmiaru widocznego ekranu.
+		 *
+		 * @return obiekt z przyciętymi wymiarami
+		 */
+		public WindowDimensions shrinkToVisible()
+		{
+			Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
+
+			if (scrDim == null || scrDim.width <= 0 || scrDim.height <= 0)
+				return this;
+
+			int sLeft = this.left;
+			int sTop = this.top;
+			int sWidth = this.width;
+			int sHeight = this.height;
+
+			if (sWidth > scrDim.width)
+				sWidth = scrDim.width;
+			if (sHeight > scrDim.height)
+				sHeight = scrDim.height;
+			if (sLeft + sWidth > scrDim.width)
+				sLeft = scrDim.width - sWidth;
+			if (sTop + sHeight > scrDim.height)
+				sTop = scrDim.height - sHeight;
+
+			return new WindowDimensions(sLeft, sTop, sWidth, sHeight);
+		}
+	}
 
 }

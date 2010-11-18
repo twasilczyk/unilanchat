@@ -29,7 +29,7 @@ public class WarningNotificationPanel extends JPanel
 		this.messages = messages;
 		messages.addObserver(listener);
 
-		setLayout(new BorderLayout());
+		setLayout(new BorderLayout(0, 3));
 		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		titleLabel.setIcon(ResourceManager.getIcon("warningIcon.png"));
@@ -79,7 +79,7 @@ public class WarningNotificationPanel extends JPanel
 		}
 	}
 
-	protected void refresh()
+	final protected void refresh()
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
