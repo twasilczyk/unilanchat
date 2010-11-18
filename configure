@@ -15,20 +15,36 @@ fi
 
 echo "DEBUGMODE=$DEBUGMODE" >> Makefile
 
-JAVA_ROOT=$JDK_HOME
-if [ -d "$JAVA_ROOT" ] ; then
-	echo -n
-elif [ -d "/usr/lib/jvm/java-6-sun" ] ; then # Ubuntu
-	JAVA_ROOT="/usr/lib/jvm/java-6-sun"
-elif [ -d "/usr/lib/jvm/java" ] ; then # OpenSUSE
-	JAVA_ROOT="/usr/lib/jvm/java"
+
+CHECK_JAVA_ROOTS=( \
+	$JAVA_ROOT \
+	"/usr/lib/jvm/java-6-sun" \
+	"/usr/lib/jvm/java" \
+	"/usr/java/default" \
+	)
+
+JAVA_ROOT=
+
+for CHECK in $(seq 0 $((${#CHECK_JAVA_ROOTS[@]} - 1)))
+do
+	JAVA_PATH=${CHECK_JAVA_ROOTS[$CHECK]}
+	if [ -f "$JAVA_PATH/bin/javac" ] ; then
+		JAVA_ROOT=$JAVA_PATH ;\
+		break
+	fi
+done
+
+if [ $JAVA_ROOT ] ; then
+	echo "JAVA_ROOT=$JAVA_ROOT" >> Makefile ;\
+	echo "JAVA_ROOT=$JAVA_ROOT"
 else
-	echo "Nie znaleziono JDK, zmienna systemowa JDK_HOME nie wskazuje poprawnego katalogu."
+	echo "Nie znaleziono JDK, zmienna systemowa JDK_HOME nie wskazuje poprawnego katalogu." ;\
 	exit
 fi
-echo "JAVA_ROOT=$JAVA_ROOT" >> Makefile
+
 
 echo >> Makefile
 cat Makefile.in >> Makefile
 
+echo
 echo "Plik Makefile gotowy, możesz użyć make, lub make all."

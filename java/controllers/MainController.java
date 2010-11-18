@@ -196,6 +196,12 @@ public class MainController extends SimpleObservable implements Observer
 	public void applicationClose()
 	{
 		notifyObservers("applicationClose");
+
+		Configuration config = Configuration.getInstance();
+
+		config.setDefaultStatus(currentStatus);
+		config.setDefaultTextStatus(currentTextStatus);
+
 		setStatus(Contact.UserStatus.OFFLINE);
 		saveConfiguration();
 		System.exit(0);
@@ -216,7 +222,11 @@ public class MainController extends SimpleObservable implements Observer
 	{
 		if (X11StartupNotification.isSupported)
 			X11StartupNotification.notifyStartupComplete();
-		setStatus(Contact.UserStatus.ONLINE);
+
+		Configuration config = Configuration.getInstance();
+
+		setTextStatus(config.getDefaultTextStatus());
+		setStatus(config.getDefaultStatus());
 
 		if (Configuration.getInstance().getAutoUpdate())
 			updater.checkForUpdates();

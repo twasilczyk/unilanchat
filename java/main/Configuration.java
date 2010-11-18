@@ -7,6 +7,7 @@ import java.util.Observable;
 
 import org.w3c.dom.*;
 
+import protocols.Contact;
 import tools.xml.*;
 
 /**
@@ -66,6 +67,16 @@ public class Configuration extends Observable
 		XMLUtilities.appendTextNode(configurationEl, "nick", getNick());
 		XMLUtilities.appendTextNode(configurationEl, "ignoreAutoResponses", ignoreAutoResponses);
 		XMLUtilities.appendTextNode(configurationEl, "autoUpdate", autoUpdate);
+
+		{
+			Element node = serializationDoc.createElement("defaultStatus");
+			configurationEl.appendChild(node);
+			Text nodeVal = serializationDoc.createTextNode(defaultTextStatus);
+			node.appendChild(nodeVal);
+
+			node.setAttribute("type", defaultStatus.toString());
+		}
+
 		XMLUtilities.appendTextNode(configurationEl, "debugMode", debugMode);
 
 		if (mainViewDimensions != null)
@@ -106,6 +117,19 @@ public class Configuration extends Observable
 					conf.debugMode);
 			else if (currentNodeName.equals("mainViewDimensions"))
 				conf.mainViewDimensions = WindowDimensions.deserialize(currentNode);
+			else if (currentNodeName.equals("defaultStatus"))
+			{
+				conf.defaultTextStatus = currentNode.getTextContent().trim();
+
+				try
+				{
+					conf.defaultStatus = Contact.UserStatus.valueOf(
+						currentNode.getAttributes().getNamedItem("type").getTextContent());
+				}
+				catch (IllegalArgumentException ex)
+				{
+				}
+			}
 		}
 
 		return conf;
@@ -302,6 +326,59 @@ public class Configuration extends Observable
 		debugMode = enabled;
 	}
 
+	private Contact.UserStatus defaultStatus = Contact.UserStatus.ONLINE;
+
+	/**
+	 * Pobiera domyślny status użytkownika.
+	 *
+	 * @return domyślny status
+	 */
+	public Contact.UserStatus getDefaultStatus()
+	{
+		return defaultStatus;
+	}
+
+	/**
+	 * Ustala domyślny status użytkownika.
+	 *
+	 * @param status nowy domyślny status
+	 */
+	public void setDefaultStatus(Contact.UserStatus status)
+	{
+		if (status == null)
+			throw new NullPointerException();
+		this.defaultStatus = status;
+	}
+
+	private String defaultTextStatus = "";
+
+	/**
+	 * Pobiera domyślny status tekstowy użytkownika.
+	 *
+	 * @return domyślny status tekstowy
+	 */
+	public String getDefaultTextStatus()
+	{
+		return defaultTextStatus;
+	}
+
+	/**
+	 * Ustala domyślny status tekstowy użytkownika.
+	 *
+	 * @see #getDefaultTextStatus()
+	 * @param nick nowy domyślny status tekstowy
+	 */
+	public void setDefaultTextStatus(String textStatus)
+	{
+		if (textStatus == null)
+			throw new NullPointerException();
+		this.defaultTextStatus = textStatus;
+	}
+
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Wymiary okien">
+
 	private WindowDimensions mainViewDimensions = null;
 
 	/**
@@ -326,8 +403,6 @@ public class Configuration extends Observable
 			throw new NullPointerException();
 		this.mainViewDimensions = mainViewDimensions;
 	}
-
-	// </editor-fold>
 
 	/**
 	 * Klasa przechowująca położenie i wymiary okna
@@ -444,5 +519,7 @@ public class Configuration extends Observable
 			return new WindowDimensions(sLeft, sTop, sWidth, sHeight);
 		}
 	}
+	
+	// </editor-fold>
 
 }

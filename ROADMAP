@@ -3,8 +3,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
 
 
 0.3
- - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
- - możliwość załączania plików do wiadomości przez drag&drop
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
@@ -12,12 +10,13 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
  - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
- - do configure dodać więcej możliwych ścieżek do JDK, sprawdzanie ma obejmować
-   także występowanie javac
  - konfiguracja: możliwość nie pokazywania okna transferów po zapisaniu
    załącznika
+ - automatyczne uruchamianie wraz ze startem systemu
 
 0.4
+ - możliwość załączania plików do wiadomości przez drag&drop
+ - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
  - tylko jedna instancja programu
  - lista kontaktów: możliwość oznaczania kontaktów jako znajomych (na stałe na
    liście, można zmieniać nazwę kontaktu, oznaczeni np. gwiazdką)
@@ -26,7 +25,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    jeszcze nie osiągnęli timeoutu)
  - ipmsg: szyfrowanie (wymaga znajomych na liście kontaktów), dodawanie kluczy
    publicznych do znajomych kontaktów
- - automatyczne uruchamianie wraz ze startem systemu
  - ipmsg: wykrywanie, lub ustawianie dla konkretnych kontaktów innych znaków
    cytujących (niektórzy ustawiają #, $, @, zamiast >). Wykrywanie klienta
    UniLANChat - wiadomości od nich nie są kompaktowane pod względem zawierania
@@ -36,7 +34,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    pakiety COMM_BR_ISGETLIST2
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
    inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
- - pod Win7 jeżeli przycisk ze statusami ma hover, jego tekst jest niewidoczny
+ - pod Win7 jeżeli przycisk ze statusami ma focus, jego tekst jest niewidoczny
  - rozszerzone komunikaty o problemach (pod listą kontaktów): dynamiczne
    przyciski (np. ponów próbę), unique po typie komunikatu (String z nazwą
    typu?), możliwość usuwania komunikatów danego typu (np. po nawiązaniu
