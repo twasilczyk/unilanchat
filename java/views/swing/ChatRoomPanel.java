@@ -33,6 +33,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 
 	protected final static int minInputHeight = 25;
 	protected final static int maxInputHeight = 100;
+	protected final static int maxMessageLength = 15360;
 
 	protected final JPanel tabComponent = new JPanel(new BorderLayout(4, 0));
 	protected final JLabel tabTitle = new JLabel("rozmowa");
@@ -197,10 +198,23 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 			}
 			if (e.getKeyChar() == KeyEvent.VK_ENTER)
 			{
+				e.consume();
+
 				if (e.isShiftDown())
 					inputPane.replaceSelection("\n");
 				else
 				{
+					if (inputPane.getText().length() > maxMessageLength)
+					{
+						JOptionPane.showMessageDialog(inputPane,
+							"Wiadomość, którą próbujesz wysłać jest za długa (limit to " +
+							StringUtilities.formatFileSize(maxMessageLength) +
+							").\nSpróbuj skrócić wiadomość, lub wysłać ją w postaci pliku.",
+							"Nie można wysłać wiadomości",
+							JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+
 					String sendText;
 					synchronized (inputPane)
 					{
@@ -223,13 +237,7 @@ public class ChatRoomPanel extends JPanel implements SetListener<Message>
 			}
 		}
 
-		public void keyTyped(KeyEvent e)
-		{
-			// należy ponownie wyczyścić pole edycji, ponieważ dodał się do
-			// niego enter, naciskany przy wysyłaniu
-			if (e.getKeyChar() == KeyEvent.VK_ENTER && !e.isShiftDown())
-				inputPane.setText("");
-		}
+		public void keyTyped(KeyEvent e) { }
 
 		public void keyReleased(KeyEvent e)
 		{

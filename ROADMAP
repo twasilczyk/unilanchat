@@ -7,8 +7,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
  - logowanie przebiegu rozmów, podgląd logów
- - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
-   w tym przypadku zazwyczaj zawiesza
  - konfiguracja: możliwość nie pokazywania okna transferów po zapisaniu
    załącznika
  - automatyczne uruchamianie wraz ze startem systemu
