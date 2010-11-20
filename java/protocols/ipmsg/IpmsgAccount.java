@@ -125,7 +125,8 @@ public class IpmsgAccount extends Account
 		{
 			connectionThread = new IpmsgConnectionThread(this);
 			while (!connectionThread.isConnected &&
-					!connectionThread.failedConnecting)
+					!connectionThread.failedConnecting &&
+					connectionThread.isAlive())
 			{
 				try
 				{
@@ -150,6 +151,9 @@ public class IpmsgAccount extends Account
 				contactsThread.speedupRefresh();
 				return true;
 			}
+			if (fileTransferThread != null &&
+				fileTransferThread.isAlive())
+				fileTransferThread.interrupt();
 			if (connectionThread.failedConnecting)
 			{
 				Main.userNotifications.add("Problem z siecią IPMsg",
@@ -158,7 +162,6 @@ public class IpmsgAccount extends Account
 					"sieci (np. oryginalny klient IPMsg).");
 				return false;
 			}
-			fileTransferThread.interrupt();
 			return false;
 		}
 		else

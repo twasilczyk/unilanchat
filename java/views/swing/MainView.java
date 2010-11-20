@@ -6,8 +6,7 @@ import java.util.*;
 import javax.swing.*;
 
 import controllers.MainController;
-import main.Configuration;
-import main.Main;
+import main.*;
 import resources.ResourceManager;
 import tools.*;
 import tools.systemintegration.SystemProcesses;

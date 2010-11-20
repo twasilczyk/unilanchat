@@ -9,7 +9,6 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - logowanie przebiegu rozmów, podgląd logów
  - bug: brak ostrzeżenia przy wysyłaniu zbyt długich wiadomości, program się
    w tym przypadku zazwyczaj zawiesza
- - rozszerzenie trybu debugmode o logowanie zdarzeń do pliku
  - konfiguracja: możliwość nie pokazywania okna transferów po zapisaniu
    załącznika
  - automatyczne uruchamianie wraz ze startem systemu
@@ -34,7 +33,8 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    pakiety COMM_BR_ISGETLIST2
  - jeżeli tray jest nieobsługiwany, okno ma być widoczne po starcie programu,
    inny sposób obsługi zamykania okna kontaktów (wyłączenie programu?)
- - pod Win7 jeżeli przycisk ze statusami ma focus, jego tekst jest niewidoczny
+ - bug: pod Win7 jeżeli przycisk ze statusami ma focus, jego tekst jest
+   niewidoczny
  - rozszerzone komunikaty o problemach (pod listą kontaktów): dynamiczne
    przyciski (np. ponów próbę), unique po typie komunikatu (String z nazwą
    typu?), możliwość usuwania komunikatów danego typu (np. po nawiązaniu

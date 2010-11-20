@@ -1,6 +1,9 @@
 package main;
 
-import java.io.File;
+import java.util.logging.*;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import controllers.MainController;
 import tools.*;
@@ -22,6 +25,8 @@ public abstract class Main
 	 * Stos ostrzeżeń dla użytkownika.
 	 */
 	public static final UserNotificationsStack userNotifications = new UserNotificationsStack();
+
+	public static final Logger logger = Logger.getLogger("uncaughtExceptionsLog");
 
 	/**
 	 * Oznaczenie numeru wersji w formacie:
@@ -77,17 +82,14 @@ public abstract class Main
 		if (args == null)
 			throw new NullPointerException();
 
-//		System.out.println("TMP: uruchamianie...");
+		logger.setLevel(Level.WARNING);
+		logger.log(Level.INFO, "Uruchamianie");
 
 		System.setProperty("line.separator", "\n");
 
 //		for (Object k : System.getProperties().keySet())
 //			System.out.println(k.toString() + " = " + System.getProperty((String)k));
 
-		GUIUtilities.setApplicationName(applicationFullName);
-		GUIUtilities.installCarefulRepaintManager(false);
-		GUIUtilities.setBestLookAndFeel(true);
-		
 		// <editor-fold defaultstate="collapsed" desc="Wczytywanie parametrów">
 
 		String paramNick = null, paramUserDir = null;
@@ -105,6 +107,15 @@ public abstract class Main
 		else
 			appDir = SystemDirectories.getAppStoreDir(applicationName, true);
 
+		// </editor-fold>
+
+		installDefaultExceptionHandler();
+		GUIUtilities.setApplicationName(applicationFullName);
+		GUIUtilities.installCarefulRepaintManager(false);
+		GUIUtilities.setBestLookAndFeel(true);
+
+		// <editor-fold defaultstate="collapsed" desc="Wczytywanie konfiguracji">
+
 		Configuration.loadInstance(appDir + "config.xml"); // ~50ms
 
 		if (paramNick != null)
@@ -117,10 +128,69 @@ public abstract class Main
 		final MainController mainController = new MainController();
 
 		if (!views.swing.MainView.init(mainController))
-			System.out.println("TMP: błąd ładowania programu!");
-//		else
-//			System.out.println("TMP: załadowano program");
+		{
+			logger.log(Level.WARNING, "Nie udało się uruchomić widoku");
+			return;
+		}
+		else
+			logger.log(Level.INFO, "Uruchamianie");
 
 		mainController.onAppLoad();
+	}
+
+	private static void installDefaultExceptionHandler()
+	{
+		final FileHandler fileHandler;
+		final ConsoleHandler consoleHandler = new ConsoleHandler();
+		
+		try
+		{
+			fileHandler = new FileHandler(getAppDir() + "error_log", true);
+		}
+		catch (IOException ex)
+		{
+			throw new RuntimeException("Nie udało się utworzyć logu");
+		}
+
+		Formatter exceptionFormatter = new Formatter()
+		{
+			final SimpleDateFormat dateFormat =
+				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			@Override
+			public String format(LogRecord lr)
+			{
+				String exceptionDetails = "";
+				if (lr.getThrown() != null)
+				{
+					StringWriter stackTraceWriter = new StringWriter();
+					lr.getThrown().printStackTrace(new PrintWriter(stackTraceWriter));
+					exceptionDetails = "\n" + stackTraceWriter.toString();
+				}
+
+				return dateFormat.format(new Date(lr.getMillis())) +
+					" " + lr.getLevel().getName() + ": " +
+					lr.getMessage() +
+					exceptionDetails +
+					"\n";
+			}
+		};
+
+		fileHandler.setFormatter(exceptionFormatter);
+		consoleHandler.setFormatter(exceptionFormatter);
+
+		logger.setUseParentHandlers(false);
+		logger.addHandler(fileHandler);
+		logger.addHandler(consoleHandler);
+
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
+		{
+			public void uncaughtException(Thread thread, Throwable thrwbl)
+			{
+				logger.log(Level.SEVERE,
+					"Nie złapany wyjątek w wątku \"" +
+					thread.getName() + "\"", thrwbl);
+			}
+		});
 	}
 }

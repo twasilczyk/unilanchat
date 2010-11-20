@@ -4,7 +4,10 @@ import java.applet.Applet;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.util.Vector;
+import java.util.logging.Level;
 import javax.swing.*;
+
+import main.Main;
 import resources.ResourceManager;
 
 /**
@@ -238,12 +241,14 @@ public abstract class GUIUtilities
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+			Main.logger.log(Level.SEVERE,
+				"Przerwano wywołanie swingInvokeAndWait", e);
 			return false;
 		}
 		catch (InvocationTargetException e)
 		{
-			e.printStackTrace();
+			Main.logger.log(Level.SEVERE,
+				"Błąd wywołania swingInvokeAndWait", e);
 			return false;
 		}
 		return true;

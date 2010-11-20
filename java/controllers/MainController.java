@@ -102,12 +102,14 @@ public class MainController extends SimpleObservable implements Observer
 	}
 
 	/**
-	 * Ustawia nowy status (w tle).
+	 * Ustawia nowy status (w tle) i zaznacza go jako domyślny.
 	 *
 	 * @param status nowy status
 	 */
 	public void setStatus(final Contact.UserStatus status)
 	{
+		Configuration.getInstance().setDefaultStatus(status);
+
 		Main.backgroundProcessing.invokeLater(new Runnable()
 		{
 			public void run()
@@ -151,7 +153,7 @@ public class MainController extends SimpleObservable implements Observer
 	}
 
 	/**
-	 * Ustawia nowy status opisowy.
+	 * Ustawia nowy status opisowy i zaznacza go jako domyślny.
 	 *
 	 * @param newStatus nowy status opisowy
 	 */
@@ -162,6 +164,8 @@ public class MainController extends SimpleObservable implements Observer
 		newStatus = newStatus.trim();
 		if (newStatus.equals(currentTextStatus))
 			return;
+
+		Configuration.getInstance().setDefaultTextStatus(newStatus);
 		currentTextStatus = newStatus;
 		for (Account account : accounts)
 			account.setTextStatus(newStatus);
@@ -190,20 +194,30 @@ public class MainController extends SimpleObservable implements Observer
 		return accounts;
 	}
 
+	private boolean beforeApplicationCloseInvoked = false;
+
 	/**
-	 * Ustawia status OFFLINE i zamyka aplikację.
+	 * Wykonuje czynności wymagane przed zamknięciem aplikacji.
+	 */
+	protected void beforeApplicationClose()
+	{
+		if (beforeApplicationCloseInvoked)
+			return;
+		beforeApplicationCloseInvoked = true;
+
+		notifyObservers("applicationClose");
+
+		saveConfiguration();
+
+		setStatus(Contact.UserStatus.OFFLINE);
+	}
+
+	/**
+	 * Zamyka aplikację.
 	 */
 	public void applicationClose()
 	{
-		notifyObservers("applicationClose");
-
-		Configuration config = Configuration.getInstance();
-
-		config.setDefaultStatus(currentStatus);
-		config.setDefaultTextStatus(currentTextStatus);
-
-		setStatus(Contact.UserStatus.OFFLINE);
-		saveConfiguration();
+		beforeApplicationClose();
 		System.exit(0);
 	}
 
@@ -227,6 +241,15 @@ public class MainController extends SimpleObservable implements Observer
 
 		setTextStatus(config.getDefaultTextStatus());
 		setStatus(config.getDefaultStatus());
+
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			@Override
+			public void run()
+			{
+				beforeApplicationClose();
+			}
+		});
 
 		if (Configuration.getInstance().getAutoUpdate())
 			updater.checkForUpdates();

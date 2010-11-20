@@ -1,6 +1,8 @@
 package tools;
 
 import java.util.Vector;
+import java.util.logging.Level;
+import main.Main;
 
 /**
  * Klasa kolejkująca zadania do wykonania w osobnym wątku. Może być
@@ -100,7 +102,9 @@ public class ProcessingQueue extends SimpleObservable
 					}
 					catch (Throwable ex)
 					{
-						ex.printStackTrace();
+						Main.logger.log(Level.SEVERE,
+							"Nie złapany wyjątek w zadaniu ProcessingQueue (wątek \"" +
+							getName() + "\")", ex);
 					}
 					
 					busy = false;
