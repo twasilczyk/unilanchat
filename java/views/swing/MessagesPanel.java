@@ -490,32 +490,7 @@ public class MessagesPanel extends JStickyScrollPane
 						JOptionPane.INFORMATION_MESSAGE);
 				}
 				else if (cmd[0].equals("downloadAttachment"))
-				{
-					JFileChooser fileChooser = attachmentSaveFileChooser.get();
-					File saveTo = null;
-					synchronized(attachmentSaveFileChooser)
-					{
-						fileChooser.setSelectedFile(new File(attachment.getFileName()));
-						if (fileChooser.showSaveDialog(messagesPanel) == JFileChooser.APPROVE_OPTION)
-							saveTo = fileChooser.getSelectedFile();
-					}
-					if (saveTo != null)
-					{
-						if (saveTo.exists())
-						{
-							if (!saveTo.canWrite())
-								throw new RuntimeException("Plik istnieje i nie można go nadpisać");
-							if (!saveTo.delete())
-								throw new RuntimeException("Nie można usunąć pliku");
-							if (saveTo.exists())
-								throw new RuntimeException("Plik się nie usunął");
-						}
-
-						attachment.receive(saveTo);
-						chatRoomPanel.chatRoomsView.mainView.mainMenu.
-								fileTransfersView.get().showTransfers();
-					}
-				}
+					downloadAttachment(attachment);
 				else // cmd[0].equals("openAttachment")
 					openAttachment(attachment);
 			}
@@ -640,6 +615,40 @@ public class MessagesPanel extends JStickyScrollPane
 			}
 		});
 		attachment.receive(tmp);
+	}
+
+	private void downloadAttachment(final ReceivedFile attachment)
+	{
+		attachmentSaveFileChooser.invokeSwingWhenReady(new Runnable()
+		{
+			public void run()
+			{
+				JFileChooser fileChooser = attachmentSaveFileChooser.getIfReady();
+				File saveTo = null;
+				synchronized(attachmentSaveFileChooser)
+				{
+					fileChooser.setSelectedFile(new File(attachment.getFileName()));
+					if (fileChooser.showSaveDialog(messagesPanel) == JFileChooser.APPROVE_OPTION)
+						saveTo = fileChooser.getSelectedFile();
+				}
+				if (saveTo != null)
+				{
+					if (saveTo.exists())
+					{
+						if (!saveTo.canWrite())
+							throw new RuntimeException("Plik istnieje i nie można go nadpisać");
+						if (!saveTo.delete())
+							throw new RuntimeException("Nie można usunąć pliku");
+						if (saveTo.exists())
+							throw new RuntimeException("Plik się nie usunął");
+					}
+
+					attachment.receive(saveTo);
+					chatRoomPanel.chatRoomsView.mainView.mainMenu.
+						showFileTransfersView();
+				}
+			}
+		});
 	}
 
 	/**

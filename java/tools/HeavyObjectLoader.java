@@ -1,6 +1,6 @@
 package tools;
 
-import java.util.Vector;
+import java.util.*;
 import javax.swing.SwingUtilities;
 
 /**
@@ -103,6 +103,16 @@ public class HeavyObjectLoader<T>
 
 			obj = initializer.build();
 			isReady = true;
+
+			//TODO: przetestować
+			Runnable[] swingTasks;
+			synchronized (swingOnReadyTasks)
+			{
+				swingTasks = swingOnReadyTasks.toArray(new Runnable[0]);
+				swingOnReadyTasks.clear();
+			}
+			for (Runnable run : swingTasks)
+				SwingUtilities.invokeLater(run);
 		}
 	}
 
@@ -201,22 +211,46 @@ public class HeavyObjectLoader<T>
 
 		if (isReady)
 			return obj;
-
-		if (!isReady)
+		
+		try
 		{
-			try
-			{
-				loaderThread.join();
-			}
-			catch (InterruptedException ex)
-			{
-				return null;
-			}
+			loaderThread.join();
+		}
+		catch (InterruptedException ex)
+		{
+			return null;
 		}
 
 		assert(isReady);
 
 		return obj;
+	}
+
+	public T getIfReady()
+	{
+		if (isReady)
+			return obj;
+		return null;
+	}
+
+	protected final ArrayList<Runnable> swingOnReadyTasks =
+		new ArrayList<Runnable>();
+
+	public void invokeSwingWhenReady(Runnable run)
+	{
+		if (isReady)
+		{
+			SwingUtilities.invokeLater(run);
+			return;
+		}
+
+		synchronized (swingOnReadyTasks)
+		{
+			if (isReady)
+				SwingUtilities.invokeLater(run);
+			else
+				swingOnReadyTasks.add(run);
+		}
 	}
 
 	/**

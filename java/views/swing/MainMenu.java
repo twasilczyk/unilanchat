@@ -26,6 +26,17 @@ public class MainMenu extends JMenuBar
 	HeavyObjectLoader<ConfigurationView> configurationView =
 			new HeavyObjectLoader<ConfigurationView>(1000);
 
+	public void showFileTransfersView()
+	{
+		Main.backgroundProcessing.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				fileTransfersView.get().showTransfers();
+			}
+		});
+	}
+
 	class MainMenuListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent event)
@@ -39,7 +50,7 @@ public class MainMenu extends JMenuBar
 				{
 					public void run()
 					{
-						fileTransfersView.get().showTransfers();
+						showFileTransfersView();
 					}
 				});
 			}
