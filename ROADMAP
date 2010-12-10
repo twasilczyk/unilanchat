@@ -10,6 +10,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
  - konfiguracja: możliwość nie pokazywania okna transferów po zapisaniu
    załącznika
  - automatyczne uruchamianie wraz ze startem systemu
+ - bug: paczka src pakuje się do tar jako kilka folderów, a nie jeden
 
 0.5
  - możliwość załączania plików do wiadomości przez drag&drop

@@ -86,7 +86,10 @@ Program przy uruchomieniu może przyjmować parametry:
 
 \section{Konfiguracja}
 
-Konfiguracja (tymczasowo) jest przeprowadzana przez edycję pliku \texttt{config.xml}, który znajduje
+Konfiguracja jest przeprowadzana w oknie konfiguracji (pozycja ``Ustawienia'' w menu ``Program'').
+Przyciski ze znakiem zapytania są odnośnikami do bardziej szczegółowych opisów poszczególnych funkcji.
+
+Można ją też przeprowadzić ręcznie, poprzez edycję pliku \texttt{config.xml}, który znajduje
 się w katalogu użytkownika, czyli \texttt{\~{ }/.UniLANChat} dla Linuxa, oraz
 \texttt{C:}\textbackslash \texttt{Documents and Settings}\textbackslash
 \texttt{Uzytkownik}\textbackslash \texttt{Dane aplikacji}\textbackslash
@@ -95,16 +98,8 @@ się w katalogu użytkownika, czyli \texttt{\~{ }/.UniLANChat} dla Linuxa, oraz
 Należy pamiętać, aby w czasie edycji tego pliku, program był wyłączony. W przeciwnym razie być może
 nadpisze on wprowadzone zmiany, bez ich odczytywania. Plik musi być zapisany w formatowaniu UTF-8.
 
-W pliku dostępne są sekcje:
-\begin{itemize}
-	\item \textbf{nick} -- nick użytkownika, tak jak opisany w sekcji \nameref{sec:parameters};
-	\item \textbf{ignoreAutoResponses} -- czy ignorować automatyczne odpowiedzi użytkowników,
-	na wypadek nieobecności (domyślnie tak). W oryginalnej implementacji IPMessengera, użytkownik
-	może ustawić sobie taki tekst, który jest odsyłany każdemu, kto spróbuje mu wysłać jakąś
-	wiadomość. Wspomniane wiadomości mogą być uciążliwe, jeżeli korzysta się z kanału głównego;
-	\item \textbf{autoUpdate} -- czy mają być włączone automatyczne aktualizacje;
-	\item \textbf{debugMode} -- czy ma być włączony tryb debug.
-\end{itemize}
+Poza konfiguracją edytowalną z poziomu programu, w pliku znajduje się jedna dodatkowa opcja --
+\textbf{debugMode}, zaznaczająca czy ma być włączony tryb debug.
 
 \section{Automatyczna aktualizacja}
 
