@@ -2,7 +2,7 @@ Plany rozwoju programu UniLANChat. Niniejszy dokument jest luźnym planem, podan
 tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmienić.
 
 
-0.3
+0.4
  - uzupełnić komentarze w pakiecie views.swing
  - poprawić metody ChatTabs.getRoomPanel() i ChatRoomsView.getAnyUnread() oraz
    ogólnie przejrzeć te klasy
@@ -11,7 +11,7 @@ tutaj powiązania numerów wersji z zakładanymi celami mogą się jeszcze zmien
    załącznika
  - automatyczne uruchamianie wraz ze startem systemu
 
-0.4
+0.5
  - możliwość załączania plików do wiadomości przez drag&drop
  - ostrzeżenie przy zamykaniu programu o nie ukończonych transferach
  - tylko jedna instancja programu

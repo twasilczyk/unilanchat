@@ -130,6 +130,7 @@ class ContactListPanelRenderer implements ListCellRenderer
 	protected final static Image iconOffline = ResourceManager.getImage("status/offline.png");
 	protected final static Image iconBusy = ResourceManager.getImage("status/busy.png");
 
+	protected final static Image iconUniLANChat = ResourceManager.getImage("protocols/unilanchat.png");
 	protected final static Image iconIpmsg = ResourceManager.getImage("protocols/ipmsg.png");
 
 	public ContactListPanelRenderer()
@@ -211,7 +212,13 @@ class ContactListPanelRenderer implements ListCellRenderer
 		}
 
 		if (contact instanceof protocols.ipmsg.IpmsgContact)
-			protocolIcon.setImage(iconIpmsg);
+		{
+			// oczywiście niepewne i tymczasowe
+			if (contact.getGroup().equals("UniLANChat"))
+				protocolIcon.setImage(iconUniLANChat);
+			else
+				protocolIcon.setImage(iconIpmsg);
+		}
 		else
 			assert(false);
 
