@@ -122,6 +122,12 @@ Przed kompilacją należy wywołać skrypt "./configure". Dostępne opcje Makefi
 ## WYDANE WERSJE
 ################################################################################
 
+ * 0.3 (2010-12-10)
+   Okno konfiguracji (z podpowiedziami); przyjazne powiadamianie (w oknie listy
+   kontaktów) o problemach; zapamiętywanie położenia okna kontaktów oraz
+   wybranego statusu; logowanie wyjątków na dysk; osobne ikonki protokołu dla
+   użytkowników UniLANChat.
+
  * 0.2.1 (2010-06-22)
    Wersja broniona jako rezultat projektu licencjackiego (Instytut Infomatyki
    UWr). Poprawione bugi, lepszy UI zakładek rozmów, szybsze działanie na
