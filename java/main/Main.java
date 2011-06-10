@@ -82,7 +82,7 @@ public abstract class Main
 		if (args == null)
 			throw new NullPointerException();
 
-		logger.setLevel(isNightly ? Level.ALL : Level.WARNING);
+		logger.setLevel(isNightly ? Level.INFO : Level.WARNING);
 
 		System.setProperty("line.separator", "\n");
 
@@ -99,6 +99,8 @@ public abstract class Main
 				paramNick = args[++i];
 			else if (args[i].equals("--user-dir") && i + 1 < args.length)
 				paramUserDir = args[++i];
+			else if (args[i].equals("--verbose"))
+				logger.setLevel(Level.ALL);
 		}
 
 		if(paramUserDir != null)
@@ -180,6 +182,8 @@ public abstract class Main
 
 		fileHandler.setFormatter(exceptionFormatter);
 		consoleHandler.setFormatter(exceptionFormatter);
+		fileHandler.setLevel(logger.getLevel());
+		consoleHandler.setLevel(logger.getLevel());
 
 		logger.setUseParentHandlers(false);
 		logger.addHandler(fileHandler);

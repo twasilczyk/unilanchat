@@ -3,6 +3,7 @@ package protocols.ipmsg;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
 
 import main.*;
 import protocols.*;
@@ -232,6 +233,7 @@ public class IpmsgAccount extends Account
 			userStatus == Contact.UserStatus.OFFLINE ||
 			packet.getCommand() == IpmsgPacket.COMM_NOOP)
 			return;
+		Main.logger.log(Level.FINER, "Odebrano pakiet: " + packet.toString());
 
 		Contact genContact = contactList.get(IpmsgContact.getID(packet.ip));
 		IpmsgContact contact = null;
@@ -260,7 +262,9 @@ public class IpmsgAccount extends Account
 			else
 				contact.setStatus(Contact.UserStatus.ONLINE);
 			String[] dataSplit = packet.data.split("\0", 10);
-			if (dataSplit.length == 2)
+			if (dataSplit.length == 1)
+				contact.setName(dataSplit[0]);
+			else if (dataSplit.length == 2 || dataSplit.length == 3)
 			{
 				String nick = dataSplit[0].trim();
 				int statusStart = nick.lastIndexOf('[');
@@ -278,10 +282,9 @@ public class IpmsgAccount extends Account
 
 				contact.setGroup(dataSplit[1]);
 			}
-			//else if (dataSplit.length == 3) // TODO: wtf? protokół o tym nie wspomina (?)
+			else if (dataSplit.length > 3)
+				Main.logger.log(Level.WARNING, "dataSplit.length > 3");
 		}
-
-//		System.out.println("Odebrano pakiet: " + packet);
 
 		switch (packet.getCommand())
 		{
