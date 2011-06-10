@@ -3,6 +3,7 @@ package views.swing;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.logging.Level;
 import javax.swing.*;
 
 import controllers.MainController;
@@ -225,7 +226,7 @@ public class MainView extends JFrame implements Observer
 		catch (InterruptedException ex) { }
 		if (trayInitThread.trayIcon == null)
 		{
-			System.err.println("Nie załadowano ikony w trayu");
+			Main.logger.log(Level.WARNING, "Nie załadowano ikony w trayu");
 			return false;
 		}
 		init.getMainView().trayIcon = trayInitThread.trayIcon;
@@ -336,15 +337,22 @@ public class MainView extends JFrame implements Observer
 			//TODO: jakoś trzeba zareagować - jest to podstawowa funkcja tego
 			//widoku
 			if (!SystemTray.isSupported())
+			{
+				Main.logger.log(Level.WARNING, "Tray: nie obsługiwany");
 				return;
+			}
+			Main.logger.log(Level.INFO, "Tray: wspierany");
+
 			try
 			{
 				tray = SystemTray.getSystemTray();
 			}
 			catch (Throwable e)
 			{
+				Main.logger.log(Level.SEVERE, "Tray: błąd pobierania", e);
 				return;
 			}
+			Main.logger.log(Level.INFO, "Tray: pobrano");
 
 			if (trayIconImageReady == null)
 			{
@@ -375,6 +383,7 @@ public class MainView extends JFrame implements Observer
 
 			trayIcon = new TrayIcon(trayIconImageReady, Main.applicationName);
 			trayIcon.setImageAutoSize(false);
+			Main.logger.log(Level.INFO, "Tray: przygotowano ikonę");
 
 			try
 			{
@@ -383,8 +392,11 @@ public class MainView extends JFrame implements Observer
 			catch (AWTException e)
 			{
 				trayIcon = null;
+				Main.logger.log(Level.SEVERE, "Tray: nie dodano", e);
 				return;
 			}
+
+			Main.logger.log(Level.INFO, "Tray: OK");
 		}
 	}
 

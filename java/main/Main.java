@@ -82,8 +82,7 @@ public abstract class Main
 		if (args == null)
 			throw new NullPointerException();
 
-		logger.setLevel(Level.WARNING);
-		logger.log(Level.INFO, "Uruchamianie");
+		logger.setLevel(isNightly ? Level.ALL : Level.WARNING);
 
 		System.setProperty("line.separator", "\n");
 
@@ -110,6 +109,9 @@ public abstract class Main
 		// </editor-fold>
 
 		installDefaultExceptionHandler();
+
+		logger.log(Level.INFO, "Uruchamianie...");
+
 		GUIUtilities.setApplicationName(applicationFullName);
 		GUIUtilities.installCarefulRepaintManager(false);
 		GUIUtilities.setBestLookAndFeel(true);
@@ -133,7 +135,7 @@ public abstract class Main
 			return;
 		}
 		else
-			logger.log(Level.INFO, "Uruchamianie");
+			logger.log(Level.INFO, "Widok uruchomiony");
 
 		mainController.onAppLoad();
 	}
