@@ -270,7 +270,7 @@ public class IpmsgAccount extends Account
 				int statusStart = nick.lastIndexOf('[');
 				if (!nick.isEmpty() &&
 					nick.charAt(nick.length() - 1) == ']' &&
-					statusStart >= 0)
+					statusStart > 0)
 				{
 					contact.setTextStatus(nick.substring(statusStart + 1, nick.length() - 1));
 					nick = nick.substring(0, statusStart).trim();
